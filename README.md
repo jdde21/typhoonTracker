@@ -5,9 +5,9 @@ A full-stack application that predicts typhoon tracks based on historical data o
 
 ## 🚀 Overview
 
-This project is a web-based prediction system that allows users to input data and receive a computed prediction result.  
-It combines a **React frontend** with a **Python (FastAPI) backend**, making it fast, interactive, and scalable.
-Dataset used is from the International Best Track Archive for Climate Stewardship (IBTrACS)
+- This project is a web-based prediction system that allows users to input data and receive a computed prediction result. 
+- It combines a **React frontend** with a **Python (FastAPI) backend**, making it fast, interactive, and scalable.
+- Dataset used is from the International Best Track Archive for Climate Stewardship (IBTrACS)
 ## 🛠️ Tech Stack
 
 **Frontend:**
