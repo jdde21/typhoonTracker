@@ -24,7 +24,7 @@ It combines a **React frontend** with a **Python (FastAPI) backend**, making it 
 ## 📸 Preview
 
 ### Prediction for typhoon Sinlaku
-<img src="./screenshots/track1.png" width="600"/>
+<img src="./screenshots/track2.png" width="600"/>
 
 ### Random input
-<img src="./screenshots/track2.png" width="600"/>
+<img src="./screenshots/track1.png" width="600"/>
