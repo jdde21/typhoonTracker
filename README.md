@@ -1,6 +1,6 @@
 # 📊 Prediction App
 
-A full-stack application that predicts typhoon tracks outcomes based on historical data on previous typhoons using K-Nearest Neighbor
+A full-stack application that predicts typhoon tracks based on historical data on previous typhoons using K-Nearest Neighbor
 <br>
 Dataset used is from the International Best Track Archive for Climate Stewardship (IBTrACS)
 ---
