@@ -1,17 +1,13 @@
 # 📊 Prediction App
 
 A full-stack application that predicts typhoon tracks based on historical data on previous typhoons using K-Nearest Neighbor
-<br>
-<br>
-Dataset used is from the International Best Track Archive for Climate Stewardship (IBTrACS)
 ---
 
 ## 🚀 Overview
 
 This project is a web-based prediction system that allows users to input data and receive a computed prediction result.  
-<br>
 It combines a **React frontend** with a **Python (FastAPI) backend**, making it fast, interactive, and scalable.
-
+Dataset used is from the International Best Track Archive for Climate Stewardship (IBTrACS)
 ## 🛠️ Tech Stack
 
 **Frontend:**
