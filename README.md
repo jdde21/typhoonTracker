@@ -23,8 +23,8 @@ It combines a **React frontend** with a **Python (FastAPI) backend**, making it 
 
 ## 📸 Preview
 
-### Main View
+### Prediction for typhoon Sinlaku
 <img src="./screenshots/track1.png" width="600"/>
 
-### Secondary View
+### Random input
 <img src="./screenshots/track2.png" width="600"/>
