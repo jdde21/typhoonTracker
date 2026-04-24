@@ -136,7 +136,7 @@ export default function DrawerForm() {
 
 function InputForm({ pointNumber }) {
     return <>
-        <label className="flex justify-center px-4 text-sm font-semibold rounded text-white mb-2 bg-[#191C1E]">
+        <label className="flex justify-center px-4 text-sm font-semibold rounded text-white mb-2 bg-[#191C1Egit]">
             Point {pointNumber + 1}
         </label>
         <div className='flex gap-2'>
