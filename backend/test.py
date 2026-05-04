@@ -9,7 +9,7 @@ import re
 
 
 
-def typhoon_tracker(coordinates):
+def typhoon_tracker(coordinates=None):
     recent_typhoons = pd.read_csv('recent_typhoons_cleaned_all_coordinates_horizontal.csv', encoding = 'latin-1')
     unique_sid = list(dict.fromkeys(recent_typhoons["SID"].tolist())) # removes duplicates while maintaining the same order
 
@@ -54,24 +54,29 @@ def typhoon_tracker(coordinates):
     # nilalagay sa recent typhoons dict yung mga coordinates per typhoon (sid ginagamit as key, yung coordinates (naka 2dimensional array siya) ginagamit as value)
     for index, row in recent_typhoons.iterrows():
         list_of_coordinates = row['COORDINATES']
+
         list_of_coordinates = list_of_coordinates.replace('[', '')
         list_of_coordinates = list_of_coordinates.replace(']', '')
         coordinates = re.findall(r"\(\d+\.\d+, \d+\.\d+, \d\)", list_of_coordinates)
         
         sid = unique_sid[index]
         recent_typhoons_dict[sid] = np.empty((0,3)) # initializing an empty 2d np array
-        
+
+ 
         closest_index = [-1,-1] # will contain the index of the coordinate sa typhoon in the current iteration is closest dun sa first coordinate nung bagong typhoon; first element is index, second element is yung distance niya compared to the first coordinate ng bagyo
 
+
+        # this loop finds the closest point of the typhoon in the database to the first point of the new typhoon
         for index, coordinate in enumerate(coordinates): # para makuha yung index
             temp = coordinate
             temp = temp.replace('(', '')
             temp = temp.replace(')', '')
             temp = temp.split(',')
-            temp = np.array(list(map(float, temp)))
+            temp = np.array(list(map(float, temp))) # converted the coordinates to a float instead of a string
+       
 
             distance = np.linalg.norm(temp[:2] - inputs[0,:2])
-
+     
             # hinahanap neto yung i coconsider as first point sa mga bagyo sa training set
             if closest_index[0] == -1:
                 closest_index[0] = index
@@ -82,12 +87,26 @@ def typhoon_tracker(coordinates):
 
             recent_typhoons_dict[sid] = np.vstack((recent_typhoons_dict[sid], temp))
         
+        
 
-        typhoon_iso_time = (recent_typhoons_dict[sid][closest_index[0] + 1:, 2]).flatten()
-        input_iso_time = inputs[1:,2].flatten() # .flatten() ginagawang 1d array kasi originally 2d array eto pero yung list element nagcocontain lng ng isang element
-        typhoon_indices = [closest_index[0]]
+
+        #  this obtains the time gaps in between track records of the typhoon (e.g., first track was obtained at 9am, second track was obtained at 10 am so the time gap is 1)
+        typhoon_iso_time = (recent_typhoons_dict[sid][closest_index[0] + 1:, 2]).flatten() 
+ 
+        # same thing is happening in input_iso_time but it is done for the incoming typhoon
+        # .flatten() ginagawang 1d array kasi originally 2d array eto pero yung list element nagcocontain lng ng isang element
+        input_iso_time = inputs[1:,2].flatten() 
+
+
+        # typhoon_indices will contain the indices of the coordinates of the old typhoon (which is being compared to the new one) that is similar in terms of time to the new typhoon
+        # e.g., new typhoon's input data is (8.11, 129.2, 3), (8.12, 129.5, 3)
+        # and old typhoon's data is (16.5, 123.8, 2), (16.6, 123.5, 3), (16.7, 123.2, 3), (16.8, 122.9, 3), (16.8, 122.8, 1)
+        # out of the old typhoon's data, what will be chosen is (16.5, 123.8, 2), (16.6, 123.5, 3)
+        typhoon_indices = [closest_index[0]] 
         current_index_increment = closest_index[0] + 1
 
+    
+  
         # this section ay para sa paghanap ng mga points while considering yung gap of time between records nung training data typhoons and yung bagong typhoon
         for input_time in input_iso_time:
             closest_time_index = [1000, 1000] #yung 1000 arbitrary number lang yan. nilakihan ko para palaging less than yung difference ng abs(current_time - input_time). first element is index, second element is yung difference in time
@@ -102,13 +121,12 @@ def typhoon_tracker(coordinates):
                 else:
                     closest_time_index = [index + current_index_increment, abs(current_time - input_time)] if closest_time_index[1] > abs(current_time - input_time) else closest_time_index 
                     if current_time > input_time:
-                        typhoon_iso_time = np.delete(typhoon_iso_time, slice(0, index + 1))
-                        current_index_increment += index + 1
+                        # print(typhoon_iso_time, index + 1, closest_time_index[0])
+                        typhoon_iso_time = np.delete(typhoon_iso_time, slice(0, index))
+                        current_index_increment += index
                         break
                 
             typhoon_indices.append(closest_time_index[0])
-
-        
         
         try:
             # print(inputs[:, :2])
@@ -166,3 +184,5 @@ def typhoon_tracker(coordinates):
     total_tracks[inputs.shape[0]:, :] /= np.array(weights).sum() # instead of neighbors, yung sum ng weights magiging denominator
     print(total_tracks)
     return total_tracks.tolist()
+
+# typhoon_tracker()
