@@ -2,6 +2,7 @@ import React, { useState, useContext } from 'react';
 import { Card } from './ui/card';
 import { Trash } from 'lucide-react';
 import { TyphoonDataContext } from '../App';
+import { Plus } from "lucide-react";
 
 
 
@@ -12,13 +13,6 @@ export default function DrawerForm() {
     let coordinate = function (index) {
         return <>
             <InputForm pointNumber={index}></InputForm>
-            {/* <label>Coordinate {index + 1}</label>
-            <div className='flex flex-col items-baseline gap-1 w-full p-2'>
-                <div className='flex items-center justify-center gap-1 w-full p-2'>
-                    <input id={`coordinate${index}`} className='flex justify-center items-center bg-white rounded text-black text-center w-[50%]' type="text" placeholder="Enter coordinates" />
-                    <input id={`time${index}`} className='flex justify-center items-center bg-white rounded text-black text-center w-[50%]' type="text" placeholder="Enter time" />
-                </div>
-            </div> */}
         </>
     }
 
@@ -87,7 +81,7 @@ export default function DrawerForm() {
 
             <div className='flex flex-col justify-between h-full'>
                 <div className='flex flex-col px-2 gap-1'>
-                    <div className="flex flex-col max-h-164 overflow-y-auto scrollbar-hide gap-1">
+                    <div className="flex flex-col max-h-50 overflow-y-auto scrollbar-hide gap-1">
                         {
                             numberOfCoords
                         }
@@ -108,36 +102,76 @@ export default function DrawerForm() {
                 </div>
             </div>
 
-
-            {/* <div className='flex flex-col h-3/4 items-center justify-center'>
-                <div className='flex flex-col w-full h-full items-center gap-3'>
-
-                    <form className='flex items-center justify-center w-full'>
-                        <div className='flex flex-col items-center justify-center gap-1 w-full'>
-                            {
-                                numberOfCoords
-                            }
-                            <button onClick={(e) => {
-                                e.preventDefault();
-                                submitForm();
-                            }}>Submit</button>
-                        </div>
-                    </form>
-                    <div className='flex justify-center items-center w-full gap-1'>
-                        <button onClick={incrementNumberOfCoords} className="btn bg-black rounded text-white p-1 w-[40%]">Add coordinate</button>
-                        <button onClick={decrementNumberOfCoords} className="btn bg-black rounded text-white p-1 w-[40%]">Sub coordinate</button>
-                    </div>
-                </div>
-            </div> */}
-
         </Card>
     )
 }
 
+function MapDrawer() {
+    const [inputs, setInputs] = useState([""]);
+
+    const handleChange = (value, index) => {
+        const updated = [...inputs];
+        updated[index] = value;
+        setInputs(updated);
+    };
+
+    const addInput = () => {
+        setInputs([...inputs, ""]);
+    };
+
+    return (
+        <div className="absolute bottom-0 left-0 w-full flex justify-center pointer-events-none">
+
+            {/* Drawer */}
+            <div className="pointer-events-auto w-full max-w-md bg-[#1E1E1E] text-white rounded-t-2xl shadow-2xl border border-[#2A2A2A]">
+
+                {/* Drag Handle */}
+                <div className="w-full flex justify-center py-2">
+                    <div className="w-10 h-1.5 bg-gray-500 rounded-full" />
+                </div>
+
+                {/* Content */}
+                <div className="flex flex-col h-[350px]">
+
+                    {/* Scrollable Inputs */}
+                    <div className="flex-1 overflow-y-auto px-4 space-y-3 pb-2">
+                        {inputs.map((input, index) => (
+                            <input
+                                key={index}
+                                value={input}
+                                onChange={(e) => handleChange(e.target.value, index)}
+                                placeholder={`Point ${index + 1}`}
+                                className="w-full p-3 rounded-lg bg-[#2A2A2A] border border-[#3A3A3A] focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
+                            />
+                        ))}
+
+                        {/* Add Button */}
+                        <button
+                            onClick={addInput}
+                            className="flex items-center gap-2 text-blue-400 hover:text-blue-300 text-sm"
+                        >
+                            <Plus size={16} />
+                            Add field
+                        </button>
+                    </div>
+
+                    {/* Bottom Button */}
+                    <div className="p-4 border-t border-[#2A2A2A]">
+                        <button className="w-full bg-blue-600 hover:bg-blue-500 transition rounded-lg py-3 font-semibold">
+                            Submit
+                        </button>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+    );
+}
+
 function InputForm({ pointNumber }) {
     return <>
-        <label className="flex justify-center px-4 text-sm font-semibold rounded text-white mb-2 bg-[#191C1Egit]">
-            Point {pointNumber + 1}
+        <label className="flex justify-start text-sm font-semibold rounded text-black mb-2 bg-[#191C1Egit]">
+            POINT {pointNumber + 1}
         </label>
         <div className='flex gap-2'>
             <div className='flex flex-col justify-center items-start'>
@@ -174,5 +208,7 @@ function InputForm({ pointNumber }) {
                 className="w-full px-3 py-3 rounded-md bg-white text-black border text-xs border-gray-300 focus:outline-none focus:ring-2 focus:ring-[#64748B]"
             />
         </div>
+        <div className="w-full h-px bg-gray-700 my-3" />
     </>
 }
+

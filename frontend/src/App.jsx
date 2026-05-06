@@ -2,6 +2,7 @@ import { Button } from "@/components/ui/button"
 import ParisMap from "./components/parisMap"
 import DrawerForm from "./components/drawerForm"
 import TyphoonInfo from "./components/typhoonInfo"
+import PopUpDrawer from "./components/popupDrawer"
 import { createContext, useState } from "react"
 import './App.css';
 
@@ -20,7 +21,7 @@ export function App() {
       </div>
 
       <div className="absolute top-[5%] left-[1%] w-[20%] h-[90%] z-10">
-        <DrawerForm />
+        <PopUpDrawer/>
       </div>
       </TyphoonDataContext.Provider>
 
