@@ -126,11 +126,14 @@ export default function SideDrawer() {
                                 list_coordinates.push(temp);
                             })
                             let list = await getData(list_coordinates);
+                            let currentHours = 0;
                             list.forEach((value, index) => {
-                                let location = { id: index + 1, lat: value[0], lng: value[1], name: 'random' };
+                                currentHours += value[2]
+                                let location = { id: index + 1, lat: value[0], lng: value[1], name: `${Math.floor(currentHours)} hours` };
                                 typhoon_locations.push(location);
                             })
                             setTyphoonLocations(typhoon_locations);
+                            setPoints([{ lat: "", lon: "", time: 0 }])
                             setOpen(false);
                         }} className="w-full bg-blue-600 hover:bg-blue-500 transition rounded-lg py-3 font-semibold">
                             Submit
