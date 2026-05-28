@@ -3,7 +3,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 from typing import List
 import pandas as pd 
-from test import typhoon_tracker
+from test import typhoon_tracker, scores_printer
 
 app = FastAPI()
 
@@ -44,9 +44,12 @@ def append(item: Item):
 
 @app.post('/input')
 def input_coordinates(coordinates: Coordinates):
-    print(coordinates)
     for coordinate in coordinates.coordinates:
         list_coordinates.append(coordinate)
     data = typhoon_tracker(list_coordinates)
     list_coordinates.clear()
     return data
+
+@app.get('/neighbors')
+def get_neighbors():
+    return scores_printer()

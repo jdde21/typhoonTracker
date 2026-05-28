@@ -8,6 +8,11 @@ import numpy as np
 import re
 
 
+SCORES = []
+TYPHOON_SCORES = []
+MINIMUM = 0
+STARTING_POINT = 0
+TRACKS = []
 
 def typhoon_tracker(coordinates=None):
     recent_typhoons = pd.read_csv('recent_typhoons_cleaned_all_coordinates_horizontal.csv', encoding = 'latin-1')
@@ -143,6 +148,7 @@ def typhoon_tracker(coordinates=None):
         scores.append(score)
         scores = sorted(scores)
 
+   
 
     minimum = 1000 # random high number lang eto
     weights = []
@@ -157,9 +163,17 @@ def typhoon_tracker(coordinates=None):
         if len(tracks) < minimum:
             minimum = len(tracks)
 
-    
-
-
+     # just initializing the global variables SCORES so that the scores generated in this function can be used in other functions
+    global SCORES
+    global TYPHOON_SCORES
+    global STARTING_POINT
+    global MINIMUM
+    global TRACKS
+    TYPHOON_SCORES = typhoon_scores
+    SCORES = scores[0:neighbors]
+    MINIMUM = minimum
+    STARTING_POINT = number_of_track_reports # same as inputs.shape[0]
+    TRACKS = recent_typhoons_dict_closest_to_farthest
 
     # this will be where the final predicted tracks will be placed
     total_tracks = np.empty((minimum,3))
@@ -172,7 +186,7 @@ def typhoon_tracker(coordinates=None):
     for i in range(neighbors):
         sid = typhoon_scores[scores[i]]
         tracks = recent_typhoons_dict_closest_to_farthest[sid]
-
+ 
         temp_tracks = np.empty((minimum,3))
         temp_tracks.fill(0)
         for j in range(inputs.shape[0], minimum):
@@ -185,4 +199,21 @@ def typhoon_tracker(coordinates=None):
     print(total_tracks)
     return total_tracks.tolist()
 
-# typhoon_tracker()
+
+def scores_printer():
+    print(MINIMUM)
+    dict_of_tracks = {}
+    for index, scores in enumerate(SCORES):
+        if index == 0:
+            continue
+        sid = TYPHOON_SCORES[scores]
+        temp = TRACKS[sid]
+        temp = temp[0:MINIMUM]
+        dict_of_tracks[sid] = temp.tolist()
+
+    return dict_of_tracks
+
+
+if __name__ == "__main__":
+    typhoon_tracker()
+    scores_printer()

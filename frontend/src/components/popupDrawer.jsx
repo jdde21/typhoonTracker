@@ -3,7 +3,7 @@ import { TyphoonDataContext } from '../App';
 import { Plus, X } from "lucide-react";
 
 export default function SideDrawer() {
-    const { setTyphoonLocations } = useContext(TyphoonDataContext);
+    const { setTyphoonLocations, setNeighborTyphoonsLocations, setNeighboringTyphoons } = useContext(TyphoonDataContext);
     const typhoon_locations = []
 
     const [open, setOpen] = useState(false);
@@ -37,6 +37,23 @@ export default function SideDrawer() {
 
             const result = await response.json();
             return result
+        } catch (error) {
+            console.error(error.message);
+        }
+    }
+
+    async function getNeighbors() {
+        const url = "http://127.0.0.1:8000/neighbors"
+        try {
+            const response = await fetch(url, {
+                method: 'GET',
+            });
+            if (!response.ok) {
+                throw new Error(`Response status: ${response.status}`);
+            }
+
+            const result = await response.json();
+            return result;
         } catch (error) {
             console.error(error.message);
         }
@@ -117,6 +134,7 @@ export default function SideDrawer() {
 
                     <div className="p-4 border-t border-[#2A2A2A] shrink-0">
                         <button onClick={async () => {
+                            let neighborLocations = []
                             let list_coordinates = [];
                             points.forEach((value) => {
                                 const temp = [];
@@ -126,13 +144,29 @@ export default function SideDrawer() {
                                 list_coordinates.push(temp);
                             })
                             let list = await getData(list_coordinates);
+                            let neighboringTyphoons = await getNeighbors();
+                            let neighboringTyphoonsSIDs = Object.keys(neighboringTyphoons)
+                            let neighboringTyphoonsTracks = Object.values(neighboringTyphoons)
                             let currentHours = 0;
                             list.forEach((value, index) => {
                                 currentHours += value[2]
                                 let location = { id: index + 1, lat: value[0], lng: value[1], name: `${Math.floor(currentHours)} hours` };
                                 typhoon_locations.push(location);
                             })
+                            currentHours = 0;
+                            neighboringTyphoonsTracks.forEach((track, index) => {
+                                let temp = []
+                                track.forEach((value) => {
+                                    currentHours += value[2]
+                                    let location = { id: index + 1, lat: value[0], lng: value[1], name: `${Math.floor(currentHours)} hours` };
+                                    temp.push(location);
+                                })  
+                                neighborLocations.push(temp)
+                            })
+                            
                             setTyphoonLocations(typhoon_locations);
+                            setNeighborTyphoonsLocations(neighborLocations);
+                            setNeighboringTyphoons(neighboringTyphoons);
                             setPoints([{ lat: "", lon: "", time: 0 }])
                             setOpen(false);
                         }} className="w-full bg-blue-600 hover:bg-blue-500 transition rounded-lg py-3 font-semibold">
