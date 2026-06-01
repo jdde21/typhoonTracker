@@ -3,6 +3,10 @@ import { Trash2 } from "lucide-react";
 import { TyphoonDataContext } from '../App';
 import { useQuery } from "@tanstack/react-query";
 
+
+
+const TYPHOON_AGENCIES = ["Default", "JTWC", "JMA", "CMA", "HKO", "IMD", "KMA"];
+
 export default function RoutePoints() {
     const { setTyphoonLocations, setNeighborTyphoonsLocations, setNeighboringTyphoons, setNeighboringTyphoonsNames } = useContext(TyphoonDataContext);
     const typhoon_locations = []
@@ -29,7 +33,7 @@ export default function RoutePoints() {
                 headers: {
                     'Content-Type': 'application/json'
                 },
-                body: JSON.stringify({ coordinates: list_coordinates })
+                body: JSON.stringify({ coordinates: list_coordinates, database: selected})
             });
             if (!response.ok) {
                 throw new Error(`Response status: ${response.status}`);
@@ -140,10 +144,10 @@ export default function RoutePoints() {
                     value={selected}
                     className="bg-white/10 text-white text-sm rounded px-2 py-2 border border-white/20 focus:outline-none cursor-pointer mx-2 my-2"
                 >
-                    <option value="Select Database">Select Database</option>
-                    <option value="Default">Default</option>
-                    <option value="JTWC">JTWC</option>
-                    <option value="JMA">JMA</option>
+                    <option value="Select Database" disabled selected>Select Database</option>
+                    {
+                        TYPHOON_AGENCIES.map(agency => <option value={agency}>{agency}</option>)
+                    }
                 </select>
 
                 {/* scrollable list */}

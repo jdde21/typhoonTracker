@@ -15,8 +15,13 @@ STARTING_POINT = 0
 TRACKS = []
 NEIGHBORING_TYPHOON_NAMES = {}
 
-def typhoon_tracker(coordinates=None):
-    recent_typhoons = pd.read_csv('new_data.csv', encoding = 'latin-1')
+def typhoon_tracker(coordinates=None, database="Default"):
+    if database == "Default":
+        recent_typhoons = pd.read_csv('new_data.csv', encoding = 'latin-1')
+    elif database == "JMA":
+        recent_typhoons = pd.read_csv('cleaned/cleaned_japan.csv', encoding = 'latin-1')
+    elif database == "JTWC":
+        recent_typhoons = pd.read_csv('cleaned/cleaned_usa.csv', encoding = 'latin-1')
     unique_sid = list(dict.fromkeys(recent_typhoons["SID"].tolist())) # removes duplicates while maintaining the same order
 
     inputs = np.empty((0,3))

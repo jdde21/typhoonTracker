@@ -1,3 +1,4 @@
+import string
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
@@ -11,8 +12,9 @@ class Item(BaseModel):
     text: str = None
     is_done: bool = False
 
-class Coordinates(BaseModel):
+class Body(BaseModel):
     coordinates: List[List[float]]
+    database: str
 
 items = []
 list_coordinates = []
@@ -43,10 +45,10 @@ def append(item: Item):
     return items
 
 @app.post('/input')
-def input_coordinates(coordinates: Coordinates):
-    for coordinate in coordinates.coordinates:
+def input_coordinates(body: Body):
+    for coordinate in body.coordinates:
         list_coordinates.append(coordinate)
-    data = typhoon_tracker(list_coordinates)
+    data = typhoon_tracker(list_coordinates, body.database)
     list_coordinates.clear()
     return data
 
