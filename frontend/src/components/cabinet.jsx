@@ -2,7 +2,7 @@ import { useState, useContext } from "react";
 import { TyphoonDataContext } from '../App';
 
 export default function Cabinet({ neighboringTyphoons = [], onSelect }) {
-    const { setShowNeighbor } = useContext(TyphoonDataContext);
+    const { setShowNeighbor, neighboringTyphoonsNames } = useContext(TyphoonDataContext);
 
     const [filter, setFilter] = useState("all");
     const [expandedSid, setExpandedSid] = useState(null);
@@ -25,6 +25,7 @@ export default function Cabinet({ neighboringTyphoons = [], onSelect }) {
                 )}
                 {Object.keys(neighboringTyphoons).map((sid, idx) => {
                     const tracks = neighboringTyphoons[sid];
+                    const name = neighboringTyphoonsNames[sid];
                     const isExpanded = expandedSid === sid;
 
                     return (
@@ -40,7 +41,7 @@ export default function Cabinet({ neighboringTyphoons = [], onSelect }) {
 
                                 <div className="flex-1 min-w-0">
                                     <p className="font-medium text-zinc-800 dark:text-zinc-100 truncate">
-                                        {sid}
+                                        {name}
                                     </p>
                                 </div>
 

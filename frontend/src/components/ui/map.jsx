@@ -15,6 +15,7 @@ import {
 } from "react";
 import { createPortal } from "react-dom";
 import { X, Minus, Plus, Locate, Maximize, Loader2 } from "lucide-react";
+import { TyphoonDataContext } from '../../App';
 
 import { cn } from "@/lib/utils";
 
@@ -22,6 +23,7 @@ const defaultStyles = {
   dark: "https://basemaps.cartocdn.com/gl/dark-matter-gl-style/style.json",
   light: "https://basemaps.cartocdn.com/gl/positron-gl-style/style.json",
 };
+
 
 // Check document class for theme (works with next-themes, etc.)
 function getDocumentTheme() {
@@ -113,6 +115,7 @@ function getViewport(map) {
 
 const Map = forwardRef(function Map(
   {
+    typhoonCoordinates,
     children,
     className,
     theme: themeProp,
@@ -125,6 +128,7 @@ const Map = forwardRef(function Map(
   },
   ref,
 ) {
+  const { typhoonLocations, neighboringTyphoons, showNeighbor } = useContext(TyphoonDataContext);
   const containerRef = useRef(null);
   const [mapInstance, setMapInstance] = useState(null);
   const [isLoaded, setIsLoaded] = useState(false);
@@ -173,6 +177,22 @@ const Map = forwardRef(function Map(
       ...viewport,
     });
 
+    const coordinates = (typhoonLocations.map((track) => {
+      return [track.lng, track.lat]
+    }));
+
+    const neighborCoordinates = Object.keys(neighboringTyphoons).map((sid) => {
+      const tracks = neighboringTyphoons[sid];
+      if (sid !== showNeighbor) {
+        return null;
+      }
+      return tracks.map((values, index) => {
+        const longitude = values[1];
+        const latitude = values[0];
+        return [longitude, latitude]
+      })
+    });
+
     const styleDataHandler = () => {
       clearStyleTimeout();
       // Delay to ensure style is fully processed before allowing layer operations
@@ -210,6 +230,95 @@ const Map = forwardRef(function Map(
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+  // draws the line for the selected neighbor typhoon
+  useEffect(() => {
+    if (!mapInstance || !isLoaded) return;
+
+    let coordinates;
+    Object.keys(neighboringTyphoons).forEach((sid) => {
+      const tracks = neighboringTyphoons[sid];
+      if (sid === showNeighbor) {
+        coordinates = (tracks.map((values, index) => {
+          const longitude = values[1];
+          const latitude = values[0];
+          return [longitude, latitude]
+        }));
+      }
+    });
+
+
+
+
+    const source = mapInstance.getSource('neighbor-route');
+    if (source && !coordinates) {
+      source.setData({
+        type: 'Feature',
+        properties: {},
+        geometry: { type: 'LineString', coordinates: []}
+      });
+    } else if (source) {
+      source.setData({
+        type: 'Feature',
+        properties: {},
+        geometry: { type: 'LineString', coordinates }
+      });
+    } else {
+      mapInstance.addSource('neighbor-route', {
+        type: 'geojson',
+        data: {
+          type: 'Feature',
+          properties: {},
+          geometry: { type: 'LineString', coordinates }
+        }
+      });
+
+      mapInstance.addLayer({
+        id: 'neighbor-route',
+        type: 'line',
+        source: 'neighbor-route',
+        layout: { 'line-join': 'round', 'line-cap': 'round' },
+        paint: { 'line-color': '#888', 'line-width': 8 }
+      });
+    }
+
+  }, [mapInstance, isLoaded, neighboringTyphoons, showNeighbor]);
+
+  // draws the line for the incoming typhoon
+  useEffect(() => {
+    if (!mapInstance || !isLoaded) return;
+
+    const coordinates = (typhoonLocations.map((track) => {
+      return [track.lng, track.lat]
+    }));
+
+    const source = mapInstance.getSource('route');
+    if (source) {
+      source.setData({
+        type: 'Feature',
+        properties: {},
+        geometry: { type: 'LineString', coordinates }
+      });
+    } else {
+      mapInstance.addSource('route', {
+        type: 'geojson',
+        data: {
+          type: 'Feature',
+          properties: {},
+          geometry: { type: 'LineString', coordinates }
+        }
+      });
+
+      mapInstance.addLayer({
+        id: 'route',
+        type: 'line',
+        source: 'route',
+        layout: { 'line-join': 'round', 'line-cap': 'round' },
+        paint: { 'line-color': '#888', 'line-width': 8 }
+      });
+    }
+
+  }, [mapInstance, isLoaded, typhoonLocations]);
 
   // Sync controlled viewport to map
   useEffect(() => {

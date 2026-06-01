@@ -13,9 +13,10 @@ TYPHOON_SCORES = []
 MINIMUM = 0
 STARTING_POINT = 0
 TRACKS = []
+NEIGHBORING_TYPHOON_NAMES = {}
 
 def typhoon_tracker(coordinates=None):
-    recent_typhoons = pd.read_csv('recent_typhoons_cleaned_all_coordinates_horizontal.csv', encoding = 'latin-1')
+    recent_typhoons = pd.read_csv('new_data.csv', encoding = 'latin-1')
     unique_sid = list(dict.fromkeys(recent_typhoons["SID"].tolist())) # removes duplicates while maintaining the same order
 
     inputs = np.empty((0,3))
@@ -51,7 +52,7 @@ def typhoon_tracker(coordinates=None):
 
     recent_typhoons_dict = {}
     recent_typhoons_dict_closest_to_farthest = {}
-
+    typhoon_names = {}
     typhoon_scores = {} # gagamitin ko eto para malaman ko kung ano yung sid nung top k typhoons sa scores. yung score ay key tapos yung sid yung value. may ran into a problem if may parehong score pero i think improbable
     scores = [] # will hold the distance scores of each typhoon compared to the new typhoon
     neighbors = 7
@@ -114,7 +115,7 @@ def typhoon_tracker(coordinates=None):
   
         # this section ay para sa paghanap ng mga points while considering yung gap of time between records nung training data typhoons and yung bagong typhoon
         for input_time in input_iso_time:
-            closest_time_index = [1000, 1000] #yung 1000 arbitrary number lang yan. nilakihan ko para palaging less than yung difference ng abs(current_time - input_time). first element is index, second element is yung difference in time
+            closest_time_index = [float('inf'), float('-inf')] #first element is index, second element is yung difference in time
             current_time = 0
             for index, typhoon_time in enumerate(typhoon_iso_time):
                 current_time += typhoon_time
@@ -134,9 +135,6 @@ def typhoon_tracker(coordinates=None):
             typhoon_indices.append(closest_time_index[0])
         
         try:
-            # print(inputs[:, :2])
-            # print(recent_typhoons_dict[sid][typhoon_indices, :2])
-            # print(inputs[:, :2] - recent_typhoons_dict[sid][typhoon_indices, :2])
             distance_of_tracks = np.linalg.norm(inputs[:, :2] - recent_typhoons_dict[sid][typhoon_indices, :2])
         except:
             continue
@@ -144,6 +142,7 @@ def typhoon_tracker(coordinates=None):
         
         recent_typhoons_dict_closest_to_farthest[sid] = recent_typhoons_dict[sid][typhoon_indices + list(range(typhoon_indices[-1] + 1, recent_typhoons_dict[sid].shape[0])), :]
 
+        typhoon_names[sid] = row['NAME']
         typhoon_scores[score] = sid
         scores.append(score)
         scores = sorted(scores)
@@ -156,8 +155,6 @@ def typhoon_tracker(coordinates=None):
     # this gets the minimum amount of records contained dun sa mga tracks ng pinakamalapit na typhoons in terms of coordinates
     for i in range(neighbors):
         sid = typhoon_scores[scores[i]]
-        if i == 0:
-            print(sid)
         weights.append(1/(scores[i] + 1e-8))
         tracks = recent_typhoons_dict_closest_to_farthest[sid]
         if len(tracks) < minimum:
@@ -169,11 +166,13 @@ def typhoon_tracker(coordinates=None):
     global STARTING_POINT
     global MINIMUM
     global TRACKS
+    global NEIGHBORING_TYPHOON_NAMES
     TYPHOON_SCORES = typhoon_scores
     SCORES = scores[0:neighbors]
     MINIMUM = minimum
     STARTING_POINT = number_of_track_reports # same as inputs.shape[0]
     TRACKS = recent_typhoons_dict_closest_to_farthest
+    NEIGHBORING_TYPHOON_NAMES = typhoon_names
 
     # this will be where the final predicted tracks will be placed
     total_tracks = np.empty((minimum,3))
@@ -196,22 +195,22 @@ def typhoon_tracker(coordinates=None):
 
 
     total_tracks[inputs.shape[0]:, :] /= np.array(weights).sum() # instead of neighbors, yung sum ng weights magiging denominator
-    print(total_tracks)
     return total_tracks.tolist()
 
 
 def scores_printer():
-    print(MINIMUM)
     dict_of_tracks = {}
     for index, scores in enumerate(SCORES):
-        if index == 0:
-            continue
         sid = TYPHOON_SCORES[scores]
         temp = TRACKS[sid]
         temp = temp[0:MINIMUM]
         dict_of_tracks[sid] = temp.tolist()
 
     return dict_of_tracks
+
+
+def names_printer():
+    return NEIGHBORING_TYPHOON_NAMES
 
 
 if __name__ == "__main__":
