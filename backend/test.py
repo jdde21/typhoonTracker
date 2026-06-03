@@ -15,13 +15,24 @@ STARTING_POINT = 0
 TRACKS = []
 NEIGHBORING_TYPHOON_NAMES = {}
 
-def typhoon_tracker(coordinates=None, database="Default"):
+def typhoon_tracker(coordinates=None, database="Default", year_range = []):
+
     if database == "Default":
         recent_typhoons = pd.read_csv('new_data.csv', encoding = 'latin-1')
     elif database == "JMA":
         recent_typhoons = pd.read_csv('cleaned/cleaned_japan.csv', encoding = 'latin-1')
     elif database == "JTWC":
         recent_typhoons = pd.read_csv('cleaned/cleaned_usa.csv', encoding = 'latin-1')
+    elif database == "CMA":
+        recent_typhoons = pd.read_csv('cleaned/cleaned_china.csv', encoding = 'latin-1')
+    elif database == "HKO":
+        recent_typhoons = pd.read_csv('cleaned/cleaned_hongkong.csv', encoding = 'latin-1')
+    elif database == "IMD":
+        recent_typhoons = pd.read_csv('cleaned/cleaned_india.csv', encoding = 'latin-1')
+    else:
+        recent_typhoons = pd.read_csv('cleaned/cleaned_korea.csv', encoding = 'latin-1')
+    
+
     unique_sid = list(dict.fromkeys(recent_typhoons["SID"].tolist())) # removes duplicates while maintaining the same order
 
     inputs = np.empty((0,3))
@@ -65,6 +76,11 @@ def typhoon_tracker(coordinates=None, database="Default"):
     # nilalagay sa recent typhoons dict yung mga coordinates per typhoon (sid ginagamit as key, yung coordinates (naka 2dimensional array siya) ginagamit as value)
     for index, row in recent_typhoons.iterrows():
         list_of_coordinates = row['COORDINATES']
+        year = int(row['SID'][0:4])
+
+
+        if (len(year_range) != 0 and (year < year_range[0] or year > year_range[1])):
+            continue
 
         list_of_coordinates = list_of_coordinates.replace('[', '')
         list_of_coordinates = list_of_coordinates.replace(']', '')

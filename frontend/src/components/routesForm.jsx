@@ -4,7 +4,6 @@ import { TyphoonDataContext } from '../App';
 import { useQuery } from "@tanstack/react-query";
 
 
-
 const TYPHOON_AGENCIES = ["Default", "JTWC", "JMA", "CMA", "HKO", "IMD", "KMA"];
 
 export default function RoutePoints() {
@@ -27,13 +26,14 @@ export default function RoutePoints() {
 
     async function getData(list_coordinates) {
         const url = "http://127.0.0.1:8000/input"
+        console.log(range)
         try {
             const response = await fetch(url, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'
                 },
-                body: JSON.stringify({ coordinates: list_coordinates, database: selected})
+                body: JSON.stringify({ coordinates: list_coordinates, database: selected, range})
             });
             if (!response.ok) {
                 throw new Error(`Response status: ${response.status}`);
@@ -116,7 +116,8 @@ export default function RoutePoints() {
         setPoints(points.filter((_, idx) => idx !== i));
     };
 
-    const [selected, setSelected] = useState('Select Database');
+    const [selected, setSelected] = useState('Default');
+    const [range, setRange] = useState([0,0]);
 
     return (
         <div
@@ -139,16 +140,35 @@ export default function RoutePoints() {
 
                 {/* dropdown */}
                 <select
+                    defaultValue={selected}
                     onMouseDown={(e) => e.stopPropagation()}
                     onChange={(e) => setSelected(e.target.value)}
-                    value={selected}
                     className="bg-white/10 text-white text-sm rounded px-2 py-2 border border-white/20 focus:outline-none cursor-pointer mx-2 my-2"
                 >
-                    <option value="Select Database" disabled selected>Select Database</option>
                     {
-                        TYPHOON_AGENCIES.map(agency => <option value={agency}>{agency}</option>)
+                        TYPHOON_AGENCIES.map((agency, i) => <option key={i} value={agency}>{agency}</option>)
                     }
                 </select>
+
+                <input
+                    type="number"
+                    onChange={(e) => {
+                        const temp = [...range]
+                        temp[0] = Number(e.target.value);
+                        setRange(temp);}}
+                    placeholder="Min"
+                    className="bg-white/10 text-white text-sm rounded px-2 py-2 border border-white/20 focus:outline-none mx-2 my-2"
+                />
+
+                <input
+                    type="number"
+                    onChange={(e) => {
+                        const temp = [...range]
+                        temp[1] = Number(e.target.value);
+                        setRange(temp);}}
+                    placeholder="Max"
+                    className="bg-white/10 text-white text-sm rounded px-2 py-2 border border-white/20 focus:outline-none mx-2 my-2"
+                />
 
                 {/* scrollable list */}
                 <div className="max-h-90 overflow-y-auto px-4 py-3 flex flex-col gap-4">
