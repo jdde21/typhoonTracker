@@ -6,7 +6,7 @@ from sklearn.metrics import confusion_matrix
 from sklearn.metrics import classification_report
 import numpy as np
 import re
-from helper import agencyIdentifier
+from helper import get_database_by_agency, coordinates_to_dict, determine_weights
 
 
 SCORES = []
@@ -18,132 +18,27 @@ NEIGHBORING_TYPHOON_NAMES = {}
 
 def typhoon_tracker(coordinates=None, agency="Default", year_range = []):
     
-    recent_typhoons = agencyIdentifier(agency)
+    typhoon_database = get_database_by_agency(agency)
 
-
-    unique_sid = list(dict.fromkeys(recent_typhoons["SID"].tolist())) # removes duplicates while maintaining the same order
+    unique_sid = list(dict.fromkeys(typhoon_database["SID"].tolist())) # removes duplicates while maintaining the same order
 
     inputs = np.empty((0,3))
-
     for coordinate in coordinates:
         inputs = np.vstack((inputs, coordinate))
-
     number_of_track_reports = inputs.shape[0]
-
-    recent_typhoons_dict = {}
-    recent_typhoons_dict_closest_to_farthest = {}
-    typhoon_names = {}
-    typhoon_scores = {} # gagamitin ko eto para malaman ko kung ano yung sid nung top k typhoons sa scores. yung score ay key tapos yung sid yung value. may ran into a problem if may parehong score pero i think improbable
-    scores = [] # will hold the distance scores of each typhoon compared to the new typhoon
+    
     neighbors = 7
 
-    # nilalagay sa recent typhoons dict yung mga coordinates per typhoon (sid ginagamit as key, yung coordinates (naka 2dimensional array siya) ginagamit as value)
-    for index, row in recent_typhoons.iterrows():
-        list_of_coordinates = row['COORDINATES']
-        year = int(row['SID'][0:4])
-
-
-        if (len(year_range) != 0 and (year < year_range[0] or year > year_range[1])):
-            continue
-
-        list_of_coordinates = list_of_coordinates.replace('[', '')
-        list_of_coordinates = list_of_coordinates.replace(']', '')
-        coordinates = re.findall(r"\(\d+\.\d+, \d+\.\d+, \d\)", list_of_coordinates)
-        
-        sid = unique_sid[index]
-        recent_typhoons_dict[sid] = np.empty((0,3)) # initializing an empty 2d np array
-
- 
-        closest_index = [-1,-1] # will contain the index of the coordinate sa typhoon in the current iteration is closest dun sa first coordinate nung bagong typhoon; first element is index, second element is yung distance niya compared to the first coordinate ng bagyo
-
-
-        # this loop finds the closest point of the typhoon in the database to the first point of the new typhoon
-        for index, coordinate in enumerate(coordinates): # para makuha yung index
-            temp = coordinate
-            temp = temp.replace('(', '')
-            temp = temp.replace(')', '')
-            temp = temp.split(',')
-            temp = np.array(list(map(float, temp))) # converted the coordinates to a float instead of a string
-       
-
-            distance = np.linalg.norm(temp[:2] - inputs[0,:2])
-     
-            # hinahanap neto yung i coconsider as first point sa mga bagyo sa training set
-            if closest_index[0] == -1:
-                closest_index[0] = index
-                closest_index[1] = distance
-            elif distance < closest_index[1]:
-                closest_index[0] = index
-                closest_index[1] = distance
-
-            recent_typhoons_dict[sid] = np.vstack((recent_typhoons_dict[sid], temp))
-        
-        
-
-
-        #  this obtains the time gaps in between track records of the typhoon (e.g., first track was obtained at 9am, second track was obtained at 10 am so the time gap is 1)
-        typhoon_iso_time = (recent_typhoons_dict[sid][closest_index[0] + 1:, 2]).flatten() 
- 
-        # same thing is happening in input_iso_time but it is done for the incoming typhoon
-        # .flatten() ginagawang 1d array kasi originally 2d array eto pero yung list element nagcocontain lng ng isang element
-        input_iso_time = inputs[1:,2].flatten() 
-
-
-        # typhoon_indices will contain the indices of the coordinates of the old typhoon (which is being compared to the new one) that is similar in terms of time to the new typhoon
-        # e.g., new typhoon's input data is (8.11, 129.2, 3), (8.12, 129.5, 3)
-        # and old typhoon's data is (16.5, 123.8, 2), (16.6, 123.5, 3), (16.7, 123.2, 3), (16.8, 122.9, 3), (16.8, 122.8, 1)
-        # out of the old typhoon's data, what will be chosen is (16.5, 123.8, 2), (16.6, 123.5, 3)
-        typhoon_indices = [closest_index[0]] 
-        current_index_increment = closest_index[0] + 1
-
-    
-  
-        # this section ay para sa paghanap ng mga points while considering yung gap of time between records nung training data typhoons and yung bagong typhoon
-        for input_time in input_iso_time:
-            closest_time_index = [float('inf'), float('-inf')] #first element is index, second element is yung difference in time
-            current_time = 0
-            for index, typhoon_time in enumerate(typhoon_iso_time):
-                current_time += typhoon_time
-                if current_time == input_time:
-                    closest_time_index = [index + current_index_increment, 0]
-                    typhoon_iso_time = np.delete(typhoon_iso_time, slice(0, index + 1)) # basically, idedelete neto yung mga tinignan ng typhoon_iso_time to make way for the next iteration
-                    current_index_increment += index + 1 # index + 1 is the number of elements removed
-                    break
-                else:
-                    closest_time_index = [index + current_index_increment, abs(current_time - input_time)] if closest_time_index[1] > abs(current_time - input_time) else closest_time_index 
-                    if current_time > input_time:
-                        # print(typhoon_iso_time, index + 1, closest_time_index[0])
-                        typhoon_iso_time = np.delete(typhoon_iso_time, slice(0, index))
-                        current_index_increment += index
-                        break
-                
-            typhoon_indices.append(closest_time_index[0])
-        
-        try:
-            distance_of_tracks = np.linalg.norm(inputs[:, :2] - recent_typhoons_dict[sid][typhoon_indices, :2])
-        except:
-            continue
-        score = distance_of_tracks.mean()
-        
-        recent_typhoons_dict_closest_to_farthest[sid] = recent_typhoons_dict[sid][typhoon_indices + list(range(typhoon_indices[-1] + 1, recent_typhoons_dict[sid].shape[0])), :]
-
-        typhoon_names[sid] = row['NAME']
-        typhoon_scores[score] = sid
-        scores.append(score)
-        scores = sorted(scores)
-
+    # recent_typhoons_dict_closest_to_farthest is a dict containing the sid as a key and the tracks/coordinates as the value
+    # typhoon_names is a dict containing the sid as a key and the name of the typhoon that corresponds with the sid as the value
+    # typhoon_scores is a dict containing the euclidean distance as a key and the sid as the value
+    # scores is a list containing the euclidean distance of each typhoon 
+    # the function coordinates_to_dict() primarily converts the tracks/coordinates in the typhoon_database into clean data and place inside a dict
+    recent_typhoons_dict_closest_to_farthest, typhoon_names, typhoon_scores, scores = coordinates_to_dict(typhoon_database, year_range, unique_sid, inputs)
    
-
-    minimum = 1000 # random high number lang eto
-    weights = []
     # pag compute ng weights ay 1/(distance + 1e-8). nilagyan ng 1e-8 para if distance is 0, di magka error. the lower the denominator, the higher the weight
     # this gets the minimum amount of records contained dun sa mga tracks ng pinakamalapit na typhoons in terms of coordinates
-    for i in range(neighbors):
-        sid = typhoon_scores[scores[i]]
-        weights.append(1/(scores[i] + 1e-8))
-        tracks = recent_typhoons_dict_closest_to_farthest[sid]
-        if len(tracks) < minimum:
-            minimum = len(tracks)
+    weights, minimum = determine_weights(recent_typhoons_dict_closest_to_farthest, typhoon_scores, scores, neighbors)
 
      # just initializing the global variables SCORES so that the scores generated in this function can be used in other functions
     global SCORES
