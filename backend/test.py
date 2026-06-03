@@ -6,6 +6,7 @@ from sklearn.metrics import confusion_matrix
 from sklearn.metrics import classification_report
 import numpy as np
 import re
+from helper import agencyIdentifier
 
 
 SCORES = []
@@ -15,23 +16,10 @@ STARTING_POINT = 0
 TRACKS = []
 NEIGHBORING_TYPHOON_NAMES = {}
 
-def typhoon_tracker(coordinates=None, database="Default", year_range = []):
-
-    if database == "Default":
-        recent_typhoons = pd.read_csv('new_data.csv', encoding = 'latin-1')
-    elif database == "JMA":
-        recent_typhoons = pd.read_csv('cleaned/cleaned_japan.csv', encoding = 'latin-1')
-    elif database == "JTWC":
-        recent_typhoons = pd.read_csv('cleaned/cleaned_usa.csv', encoding = 'latin-1')
-    elif database == "CMA":
-        recent_typhoons = pd.read_csv('cleaned/cleaned_china.csv', encoding = 'latin-1')
-    elif database == "HKO":
-        recent_typhoons = pd.read_csv('cleaned/cleaned_hongkong.csv', encoding = 'latin-1')
-    elif database == "IMD":
-        recent_typhoons = pd.read_csv('cleaned/cleaned_india.csv', encoding = 'latin-1')
-    else:
-        recent_typhoons = pd.read_csv('cleaned/cleaned_korea.csv', encoding = 'latin-1')
+def typhoon_tracker(coordinates=None, agency="Default", year_range = []):
     
+    recent_typhoons = agencyIdentifier(agency)
+
 
     unique_sid = list(dict.fromkeys(recent_typhoons["SID"].tolist())) # removes duplicates while maintaining the same order
 
@@ -39,30 +27,6 @@ def typhoon_tracker(coordinates=None, database="Default", year_range = []):
 
     for coordinate in coordinates:
         inputs = np.vstack((inputs, coordinate))
-
-    # inputs = np.vstack((inputs, [8.10, 128.6, 0]))
-    # inputs = np.vstack((inputs, [8.20, 127.90, 3]))
-    # inputs = np.vstack((inputs, [8.30, 127.40, 3]))
-    # inputs = np.vstack((inputs, [8.5, 127.0, 3]))
-    #inputs = np.vstack((inputs, [9.2, 124.7, 12]))
-    #inputs = np.vstack((inputs, [10.2, 122.7, 12]))
-
-    # inputs = np.vstack((inputs, [11.3, 137.7, 0]))
-    # inputs = np.vstack((inputs, [11.6, 137.8, 6]))
-    # inputs = np.vstack((inputs, [12.2, 137.6, 6]))
-
-    # inputs = np.vstack((inputs, [12.0, 137.3, 6]))
-    # inputs = np.vstack((inputs, [10.5, 136.9, 6]))
-    # inputs = np.vstack((inputs, [10.5, 137.3, 6]))
-
-    # inputs = np.vstack((inputs, [10.9, 138.6, 6]))
-    # inputs = np.vstack((inputs, [10.2, 138.2, 6]))
-    # inputs = np.vstack((inputs, [10.6, 138.7, 6]))
-
-
-    # inputs = np.vstack((inputs, [11.3, 137.7, 0]))
-    # inputs = np.vstack((inputs, [11.6, 137.8, 6]))
-    # inputs = np.vstack((inputs, [12.2, 137.6, 6]))
 
     number_of_track_reports = inputs.shape[0]
 
