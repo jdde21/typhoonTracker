@@ -1,4 +1,4 @@
-import { useState, useRef, useContext } from "react";
+import { useState, useRef, useContext, useEffect } from "react";
 import { Trash2 } from "lucide-react";
 import { TyphoonDataContext } from '../App';
 import { useQuery } from "@tanstack/react-query";
@@ -114,6 +114,14 @@ export default function RoutePoints() {
         setPoints(points.filter((_, idx) => idx !== i));
     };
 
+    useEffect(() => {
+        if (year_range) {
+            const first_year = year_range[selected][0];
+            const last_year = year_range[selected][1]
+            setRange([first_year, last_year]);
+        }
+    }, [year_range, selected]);
+
     const [range, setRange] = useState([0, 0]);
 
     return (
@@ -167,7 +175,7 @@ export default function RoutePoints() {
                         setRange(temp);
                     }}
                     placeholder="Min"
-                    value={!year_range ? 0 : year_range[selected][0]}
+                    value={range[0]}
                     className="bg-white/10 text-white text-sm rounded px-2 py-2 border border-white/20 focus:outline-none mx-2 my-2"
                 />
 
@@ -179,7 +187,7 @@ export default function RoutePoints() {
                         setRange(temp);
                     }}
                     placeholder="Max"
-                    value={!year_range ? 0 : year_range[selected][1]}
+                    value={range[1]}
                     className="bg-white/10 text-white text-sm rounded px-2 py-2 border border-white/20 focus:outline-none mx-2 my-2"
                 />
 
