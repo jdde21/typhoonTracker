@@ -2,6 +2,7 @@ import { useState, useRef, useContext } from "react";
 import { Trash2 } from "lucide-react";
 import { TyphoonDataContext } from '../App';
 import { useQuery } from "@tanstack/react-query";
+import PriceRangeSlider from "./PriceRangeSlider";
 
 
 const TYPHOON_AGENCIES = ["Default", "JTWC", "JMA", "CMA", "HKO", "IMD", "KMA"];
@@ -10,19 +11,15 @@ export default function RoutePoints() {
     const { setTyphoonLocations, setNeighborTyphoonsLocations, setNeighboringTyphoons, setNeighboringTyphoonsNames } = useContext(TyphoonDataContext);
     const typhoon_locations = []
 
-    // const {data: users, isLoading} = useQuery({
-    //     queryKey: ["users"],
-    //     queryFn: async () => {
-    //         const res = await fetch("https://jsonplaceholder.typicode.com/users");
-    //         return res.json();
-    //     }
-    // });
+    const [selected, setSelected] = useState('Default');
+    const { data: year_range, isLoading } = useQuery({
+        queryKey: ["year_range"],
+        queryFn: async () => {
+            const res = await fetch("http://127.0.0.1:8000/year_getter");
+            return res.json();
+        }
+    });
 
-    // if (isLoading) {
-    //     console.log("loading");
-    // } else {
-    //     console.log(users);
-    // }
 
     async function getData(list_coordinates) {
         const url = "http://127.0.0.1:8000/input"
@@ -33,7 +30,7 @@ export default function RoutePoints() {
                 headers: {
                     'Content-Type': 'application/json'
                 },
-                body: JSON.stringify({ coordinates: list_coordinates, database: selected, range})
+                body: JSON.stringify({ coordinates: list_coordinates, database: selected, range })
             });
             if (!response.ok) {
                 throw new Error(`Response status: ${response.status}`);
@@ -116,8 +113,7 @@ export default function RoutePoints() {
         setPoints(points.filter((_, idx) => idx !== i));
     };
 
-    const [selected, setSelected] = useState('Default');
-    const [range, setRange] = useState([0,0]);
+    const [range, setRange] = useState([0, 0]);
 
     return (
         <div
@@ -155,8 +151,10 @@ export default function RoutePoints() {
                     onChange={(e) => {
                         const temp = [...range]
                         temp[0] = Number(e.target.value);
-                        setRange(temp);}}
+                        setRange(temp);
+                    }}
                     placeholder="Min"
+                    value={!year_range ? 0 : year_range[selected][0]}
                     className="bg-white/10 text-white text-sm rounded px-2 py-2 border border-white/20 focus:outline-none mx-2 my-2"
                 />
 
@@ -165,10 +163,14 @@ export default function RoutePoints() {
                     onChange={(e) => {
                         const temp = [...range]
                         temp[1] = Number(e.target.value);
-                        setRange(temp);}}
+                        setRange(temp);
+                    }}
                     placeholder="Max"
+                    value={!year_range ? 0 : year_range[selected][1]}
                     className="bg-white/10 text-white text-sm rounded px-2 py-2 border border-white/20 focus:outline-none mx-2 my-2"
                 />
+
+                <PriceRangeSlider min={!year_range ? 10 : year_range[selected][0]} max={!year_range ? 10 : year_range[selected][1]} onChange={() => {}} />
 
                 {/* scrollable list */}
                 <div className="max-h-90 overflow-y-auto px-4 py-3 flex flex-col gap-4">

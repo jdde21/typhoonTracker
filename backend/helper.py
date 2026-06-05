@@ -141,10 +141,26 @@ def determine_weights(recent_typhoons_dict_closest_to_farthest, typhoon_scores, 
         if len(tracks) < minimum:
             minimum = len(tracks)
     return [weights, minimum]
+
+def predicted_track(recent_typhoons_dict_closest_to_farthest, typhoon_scores, scores, weights, inputs, minimum, neighbors):
+    total_tracks = np.empty((minimum,3))
+    total_tracks.fill(0)
     
-            
+    # nilalagay ko lng yung tracks given as input. as is na siya sa total tracks. di siya mababago
+    total_tracks[0:inputs.shape[0], :] += inputs
+    # ginagawa naman dito ay from all the neighbors, kukunin yung values from index [inputs.shape[0], minimum] -- this is because yung index 0 to inputs.shape - 1 ay binigay na ng user --
+    # (continuation) at i-aadd sa total tracks.
+    for i in range(neighbors):
+        sid = typhoon_scores[scores[i]]
+        tracks = recent_typhoons_dict_closest_to_farthest[sid]
+ 
+        temp_tracks = np.empty((minimum,3))
+        temp_tracks.fill(0)
+        for j in range(inputs.shape[0], minimum):
+            temp_tracks[j] += tracks[j] * weights[i] # yung track ng typhoon will now be multiplied by its weight
+        total_tracks += temp_tracks
 
-
+    return total_tracks
         
         
         

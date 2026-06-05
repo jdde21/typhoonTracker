@@ -6,7 +6,7 @@ from sklearn.metrics import confusion_matrix
 from sklearn.metrics import classification_report
 import numpy as np
 import re
-from helper import get_database_by_agency, coordinates_to_dict, determine_weights
+from helper import get_database_by_agency, coordinates_to_dict, determine_weights, predicted_track
 
 
 SCORES = []
@@ -54,26 +54,8 @@ def typhoon_tracker(coordinates=None, agency="Default", year_range = []):
     TRACKS = recent_typhoons_dict_closest_to_farthest
     NEIGHBORING_TYPHOON_NAMES = typhoon_names
 
-    # this will be where the final predicted tracks will be placed
-    total_tracks = np.empty((minimum,3))
-    total_tracks.fill(0)
-
-    # nilalagay ko lng yung tracks given as input. as is na siya sa total tracks. di siya mababago
-    total_tracks[0:inputs.shape[0], :] += inputs
-    # ginagawa naman dito ay from all the neighbors, kukunin yung values from index [inputs.shape[0], minimum] -- this is because yung index 0 to inputs.shape - 1 ay binigay na ng user --
-    # (continuation) at i-aadd sa total tracks.
-    for i in range(neighbors):
-        sid = typhoon_scores[scores[i]]
-        tracks = recent_typhoons_dict_closest_to_farthest[sid]
- 
-        temp_tracks = np.empty((minimum,3))
-        temp_tracks.fill(0)
-        for j in range(inputs.shape[0], minimum):
-            temp_tracks[j] += tracks[j] * weights[i] # yung track ng typhoon will now be multiplied by its weight
-        total_tracks += temp_tracks
-
-
-
+    total_tracks = predicted_track(recent_typhoons_dict_closest_to_farthest, typhoon_scores, scores, weights, inputs, minimum, neighbors)
+  
     total_tracks[inputs.shape[0]:, :] /= np.array(weights).sum() # instead of neighbors, yung sum ng weights magiging denominator
     return total_tracks.tolist()
 
@@ -92,7 +74,21 @@ def scores_printer():
 def names_printer():
     return NEIGHBORING_TYPHOON_NAMES
 
+def year_range_getter():
+    TYPHOON_AGENCIES = ["Default", "JTWC", "JMA", "CMA", "HKO", "IMD", "KMA"]
+    database_year_range = {}
+    for agency in TYPHOON_AGENCIES:
+        typhoon_database = get_database_by_agency(agency)
+        first_year = int(typhoon_database["SID"].iloc[0][0:4])
+        last_year = int(typhoon_database["SID"].iloc[-1][0:4])
+        database_year_range[agency] = [first_year, last_year]
+    
+    return database_year_range
+    
+        
 
 if __name__ == "__main__":
-    typhoon_tracker()
-    scores_printer()
+    year_range_getter()
+    # typhoon_tracker()
+    # scores_printer()
+    
