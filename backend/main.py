@@ -16,6 +16,7 @@ class Body(BaseModel):
     coordinates: List[List[float]]
     database: str
     range: List[int]
+    neighbors: int
 
 items = []
 list_coordinates = []
@@ -52,7 +53,7 @@ def input_coordinates(body: Body):
     if body.range[0] == 0:
         body.range = []
         
-    data = typhoon_tracker(list_coordinates, body.database, body.range)
+    data = typhoon_tracker(list_coordinates, body.database, body.range, body.neighbors)
     list_coordinates.clear()
     return data
 
