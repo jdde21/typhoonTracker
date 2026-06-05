@@ -52,7 +52,6 @@ export default function PriceRangeSlider ({
         setMaxVal(max);
         minValRef.current = min;
         maxValRef.current = max;
-        console.log(minValRef, maxValRef)
     }, [min, max])
 
     useEffect(() => {
@@ -93,6 +92,8 @@ export default function PriceRangeSlider ({
         // const value = Math.max(snapped, minVal + 1);
         setMaxVal(raw);
     };
+
+
 
     return (
         <div className='w-full flex items-center justify-center flex-col space-y-3'>

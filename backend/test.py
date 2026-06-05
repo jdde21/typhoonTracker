@@ -27,7 +27,6 @@ def typhoon_tracker(coordinates=None, agency="Default", year_range = [], neighbo
         inputs = np.vstack((inputs, coordinate))
     number_of_track_reports = inputs.shape[0]
     
-    
     # recent_typhoons_dict_closest_to_farthest is a dict containing the sid as a key and the tracks/coordinates as the value
     # typhoon_names is a dict containing the sid as a key and the name of the typhoon that corresponds with the sid as the value
     # typhoon_scores is a dict containing the euclidean distance as a key and the sid as the value
@@ -39,7 +38,7 @@ def typhoon_tracker(coordinates=None, agency="Default", year_range = [], neighbo
     # this gets the minimum amount of records contained dun sa mga tracks ng pinakamalapit na typhoons in terms of coordinates
     weights, minimum = determine_weights(recent_typhoons_dict_closest_to_farthest, typhoon_scores, scores, neighbors)
 
-     # just initializing the global variables SCORES so that the scores generated in this function can be used in other functions
+    # just initializing the global variables SCORES so that the scores generated in this function can be used in other functions
     global SCORES
     global TYPHOON_SCORES
     global STARTING_POINT

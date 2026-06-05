@@ -20,10 +20,8 @@ export default function RoutePoints() {
         }
     });
 
-
     async function getData(list_coordinates) {
         const url = "http://127.0.0.1:8000/input"
-        console.log(range)
         try {
             const response = await fetch(url, {
                 method: 'POST',
@@ -82,6 +80,10 @@ export default function RoutePoints() {
     const [pos, setPos] = useState({ x: 900, y: 100 });
     const dragging = useRef(false);
     const offset = useRef({ x: 0, y: 0 });
+
+    const handleRangeChange = (year_range) => {
+        setRange([year_range.min, year_range.max])
+    };
 
     const onMouseDown = (e) => {
         dragging.current = true;
@@ -191,7 +193,7 @@ export default function RoutePoints() {
                     className="bg-white/10 text-white text-sm rounded px-2 py-2 border border-white/20 focus:outline-none mx-2 my-2"
                 />
 
-                <PriceRangeSlider min={!year_range ? 10 : year_range[selected][0]} max={!year_range ? 10 : year_range[selected][1]} onChange={() => {}} />
+                <PriceRangeSlider min={!year_range ? 10 : year_range[selected][0]} max={!year_range ? 10 : year_range[selected][1]} onChange={handleRangeChange} />
 
                 {/* scrollable list */}
                 <div className="max-h-90 overflow-y-auto px-4 py-3 flex flex-col gap-4">
@@ -245,7 +247,6 @@ export default function RoutePoints() {
                             temp.push(Number(value.timegap));
                             list_coordinates.push(temp);
                         })
-                        console.log(list_coordinates);
                         let list = await getData(list_coordinates);
                         let neighboringTyphoons = await getNeighbors();
                         let neighboringTyphoonsNames = await getNames();
