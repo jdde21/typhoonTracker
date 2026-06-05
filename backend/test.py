@@ -16,7 +16,7 @@ STARTING_POINT = 0
 TRACKS = []
 NEIGHBORING_TYPHOON_NAMES = {}
 
-def typhoon_tracker(coordinates=None, agency="Default", year_range = []):
+def typhoon_tracker(coordinates=None, agency="Default", year_range = [], neighbors=7):
     
     typhoon_database = get_database_by_agency(agency)
 
@@ -27,8 +27,7 @@ def typhoon_tracker(coordinates=None, agency="Default", year_range = []):
         inputs = np.vstack((inputs, coordinate))
     number_of_track_reports = inputs.shape[0]
     
-    neighbors = 7
-
+    
     # recent_typhoons_dict_closest_to_farthest is a dict containing the sid as a key and the tracks/coordinates as the value
     # typhoon_names is a dict containing the sid as a key and the name of the typhoon that corresponds with the sid as the value
     # typhoon_scores is a dict containing the euclidean distance as a key and the sid as the value

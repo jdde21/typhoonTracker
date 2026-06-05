@@ -30,7 +30,7 @@ export default function RoutePoints() {
                 headers: {
                     'Content-Type': 'application/json'
                 },
-                body: JSON.stringify({ coordinates: list_coordinates, database: selected, range })
+                body: JSON.stringify({ coordinates: list_coordinates, database: selected, range, neighbors })
             });
             if (!response.ok) {
                 throw new Error(`Response status: ${response.status}`);
@@ -75,8 +75,9 @@ export default function RoutePoints() {
         } catch (error) {
             console.error(error.message);
         }
-    }
+    }   
 
+    const [neighbors, setNeighbors] = useState(0);
     const [points, setPoints] = useState([{ lat: "", lng: "", timegap: "" }]);
     const [pos, setPos] = useState({ x: 900, y: 100 });
     const dragging = useRef(false);
@@ -145,6 +146,18 @@ export default function RoutePoints() {
                         TYPHOON_AGENCIES.map((agency, i) => <option key={i} value={agency}>{agency}</option>)
                     }
                 </select>
+                
+                <input
+                    type="number"
+                    onChange={(e) => {
+                        const value = Number(e.target.value);
+                        setNeighbors(value);
+
+                    }}
+                    placeholder="Neighbors"
+                    value={neighbors}
+                    className="bg-white/10 text-white text-sm rounded px-2 py-2 border border-white/20 focus:outline-none mx-2 my-2"
+                />
 
                 <input
                     type="number"
