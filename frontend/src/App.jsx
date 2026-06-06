@@ -91,25 +91,22 @@ export function App() {
             <RoutePoints />
           </div>
 
-          <div className="absolute top-[14%] left-[1%] w-[20%] z-10">
+          {/* <div className="absolute top-[14%] left-[1%] w-[20%] z-10">
             <Cabinet
               neighboringTyphoons={neighboringTyphoons}
               onSelect={(item) => console.log("selected", item)}
             />
-          </div>
+          </div> */}
 
           <div className="absolute bottom-4 left-1/2 -translate-x-1/2 z-10 w-full">
             <div className="w-[80%] m-auto">
               <Slider {...settings}>
                 {
-                  typhoons.map((value) => <NeighborTyphoonCard name={value.name} category={value.category} wind={value.wind} pressure={value.pressure} />)
+                  Object.keys(neighboringTyphoons).map((sid) => <NeighborTyphoonCard name={neighboringTyphoonsNames[sid]} sid={sid} category={'CAT 5'} wind={'1000'} pressure={'100'} tracks={neighboringTyphoons[sid]}/>)
                 }
               </Slider>
             </div>
           </div>
-
-
-
 
         </TyphoonDataContext.Provider>
       </QueryClientProvider>
