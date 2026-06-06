@@ -2,7 +2,6 @@ import { useState, useRef, useContext, useEffect } from "react";
 import { Trash2 } from "lucide-react";
 import { TyphoonDataContext } from '../App';
 import { useQuery } from "@tanstack/react-query";
-import TimelineFocusSlider from "./TimelineFocusSlider";
 import PriceRangeSlider from "./PriceRangeSlider";
 
 
