@@ -115,10 +115,13 @@ def coordinates_to_dict(typhoon_database, year_range, unique_sid, inputs):
             typhoon_indices.append(closest_time_index[0])
         
         try:
-            # distance_of_tracks = np.linalg.norm(inputs[:, :2] - recent_typhoons_dict[sid][typhoon_indices, :2], axis = 1) # this is per pair of points euclidean distance
-            distance_of_tracks = np.linalg.norm(inputs[:, :2] - recent_typhoons_dict[sid][typhoon_indices, :2]) # this is frobenius
-            if scores < 6:
-                print(np.linalg.norm(inputs[:, :2] - recent_typhoons_dict[sid][typhoon_indices, :2], axis = 1)) # this is per pair of points euclidean distance)
+            distance_of_tracks = np.linalg.norm(inputs[:, :2] - recent_typhoons_dict[sid][typhoon_indices, :2]) # frobenius
+            # distance_of_tracks = np.sum(np.linalg.norm(inputs[:, :2] - recent_typhoons_dict[sid][typhoon_indices, :2], axis = 1)) # per point euclidean distance
+            # if secret < 6:
+            #     secret += 1
+            #     print("frobenius", distance_of_tracks)
+            #     print("per-point", np.sum(np.linalg.norm(inputs[:, :2] - recent_typhoons_dict[sid][typhoon_indices, :2], axis = 1)))
+
         except:
             continue
         score = distance_of_tracks.mean()
