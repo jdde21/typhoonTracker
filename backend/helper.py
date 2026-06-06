@@ -24,6 +24,7 @@ def get_database_by_agency(agency):
 
 
 def coordinates_to_dict(typhoon_database, year_range, unique_sid, inputs):
+    secret = 0
     recent_typhoons_dict = {}
     recent_typhoons_dict_closest_to_farthest = {}
     typhoon_names = {}
@@ -114,7 +115,10 @@ def coordinates_to_dict(typhoon_database, year_range, unique_sid, inputs):
             typhoon_indices.append(closest_time_index[0])
         
         try:
-            distance_of_tracks = np.linalg.norm(inputs[:, :2] - recent_typhoons_dict[sid][typhoon_indices, :2])
+            # distance_of_tracks = np.linalg.norm(inputs[:, :2] - recent_typhoons_dict[sid][typhoon_indices, :2], axis = 1) # this is per pair of points euclidean distance
+            distance_of_tracks = np.linalg.norm(inputs[:, :2] - recent_typhoons_dict[sid][typhoon_indices, :2]) # this is frobenius
+            if scores < 6:
+                print(np.linalg.norm(inputs[:, :2] - recent_typhoons_dict[sid][typhoon_indices, :2], axis = 1)) # this is per pair of points euclidean distance)
         except:
             continue
         score = distance_of_tracks.mean()
@@ -137,6 +141,7 @@ def determine_weights(recent_typhoons_dict_closest_to_farthest, typhoon_scores, 
     for i in range(neighbors):
         sid = typhoon_scores[scores[i]]
         weights.append(1/(scores[i] + 1e-8))
+        print(scores[i])
         tracks = recent_typhoons_dict_closest_to_farthest[sid]
         if len(tracks) < minimum:
             minimum = len(tracks)
