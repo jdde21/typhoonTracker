@@ -18,7 +18,7 @@ const snapToNearest = (value, points, threshold) => {
     return Math.abs(closest - value) <= threshold ? closest : value;
 };
 
-export default function PriceRangeSlider ({
+export default function PriceRangeSlider({
     min,
     max,
     trackColor = "#ffffff",
@@ -96,7 +96,35 @@ export default function PriceRangeSlider ({
 
 
     return (
-        <div className='w-full flex items-center justify-center flex-col space-y-3'>
+        <div style={{
+            background: "#1c2130",
+            borderRadius: 10,
+            padding: "14px 10px 20px",
+            width: "100%",
+            maxWidth: 560,
+            boxSizing: "border-box",
+            fontFamily: "monospace",
+        }}>
+
+            <div style={{
+                display: "flex",
+                justifyContent: "space-between",
+                alignItems: "center",
+                marginBottom: 14,
+            }}>
+                <span style={{
+                    fontSize: 11,
+                    fontWeight: 500,
+                    letterSpacing: "0.12em",
+                    textTransform: "uppercase",
+                    color: "#e0174f",
+                }}>
+                    Timeline Focus
+                </span>
+                <span style={{ fontSize: 12, color: "#8a95b0", letterSpacing: "0.05em" }}>
+                    {minVal} — {maxVal}
+                </span>
+            </div>
 
             {/* Scoped thumb-size override */}
             <style>{`
@@ -110,30 +138,7 @@ export default function PriceRangeSlider ({
                 }
             `}</style>
 
-            {/* Display Price Value */}
-            {!mobileScreen ? (
-                <div className="w-75 px-4 flex items-center justify-between gap-x-5">
-                    <span className="px-3 py-1 rounded-full text-xs font-bold bg-[#6B0F2B]/10 text-[#6B0F2B]">
-                        {minVal}
-                    </span>
-                    <div className="flex-1 border-dashed border border-neutral-500 mt-1" />
-                    <span className="px-3 py-1 rounded-full text-xs font-bold bg-[#6B0F2B]/10 text-[#6B0F2B]">
-                        {maxVal}
-                    </span>
-                </div>
-            ) : (
-                <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 12, marginBottom: 10 }}>
-                    <span style={{ background: "#f5f0f2", borderRadius: 99, padding: "3px 10px", fontSize: 12, fontWeight: 700, color: "#6B0F2B", fontFamily: "'Plus Jakarta Sans', sans-serif" }}>
-                        {minVal}
-                    </span>
-                    <span style={{ fontSize: 11, color: "#bbb", fontFamily: "'Plus Jakarta Sans', sans-serif", margin: "0 4px" }}>
-                        to
-                    </span>
-                    <span style={{ background: "#f5f0f2", borderRadius: 99, padding: "3px 10px", fontSize: 12, fontWeight: 700, color: "#6B0F2B", fontFamily: "'Plus Jakarta Sans', sans-serif" }}>
-                        {maxVal}
-                    </span>
-                </div>
-            )}
+      
 
             {/* Slider */}
             <div id={uid} className="multi-slide-input-container" style={{ width: sliderWidth }}>
@@ -163,7 +168,7 @@ export default function PriceRangeSlider ({
                 />
                 <div className="slider">
                     <div style={{ backgroundColor: trackColor }} className="track-slider" />
-                    <div ref={range} style={{ backgroundColor: rangeColor }} className="range-slider" />
+                    <div ref={range} style={{ backgroundColor: "#8E0542" }} className="range-slider" />
                 </div>
             </div>
 

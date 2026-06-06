@@ -173,7 +173,7 @@
 .range-slider {
   border-radius: 4px;
   height: 6px;
-  background-color: #9A7080;
+  background-color: #8E0542;
 }
 
 /* binago nila */
@@ -206,7 +206,7 @@
 .thumb::-webkit-slider-thumb {
   background-color: #fff;
   border-radius: 50%;
-  border: 3px solid #6B0F2B; /* updated */
+  border: 1px solid #6B0F2B; /* updated */
   cursor: pointer;
   height: 28px;
   width: 28px;

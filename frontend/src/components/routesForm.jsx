@@ -2,6 +2,7 @@ import { useState, useRef, useContext, useEffect } from "react";
 import { Trash2 } from "lucide-react";
 import { TyphoonDataContext } from '../App';
 import { useQuery } from "@tanstack/react-query";
+import TimelineFocusSlider from "./TimelineFocusSlider";
 import PriceRangeSlider from "./PriceRangeSlider";
 
 
@@ -73,7 +74,7 @@ export default function RoutePoints() {
         } catch (error) {
             console.error(error.message);
         }
-    }   
+    }
 
     const [neighbors, setNeighbors] = useState(0);
     const [points, setPoints] = useState([{ lat: "", lng: "", timegap: "" }]);
@@ -156,7 +157,7 @@ export default function RoutePoints() {
                         TYPHOON_AGENCIES.map((agency, i) => <option key={i} value={agency}>{agency}</option>)
                     }
                 </select>
-                
+
                 <input
                     type="number"
                     onChange={(e) => {
@@ -169,31 +170,11 @@ export default function RoutePoints() {
                     className="bg-white/10 text-white text-sm rounded px-2 py-2 border border-white/20 focus:outline-none mx-2 my-2"
                 />
 
-                <input
-                    type="number"
-                    onChange={(e) => {
-                        const temp = [...range]
-                        temp[0] = Number(e.target.value);
-                        setRange(temp);
-                    }}
-                    placeholder="Min"
-                    value={range[0]}
-                    className="bg-white/10 text-white text-sm rounded px-2 py-2 border border-white/20 focus:outline-none mx-2 my-2"
-                />
 
-                <input
-                    type="number"
-                    onChange={(e) => {
-                        const temp = [...range]
-                        temp[1] = Number(e.target.value);
-                        setRange(temp);
-                    }}
-                    placeholder="Max"
-                    value={range[1]}
-                    className="bg-white/10 text-white text-sm rounded px-2 py-2 border border-white/20 focus:outline-none mx-2 my-2"
-                />
 
-                <PriceRangeSlider min={!year_range ? 10 : year_range[selected][0]} max={!year_range ? 10 : year_range[selected][1]} onChange={handleRangeChange} />
+                <div className="flex flex-col gap-1 w-[90%] m-auto">
+                    <PriceRangeSlider min={!year_range ? 10 : year_range[selected][0]} max={!year_range ? 10 : year_range[selected][1]} onChange={handleRangeChange} />
+                </div>
 
                 {/* scrollable list */}
                 <div className="max-h-90 overflow-y-auto px-4 py-3 flex flex-col gap-4">
