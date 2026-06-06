@@ -15,7 +15,6 @@ export default function Cabinet({ neighboringTyphoons = [], onSelect }) {
                 <span className="font-medium text-zinc-800 dark:text-zinc-100 flex-1">
                     Neighboring Typhoons
                 </span>
-
             </div>
 
             {/* Rows */}
@@ -53,7 +52,7 @@ export default function Cabinet({ neighboringTyphoons = [], onSelect }) {
                                 <div className="px-4 py-3 bg-zinc-50 dark:bg-zinc-800 border-b border-zinc-100 dark:border-zinc-800 text-xs text-zinc-600 dark:text-zinc-300 space-y-1">
                                     {tracks.map((track, i) => (
                                         <div key={i} className="flex justify-between">
-                                            <span>{track.time ?? `Point ${i + 1}`}</span>
+                                            <span>{`Point ${i + 1}`}</span>
                                             <span>[{track[0]}, {track[1]}]</span>
                                         </div>
                                     ))}
