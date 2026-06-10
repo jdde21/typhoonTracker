@@ -14,7 +14,7 @@ import {
   useState,
 } from "react";
 import { createPortal } from "react-dom";
-import { X, Minus, Plus, Locate, Maximize, Loader2 } from "lucide-react";
+import { X, Minus, Plus, Locate, Maximize, Loader2, Crosshair } from "lucide-react";
 import { TyphoonDataContext } from '../../App';
 
 import { cn } from "@/lib/utils";
@@ -255,7 +255,7 @@ const Map = forwardRef(function Map(
       source.setData({
         type: 'Feature',
         properties: {},
-        geometry: { type: 'LineString', coordinates: []}
+        geometry: { type: 'LineString', coordinates: [] }
       });
     } else if (source) {
       source.setData({
@@ -727,16 +727,27 @@ function ControlButton({
 }
 
 function MapControls({
-  position = "bottom-right",
+  position = "top-right",
   showZoom = true,
   showCompass = false,
   showLocate = false,
   showFullscreen = false,
+  showRecenter = true,
+  recenterTarget, 
   className,
-  onLocate
+  onLocate,
 }) {
   const { map } = useMap();
   const [waitingForLocation, setWaitingForLocation] = useState(false);
+
+  const handleRecenter = useCallback(() => {
+    if (!map) return;
+    map.flyTo({
+      center: recenterTarget?.center ?? [0, 0],
+      zoom: recenterTarget?.zoom ?? map.getZoom(),
+      duration: 800,
+    });
+  }, [map, recenterTarget]);
 
   const handleZoomIn = useCallback(() => {
     map?.zoomTo(map.getZoom() + 1, { duration: 300 });
@@ -796,6 +807,13 @@ function MapControls({
           </ControlButton>
           <ControlButton onClick={handleZoomOut} label="Zoom out">
             <Minus className="size-4" />
+          </ControlButton>
+        </ControlGroup>
+      )}
+      {showRecenter && (
+        <ControlGroup>
+          <ControlButton onClick={handleRecenter} label="Recenter map">
+            <Crosshair className="size-4" />
           </ControlButton>
         </ControlGroup>
       )}

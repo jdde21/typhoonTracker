@@ -1,5 +1,5 @@
 import { useState, useRef, useContext, useEffect } from "react";
-import { Trash2 } from "lucide-react";
+import { Trash2, ChevronDown, ChevronUp } from "lucide-react";
 import { TyphoonDataContext } from '../App';
 import { useQuery } from "@tanstack/react-query";
 import PriceRangeSlider from "./PriceRangeSlider";
@@ -125,6 +125,7 @@ export default function RoutePoints() {
     }, [year_range, selected]);
 
     const [range, setRange] = useState([0, 0]);
+    const [collapsed, setCollapsed] = useState(false);
 
     return (
         <div
@@ -134,42 +135,54 @@ export default function RoutePoints() {
         >
             <div
                 style={{ left: pos.x, top: pos.y }}
-                className="absolute pointer-events-auto bg-[#1c1c1e] rounded-2xl w-90 text-white select-none"
+                className="absolute pointer-events-auto bg-[#161b27] rounded-2xl w-90 text-white select-none"
             >
                 {/* header — drag handle */}
                 <div
                     onMouseDown={onMouseDown}
-                    className="flex justify-between items-center px-4 py-3 border-b border-white/10 cursor-grab active:cursor-grabbing"
+                    className={`flex justify-between items-center px-4 py-3 ${!collapsed ? "border-b border-white/10" : ""} cursor-grab active:cursor-grabbing`}
                 >
                     <span className="font-medium">Route Points</span>
-                    <button className="text-white/50 hover:text-white">✕</button>
+                    <button
+                        onClick={() => setCollapsed((prev) => !prev)}
+                        className="text-white/50 hover:text-white transition-colors"
+                        aria-label={collapsed ? "Expand panel" : "Collapse panel"}
+                    >
+                        {collapsed ? <ChevronDown size={16} /> : <ChevronUp size={16} />}
+                    </button>
                 </div>
 
-                {/* dropdown */}
-                <select
-                    defaultValue={selected}
-                    onMouseDown={(e) => e.stopPropagation()}
-                    onChange={(e) => setSelected(e.target.value)}
-                    className="bg-white/10 text-white text-sm rounded px-2 py-2 border border-white/20 focus:outline-none cursor-pointer mx-2 my-2"
-                >
-                    {
-                        TYPHOON_AGENCIES.map((agency, i) => <option key={i} value={agency}>{agency}</option>)
-                    }
-                </select>
+                {!collapsed && (
+                    <>
+                <div className="flex flex-row mx-2 my-2 gap-3">
+                    {/* Database */}
+                    <div className="flex flex-col gap-1 flex-2">
+                        <label className="text-[10px] font-semibold tracking-widest text-white/50 uppercase">Database</label>
+                        <select
+                            defaultValue={selected}
+                            onMouseDown={(e) => e.stopPropagation()}
+                            onChange={(e) => setSelected(e.target.value)}
+                            style={{ backgroundColor: "#1c2130" }}
+                            className="w-full text-white text-sm px-3 py-1.5 border border-white/10 rounded-lg focus:outline-none cursor-pointer appearance-none"
+                        >
+                            {TYPHOON_AGENCIES.map((agency, i) => (
+                                <option key={i} value={agency}>{agency}</option>
+                            ))}
+                        </select>
+                    </div>
 
-                <input
-                    type="number"
-                    onChange={(e) => {
-                        const value = Number(e.target.value);
-                        setNeighbors(value);
-
-                    }}
-                    placeholder="Neighbors"
-                    value={neighbors}
-                    className="bg-white/10 text-white text-sm rounded px-2 py-2 border border-white/20 focus:outline-none mx-2 my-2"
-                />
-
-
+                    {/* Neighbors */}
+                    <div className="flex flex-col gap-1 flex-1">
+                        <label className="text-[10px] font-semibold tracking-widest text-white/50 uppercase">Neighbors</label>
+                        <input
+                            type="number"
+                            onChange={(e) => setNeighbors(Number(e.target.value))}
+                            value={neighbors}
+                            style={{ backgroundColor: "#1c2130" }}
+                            className="w-full text-white text-sm px-3 py-1.5 border border-white/10 rounded-lg focus:outline-none"
+                        />
+                    </div>
+                </div>
 
                 <div className="flex flex-col gap-1 w-[90%] m-auto">
                     <PriceRangeSlider min={!year_range ? 10 : year_range[selected][0]} max={!year_range ? 10 : year_range[selected][1]} onChange={handleRangeChange} />
@@ -203,7 +216,7 @@ export default function RoutePoints() {
                                             placeholder={field === "timegap" ? "0" : "0.000"}
                                             value={p[field]}
                                             onChange={(e) => updatePoint(i, field, e.target.value)}
-                                            className="bg-[#2c2c2e] border border-white/10 rounded-lg px-2 py-2 text-sm w-full outline-none focus:border-white/30"
+                                            className="bg-[#1c2130] border border-white/10 rounded-lg px-2 py-2 text-sm w-full outline-none focus:border-white/30"
                                         />
                                     </div>
                                 ))}
@@ -242,11 +255,11 @@ export default function RoutePoints() {
                         setTyphoonLocations(typhoon_locations);
                         setNeighboringTyphoons(neighboringTyphoons);
                         setNeighboringTyphoonsNames(neighboringTyphoonsNames);
-                        setPoints([{ lat: "", lng: "", timegap: "" }])
+                        setPoints([{ lat: "", lng: "", timegap: "" }]);
                     }} className="bg-blue-500 hover:bg-blue-400 rounded-xl py-3 font-semibold w-full">
                         Submit Route
                     </button>
-                </div>
+                </div></>)}
             </div>
         </div>
     );

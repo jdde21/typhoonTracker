@@ -58,13 +58,13 @@ def typhoon_tracker(coordinates=None, agency="Default", year_range = [], neighbo
     return total_tracks.tolist()
 
 
-def scores_printer():
+def sid_track_scores_dict():
     dict_of_tracks = {}
-    for index, scores in enumerate(SCORES):
-        sid = TYPHOON_SCORES[scores]
+    for score in SCORES:
+        sid = TYPHOON_SCORES[score]
         temp = TRACKS[sid]
         temp = temp[0:MINIMUM]
-        dict_of_tracks[sid] = temp.tolist()
+        dict_of_tracks[sid] = [temp.tolist(), score]
 
     return dict_of_tracks
 
