@@ -102,7 +102,7 @@ export function App() {
             <div className="w-[80%] m-auto">
               <Slider {...settings}>
                 {
-                  Object.keys(neighboringTyphoons).map((sid) => <NeighborTyphoonCard name={neighboringTyphoonsNames[sid]} sid={sid} category={'CAT 5'} wind={'1000'} pressure={'100'} tracks={neighboringTyphoons[sid]}/>)
+                  Object.keys(neighboringTyphoons).map((sid) => <NeighborTyphoonCard name={neighboringTyphoonsNames[sid]} sid={sid} category={'CAT 5'} wind={'1000'} pressure={'100'} tracks={neighboringTyphoons[sid][0]} score={neighboringTyphoons[sid][1]}/>)
                 }
               </Slider>
             </div>

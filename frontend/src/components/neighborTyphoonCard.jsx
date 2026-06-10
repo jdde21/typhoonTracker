@@ -12,7 +12,7 @@ const BADGE_STYLES = {
   TS:   { bg: "#1a3a5c", color: "#7ab8f5" },
 };
 
-export default function NeighborTyphoonCard({ name, sid, category, wind, pressure, tracks }) {
+export default function NeighborTyphoonCard({ name, sid, category, wind, pressure, tracks, score }) {
   const [expanded, setExpanded] = useState(false);
   const [cardRef, setCardRef] = useState(null);
   const { setShowNeighbor } = useContext(TyphoonDataContext);
@@ -63,7 +63,7 @@ export default function NeighborTyphoonCard({ name, sid, category, wind, pressur
           <span style={styles.name}>{name}</span>
           <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
             <span style={{ ...styles.badge, background: badge.bg, color: badge.color }}>
-              {label}
+              {score.toFixed(2)}
             </span>
             <span style={styles.chevron}>{expanded ? "▲" : "▼"}</span>
           </div>

@@ -5,6 +5,8 @@ import { TyphoonDataContext } from '../App';
 import { Source, Layer } from 'react-map-gl/maplibre';
 
 
+const DEFAULT_COORDINATES = [128.6, 8.1]
+const DEFAULT_ZOOM = 4
 
 export default function ParisMap() {
 
@@ -31,8 +33,8 @@ export default function ParisMap() {
   
   return (
     <Card className="flex h-full w-full p-0 overflow-hidden">
-      <Map typhoonCoordinates={typhoonLocations} center={[128.6, 8.1]} zoom={4}>
-        <MapControls></MapControls>
+      <Map typhoonCoordinates={typhoonLocations} center={DEFAULT_COORDINATES} zoom={DEFAULT_ZOOM}>
+        <MapControls recenterTarget={{ center: DEFAULT_COORDINATES, zoom: DEFAULT_ZOOM }}></MapControls>
         {
           typhoonLocations.map((location) => (
             <MapMarker
@@ -57,7 +59,7 @@ export default function ParisMap() {
         }
         {
           Object.keys(neighboringTyphoons).map((sid) => {
-            const tracks = neighboringTyphoons[sid];
+            const tracks = neighboringTyphoons[sid][0];
             if (sid !== showNeighbor) {
               return null;
             }

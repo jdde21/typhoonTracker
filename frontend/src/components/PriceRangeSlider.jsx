@@ -117,9 +117,9 @@ export default function PriceRangeSlider({
                     fontWeight: 500,
                     letterSpacing: "0.12em",
                     textTransform: "uppercase",
-                    color: "#e0174f",
+                    color: "#3b82f6",
                 }}>
-                    Timeline Focus
+                    Year Range
                 </span>
                 <span style={{ fontSize: 12, color: "#8a95b0", letterSpacing: "0.05em" }}>
                     {minVal} — {maxVal}
@@ -168,7 +168,7 @@ export default function PriceRangeSlider({
                 />
                 <div className="slider">
                     <div style={{ backgroundColor: trackColor }} className="track-slider" />
-                    <div ref={range} style={{ backgroundColor: "#8E0542" }} className="range-slider" />
+                    <div ref={range} style={{ backgroundColor: "#3b82f6" }} className="range-slider" />
                 </div>
             </div>
 

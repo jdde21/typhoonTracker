@@ -144,7 +144,6 @@ def determine_weights(recent_typhoons_dict_closest_to_farthest, typhoon_scores, 
     for i in range(neighbors):
         sid = typhoon_scores[scores[i]]
         weights.append(1/(scores[i] + 1e-8))
-        print(scores[i])
         tracks = recent_typhoons_dict_closest_to_farthest[sid]
         if len(tracks) < minimum:
             minimum = len(tracks)

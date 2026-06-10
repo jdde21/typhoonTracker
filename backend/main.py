@@ -4,7 +4,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 from typing import List
 import pandas as pd 
-from test import typhoon_tracker, scores_printer, names_printer, year_range_getter
+from test import typhoon_tracker, sid_track_scores_dict, names_printer, year_range_getter
 
 app = FastAPI()
 
@@ -59,7 +59,7 @@ def input_coordinates(body: Body):
 
 @app.get('/neighbors')
 def get_neighbors():
-    return scores_printer()
+    return sid_track_scores_dict()
 
 @app.get('/neighbors_names')
 def get_names():
