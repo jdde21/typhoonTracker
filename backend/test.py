@@ -1,12 +1,5 @@
-import pandas as pd 
-from sklearn.preprocessing import MinMaxScaler
-from sklearn.model_selection import train_test_split
-from sklearn.neighbors import KNeighborsClassifier
-from sklearn.metrics import confusion_matrix
-from sklearn.metrics import classification_report
 import numpy as np
-import re
-from helper import get_database_by_agency, coordinates_to_dict, determine_weights, predicted_track
+from helper import get_database_by_agency, coordinates_to_dict, determine_weights, predicted_track, get_database_by_agency_additional_properties
 
 
 SCORES = []
@@ -83,6 +76,17 @@ def year_range_getter():
     
     return database_year_range
     
+def wind_speed_and_pressure_getter(agency):
+    typhoon_database = get_database_by_agency_additional_properties(agency)
+    
+    neighboring_typhoons_additional_properties = {}
+    for score in SCORES:
+        sid = TYPHOON_SCORES[score]
+        additional_properties = typhoon_database[typhoon_database["SID"] == sid]
+        print(additional_properties, sid)
+        neighboring_typhoons_additional_properties[sid] = additional_properties.tolist()
+        
+    return neighboring_typhoons_additional_properties
         
 
 if __name__ == "__main__":

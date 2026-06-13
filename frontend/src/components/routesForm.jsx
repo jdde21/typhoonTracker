@@ -75,6 +75,40 @@ export default function RoutePoints() {
         }
     }
 
+    async function getNames() {
+        const url = "http://127.0.0.1:8000/neighbors_names"
+        try {
+            const response = await fetch(url, {
+                method: 'GET',
+            });
+            if (!response.ok) {
+                throw new Error(`Response status: ${response.status}`);
+            }
+
+            const result = await response.json();
+            return result;
+        } catch (error) {
+            console.error(error.message);
+        }
+    }
+
+    async function getNeighborsWindSpeedAndPressure() {
+        const url = `http://127.0.0.1:8000/neighbors_wind_speed_and_pressure/${selected}`
+        try {
+            const response = await fetch(url, {
+                method: 'GET',
+            });
+            if (!response.ok) {
+                throw new Error(`Response status: ${response.status}`);
+            }
+
+            const result = await response.json();
+            return result;
+        } catch (error) {
+            console.error(error.message);
+        }
+    }
+
     const [neighbors, setNeighbors] = useState(0);
     const [points, setPoints] = useState([{ lat: "", lng: "", timegap: "" }]);
     const [pos, setPos] = useState({ x: 900, y: 100 });
@@ -240,9 +274,11 @@ export default function RoutePoints() {
                             temp.push(Number(value.timegap));
                             list_coordinates.push(temp);
                         })
-                        let list = await getData(list_coordinates);
-                        let neighboringTyphoons = await getNeighbors();
-                        let neighboringTyphoonsNames = await getNames();
+                        // const [list, neighboringTyphoons, neighboringTyphoonsNames, additionalProperties] = await Promise.all([getData(list_coordinates), getNeighbors(), getNames(), getNeighborsWindSpeedAndPressure()]);
+                        const list = await getData(list_coordinates);
+                        const neighboringTyphoons = await getNeighbors();
+                        const neighboringTyphoonsNames = await getNames();
+                        const additionalProperties = await getNeighborsWindSpeedAndPressure();
 
                         let currentHours = 0;
                         list.forEach((value, index) => {
@@ -251,7 +287,7 @@ export default function RoutePoints() {
                             typhoon_locations.push(location);
                         })
 
-
+                        console.log(additionalProperties);
                         setTyphoonLocations(typhoon_locations);
                         setNeighboringTyphoons(neighboringTyphoons);
                         setNeighboringTyphoonsNames(neighboringTyphoonsNames);

@@ -22,9 +22,28 @@ def get_database_by_agency(agency):
     
     return typhoon_database
 
+def get_database_by_agency_additional_properties(agency):
+    match agency:
+        case "JMA":
+            typhoon_database = pd.read_csv('additional_properties/TOKYO_typhoons_additional_properties.csv', encoding = 'latin-1')
+        case "JTWC":
+            typhoon_database = pd.read_csv('additional_properties/USA_typhoons_additional_properties.csv', encoding = 'latin-1')
+        case "CMA":
+            typhoon_database = pd.read_csv('additional_properties/CMA_typhoons_additional_properties.csv', encoding = 'latin-1')
+        case "HKO":
+            typhoon_database = pd.read_csv('additional_properties/HKO_typhoons_additional_properties.csv', encoding = 'latin-1')
+        case "IMD":
+            typhoon_database = pd.read_csv('additional_properties/NEWDELHI_typhoons_additional_properties.csv', encoding = 'latin-1')
+        case "KMA":
+            typhoon_database = pd.read_csv('additional_properties/KMA_typhoons_additional_properties.csv', encoding = 'latin-1')
+        case _:
+            typhoon_database = pd.read_csv('additional_properties/WMO_typhoons_additional_properties.csv', encoding = 'latin-1')
+    
+    return typhoon_database
+    
+
 
 def coordinates_to_dict(typhoon_database, year_range, unique_sid, inputs):
-    secret = 0
     recent_typhoons_dict = {}
     recent_typhoons_dict_closest_to_farthest = {}
     typhoon_names = {}
