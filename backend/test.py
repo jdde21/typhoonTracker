@@ -8,6 +8,7 @@ MINIMUM = 0
 STARTING_POINT = 0
 TRACKS = []
 NEIGHBORING_TYPHOON_NAMES = {}
+NEIGHBORS = 0
 
 def typhoon_tracker(coordinates=None, agency="Default", year_range = [], neighbors=7):
     
@@ -32,12 +33,14 @@ def typhoon_tracker(coordinates=None, agency="Default", year_range = [], neighbo
     weights, minimum = determine_weights(recent_typhoons_dict_closest_to_farthest, typhoon_scores, scores, neighbors)
 
     # just initializing the global variables SCORES so that the scores generated in this function can be used in other functions
+    global NEIGHBORS
     global SCORES
     global TYPHOON_SCORES
     global STARTING_POINT
     global MINIMUM
     global TRACKS
     global NEIGHBORING_TYPHOON_NAMES
+    NEIGHBORS = neighbors
     TYPHOON_SCORES = typhoon_scores
     SCORES = scores[0:neighbors]
     MINIMUM = minimum
@@ -52,12 +55,18 @@ def typhoon_tracker(coordinates=None, agency="Default", year_range = [], neighbo
 
 
 def sid_track_scores_dict():
+    neighbor_count = 0
     dict_of_tracks = {}
     for score in SCORES:
-        sid = TYPHOON_SCORES[score]
-        temp = TRACKS[sid]
-        temp = temp[0:MINIMUM]
-        dict_of_tracks[sid] = [temp.tolist(), score]
+        list_of_sid = TYPHOON_SCORES[score]
+        for sid in list_of_sid:
+            print(sid)
+            neighbor_count += 1
+            temp = TRACKS[sid]
+            temp = temp[0:MINIMUM]
+            dict_of_tracks[sid] = [temp.tolist(), score]
+            if neighbor_count >= NEIGHBORS:
+                return dict_of_tracks
 
     return dict_of_tracks
 
@@ -80,12 +89,16 @@ def wind_speed_and_pressure_getter(agency):
     typhoon_database = get_database_by_agency_additional_properties(agency)
     
     neighboring_typhoons_additional_properties = {}
+    neighbor_count = 0
     for score in SCORES:
-        sid = TYPHOON_SCORES[score]
-        additional_properties = typhoon_database[typhoon_database["SID"] == sid]
-        print(additional_properties, sid)
-        neighboring_typhoons_additional_properties[sid] = additional_properties.tolist()
-        
+        list_of_sid = TYPHOON_SCORES[score]
+        for sid in list_of_sid:
+            neighbor_count += 1
+            additional_properties = typhoon_database[typhoon_database["SID"] == sid]
+            neighboring_typhoons_additional_properties[sid] = additional_properties.values.tolist()
+            if neighbor_count >= NEIGHBORS:
+                return neighboring_typhoons_additional_properties
+    
     return neighboring_typhoons_additional_properties
         
 

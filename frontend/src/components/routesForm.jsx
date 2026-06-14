@@ -8,7 +8,7 @@ import PriceRangeSlider from "./PriceRangeSlider";
 const TYPHOON_AGENCIES = ["Default", "JTWC", "JMA", "CMA", "HKO", "IMD", "KMA"];
 
 export default function RoutePoints() {
-    const { setTyphoonLocations, setNeighborTyphoonsLocations, setNeighboringTyphoons, setNeighboringTyphoonsNames } = useContext(TyphoonDataContext);
+    const { setTyphoonLocations, setNeighboringTyphoons, setNeighboringTyphoonsNames, setNeighboringTyphoonsAdditionalProperties } = useContext(TyphoonDataContext);
     const typhoon_locations = []
 
     const [selected, setSelected] = useState('Default');
@@ -286,11 +286,12 @@ export default function RoutePoints() {
                             let location = { id: index + 1, lat: value[0], lng: value[1], name: `${Math.floor(currentHours)} hours` };
                             typhoon_locations.push(location);
                         })
-
-                        console.log(additionalProperties);
+                        
+                        console.log(additionalProperties)
                         setTyphoonLocations(typhoon_locations);
                         setNeighboringTyphoons(neighboringTyphoons);
                         setNeighboringTyphoonsNames(neighboringTyphoonsNames);
+                        setNeighboringTyphoonsAdditionalProperties(additionalProperties);
                         setPoints([{ lat: "", lng: "", timegap: "" }]);
                     }} className="bg-blue-500 hover:bg-blue-400 rounded-xl py-3 font-semibold w-full">
                         Submit Route

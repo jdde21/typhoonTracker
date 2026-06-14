@@ -72,11 +72,11 @@ export default function NeighborTyphoonCard({ name, sid, category, wind, pressur
         <div style={styles.stats}>
           <div>
             <div style={styles.statLabel}>Wind</div>
-            <div style={styles.statValue}>{wind} km/h</div>
+            <div style={styles.statValue}>{wind}</div>
           </div>
           <div>
             <div style={styles.statLabel}>Pres</div>
-            <div style={styles.statValue}>{pressure} hPa</div>
+            <div style={styles.statValue}>{pressure}</div>
           </div>
         </div>
       </div>

@@ -66,6 +66,7 @@ export function App() {
   const [typhoonLocations, setTyphoonLocations] = useState([]);
   const [neighboringTyphoons, setNeighboringTyphoons] = useState({});
   const [neighboringTyphoonsNames, setNeighboringTyphoonsNames] = useState({});
+  const [neighboringTyphoonsAdditionalProperties, setNeighboringTyphoonsAdditionalProperties] = useState({});
 
 
   const [neighborTyphoonsLocations, setNeighborTyphoonsLocations] = useState([]);
@@ -80,7 +81,8 @@ export function App() {
         <TyphoonDataContext.Provider value={{
           typhoonLocations, setTyphoonLocations, neighboringTyphoons,
           setNeighboringTyphoons, neighborTyphoonsLocations, setNeighborTyphoonsLocations, neighborTyphoonsSID,
-          setNeighborTyphoonsSID, showNeighbor, setShowNeighbor, neighboringTyphoonsNames, setNeighboringTyphoonsNames
+          setNeighborTyphoonsSID, showNeighbor, setShowNeighbor, neighboringTyphoonsNames, setNeighboringTyphoonsNames,
+          setNeighboringTyphoonsAdditionalProperties
         }}>
           <div className="h-full w-full">
             <ParisMap />
@@ -102,7 +104,7 @@ export function App() {
             <div className="w-[80%] m-auto">
               <Slider {...settings}>
                 {
-                  Object.keys(neighboringTyphoons).map((sid) => <NeighborTyphoonCard name={neighboringTyphoonsNames[sid]} sid={sid} category={'CAT 5'} wind={'1000'} pressure={'100'} tracks={neighboringTyphoons[sid][0]} score={neighboringTyphoons[sid][1]}/>)
+                  Object.keys(neighboringTyphoons).map((sid) => <NeighborTyphoonCard name={neighboringTyphoonsNames[sid]} sid={sid} category={'CAT 5'} wind={neighboringTyphoonsAdditionalProperties[sid].length !== 0 ? `${neighboringTyphoonsAdditionalProperties[sid][1]} knots` : "No Data"} pressure={neighboringTyphoonsAdditionalProperties[sid].length !== 0 ? `${neighboringTyphoonsAdditionalProperties[sid][2]} mb` : "No Data"} tracks={neighboringTyphoons[sid][0]} score={neighboringTyphoons[sid][1]}/>)
                 }
               </Slider>
             </div>

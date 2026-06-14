@@ -148,8 +148,12 @@ def coordinates_to_dict(typhoon_database, year_range, unique_sid, inputs):
         recent_typhoons_dict_closest_to_farthest[sid] = recent_typhoons_dict[sid][typhoon_indices + list(range(typhoon_indices[-1] + 1, recent_typhoons_dict[sid].shape[0])), :]
 
         typhoon_names[sid] = row['NAME']
-        typhoon_scores[score] = sid
-        scores.append(score)
+            
+        if score in typhoon_scores:
+            typhoon_scores[score].append(sid)
+        else:
+            typhoon_scores[score] = [sid]        
+            scores.append(score)
         scores = sorted(scores)
 
     return [recent_typhoons_dict_closest_to_farthest, typhoon_names, typhoon_scores, scores]
@@ -160,12 +164,19 @@ def coordinates_to_dict(typhoon_database, year_range, unique_sid, inputs):
 def determine_weights(recent_typhoons_dict_closest_to_farthest, typhoon_scores, scores, neighbors):
     minimum = float('inf')  # random high number lang eto
     weights = []
-    for i in range(neighbors):
-        sid = typhoon_scores[scores[i]]
-        weights.append(1/(scores[i] + 1e-8))
-        tracks = recent_typhoons_dict_closest_to_farthest[sid]
-        if len(tracks) < minimum:
-            minimum = len(tracks)
+    i = 0
+    while i < neighbors:
+        list_of_sid = typhoon_scores[scores[i]]
+        for sid in list_of_sid:
+            weights.append(1/(scores[i] + 1e-8))
+            tracks = recent_typhoons_dict_closest_to_farthest[sid]
+            if len(tracks) < minimum:
+                minimum = len(tracks)
+            i += 1
+            if i >= neighbors:
+                return [weights, minimum]
+            
+            
     return [weights, minimum]
 
 def predicted_track(recent_typhoons_dict_closest_to_farthest, typhoon_scores, scores, weights, inputs, minimum, neighbors):
@@ -176,15 +187,24 @@ def predicted_track(recent_typhoons_dict_closest_to_farthest, typhoon_scores, sc
     total_tracks[0:inputs.shape[0], :] += inputs
     # ginagawa naman dito ay from all the neighbors, kukunin yung values from index [inputs.shape[0], minimum] -- this is because yung index 0 to inputs.shape - 1 ay binigay na ng user --
     # (continuation) at i-aadd sa total tracks.
-    for i in range(neighbors):
-        sid = typhoon_scores[scores[i]]
-        tracks = recent_typhoons_dict_closest_to_farthest[sid]
- 
-        temp_tracks = np.empty((minimum,3))
-        temp_tracks.fill(0)
-        for j in range(inputs.shape[0], minimum):
-            temp_tracks[j] += tracks[j] * weights[i] # yung track ng typhoon will now be multiplied by its weight
-        total_tracks += temp_tracks
+    i = 0
+    scores_counter = 0
+    while i < neighbors:
+        list_of_sid = typhoon_scores[scores[scores_counter]]
+        
+        for sid in list_of_sid:
+            tracks = recent_typhoons_dict_closest_to_farthest[sid]
+    
+            temp_tracks = np.empty((minimum,3))
+            temp_tracks.fill(0)
+            for j in range(inputs.shape[0], minimum):
+                temp_tracks[j] += tracks[j] * weights[i] # yung track ng typhoon will now be multiplied by its weight
+            total_tracks += temp_tracks
+            i += 1
+            if i >= neighbors:
+                return total_tracks
+            
+        scores_counter += 1
 
     return total_tracks
         
