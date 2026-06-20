@@ -42,6 +42,10 @@ def get_database_by_agency_additional_properties(agency):
     return typhoon_database
     
 
+def coordinates_cleaner(list_of_coordinates):
+    list_of_coordinates = list_of_coordinates.replace('[', '')
+    list_of_coordinates = list_of_coordinates.replace(']', '')
+    return re.findall(r"\(\d+\.\d+, \d+\.\d+, \d\)", list_of_coordinates)
 
 def coordinates_to_dict(typhoon_database, year_range, unique_sid, inputs):
     recent_typhoons_dict = {}

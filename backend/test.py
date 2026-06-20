@@ -1,5 +1,5 @@
 import numpy as np
-from helper import get_database_by_agency, coordinates_to_dict, determine_weights, predicted_track, get_database_by_agency_additional_properties
+from helper import get_database_by_agency, coordinates_to_dict, determine_weights, predicted_track, get_database_by_agency_additional_properties, coordinates_cleaner
 
 
 SCORES = []
@@ -60,7 +60,6 @@ def sid_track_scores_dict():
     for score in SCORES:
         list_of_sid = TYPHOON_SCORES[score]
         for sid in list_of_sid:
-            print(sid)
             neighbor_count += 1
             temp = TRACKS[sid]
             temp = temp[0:MINIMUM]
@@ -100,6 +99,26 @@ def wind_speed_and_pressure_getter(agency):
                 return neighboring_typhoons_additional_properties
     
     return neighboring_typhoons_additional_properties
+
+def all_typhoons_tracks_getter(agency):
+    typhoon_database = get_database_by_agency(agency)
+    list_of_sid = typhoon_database["SID"].values.tolist()
+    dict_of_tracks = {}
+    for sid in list_of_sid:
+        row = typhoon_database[typhoon_database["SID"] == sid]
+        list_of_coordinates = row["COORDINATES"].values[0]
+        coordinates = coordinates_cleaner(list_of_coordinates)
+        total_list_of_coordinates = []
+        for coordinate in coordinates: # para makuha yung index
+            temp = coordinate
+            temp = temp.replace('(', '')
+            temp = temp.replace(')', '')
+            temp = temp.split(',')
+            temp = list(map(float, temp)) # converted the coordinates to a float instead of a string
+            total_list_of_coordinates.append(temp)
+            
+        dict_of_tracks[sid] = total_list_of_coordinates
+    return dict_of_tracks
         
 
 if __name__ == "__main__":

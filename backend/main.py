@@ -4,7 +4,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 from typing import List
 import pandas as pd 
-from test import typhoon_tracker, sid_track_scores_dict, names_printer, year_range_getter, wind_speed_and_pressure_getter
+from test import typhoon_tracker, sid_track_scores_dict, names_printer, year_range_getter, wind_speed_and_pressure_getter, all_typhoons_tracks_getter
 
 app = FastAPI()
 
@@ -72,4 +72,8 @@ def get_years():
 @app.get('/neighbors_wind_speed_and_pressure/{database}')
 def get_wind_speed_and_pressure(database: str):
     return wind_speed_and_pressure_getter(database)
-    
+
+@app.get('/all_typhoons/{database}')
+def get_all_typhoons(database: str):
+    print("called")
+    return all_typhoons_tracks_getter(database)

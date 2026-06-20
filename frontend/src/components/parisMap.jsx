@@ -10,7 +10,7 @@ const DEFAULT_ZOOM = 4
 
 export default function ParisMap() {
 
-  const { typhoonLocations, neighborTyphoonsLocations, showNeighbor, neighboringTyphoons } = useContext(TyphoonDataContext);
+  const { typhoonLocations, all_typhoons, showNeighbor, neighboringTyphoons } = useContext(TyphoonDataContext);
 
   const pathGeoJSON = {
     type: 'Feature',
@@ -60,6 +60,36 @@ export default function ParisMap() {
         {
           Object.keys(neighboringTyphoons).map((sid) => {
             const tracks = neighboringTyphoons[sid][0];
+            if (sid !== showNeighbor) {
+              return null;
+            }
+            return tracks.map((values, index) => {
+              const longitude = values[1];
+              const latitude = values[0];
+              return <MapMarker
+                key={index}
+                longitude={longitude}
+                latitude={latitude}
+              >
+                <MarkerContent>
+                  <div className="size-4 rounded-full bg-primary border-2 border-red-500 shadow-lg" />
+                </MarkerContent>
+                <MarkerTooltip>{`${latitude.toFixed(2)}, ${longitude.toFixed(2)}`}</MarkerTooltip>
+                <MarkerPopup>
+                  <div className="space-y-1">
+                    <p className="font-medium text-foreground">{sid}</p>
+                    <p className="text-xs text-muted-foreground">
+                      {latitude.toFixed(4)}, {longitude.toFixed(4)}
+                    </p>
+                  </div>
+                </MarkerPopup>
+              </MapMarker>
+            })
+          })
+        }
+        {
+          all_typhoons && Object.keys(all_typhoons).map((sid) => {
+            const tracks = all_typhoons[sid];
             if (sid !== showNeighbor) {
               return null;
             }

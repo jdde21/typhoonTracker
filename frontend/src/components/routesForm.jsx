@@ -8,10 +8,9 @@ import PriceRangeSlider from "./PriceRangeSlider";
 const TYPHOON_AGENCIES = ["Default", "JTWC", "JMA", "CMA", "HKO", "IMD", "KMA"];
 
 export default function RoutePoints() {
-    const { setTyphoonLocations, setNeighboringTyphoons, setNeighboringTyphoonsNames, setNeighboringTyphoonsAdditionalProperties } = useContext(TyphoonDataContext);
+    const { setTyphoonLocations, setNeighboringTyphoons, setNeighboringTyphoonsNames, setNeighboringTyphoonsAdditionalProperties, database, setDatabase } = useContext(TyphoonDataContext);
     const typhoon_locations = []
 
-    const [selected, setSelected] = useState('Default');
     const { data: year_range, isLoading } = useQuery({
         queryKey: ["year_range"],
         queryFn: async () => {
@@ -19,6 +18,7 @@ export default function RoutePoints() {
             return res.json();
         }
     });
+
 
     async function getData(list_coordinates) {
         const url = "http://127.0.0.1:8000/input"
@@ -93,7 +93,7 @@ export default function RoutePoints() {
     }
 
     async function getNeighborsWindSpeedAndPressure() {
-        const url = `http://127.0.0.1:8000/neighbors_wind_speed_and_pressure/${selected}`
+        const url = `http://127.0.0.1:8000/neighbors_wind_speed_and_pressure/${database}`
         try {
             const response = await fetch(url, {
                 method: 'GET',
@@ -152,11 +152,11 @@ export default function RoutePoints() {
 
     useEffect(() => {
         if (year_range) {
-            const first_year = year_range[selected][0];
-            const last_year = year_range[selected][1]
+            const first_year = year_range[database][0];
+            const last_year = year_range[database][1]
             setRange([first_year, last_year]);
         }
-    }, [year_range, selected]);
+    }, [year_range, database]);
 
     const [range, setRange] = useState([0, 0]);
     const [collapsed, setCollapsed] = useState(false);
@@ -193,9 +193,9 @@ export default function RoutePoints() {
                     <div className="flex flex-col gap-1 flex-2">
                         <label className="text-[10px] font-semibold tracking-widest text-white/50 uppercase">Database</label>
                         <select
-                            defaultValue={selected}
+                            defaultValue={database}
                             onMouseDown={(e) => e.stopPropagation()}
-                            onChange={(e) => setSelected(e.target.value)}
+                            onChange={(e) => setDatabase(e.target.value)}
                             style={{ backgroundColor: "#1c2130" }}
                             className="w-full text-white text-sm px-3 py-1.5 border border-white/10 rounded-lg focus:outline-none cursor-pointer appearance-none"
                         >
@@ -219,7 +219,7 @@ export default function RoutePoints() {
                 </div>
 
                 <div className="flex flex-col gap-1 w-[90%] m-auto">
-                    <PriceRangeSlider min={!year_range ? 10 : year_range[selected][0]} max={!year_range ? 10 : year_range[selected][1]} onChange={handleRangeChange} />
+                    <PriceRangeSlider min={!year_range ? 10 : year_range[database][0]} max={!year_range ? 10 : year_range[database][1]} onChange={handleRangeChange} />
                 </div>
 
                 {/* scrollable list */}
@@ -287,7 +287,6 @@ export default function RoutePoints() {
                             typhoon_locations.push(location);
                         })
                         
-                        console.log(additionalProperties)
                         setTyphoonLocations(typhoon_locations);
                         setNeighboringTyphoons(neighboringTyphoons);
                         setNeighboringTyphoonsNames(neighboringTyphoonsNames);
