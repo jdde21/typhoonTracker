@@ -4,11 +4,10 @@ import './App.css';
 import RoutePoints from "./components/routesForm"
 import NeighborTyphoonCard from "./components/neighborTyphoonCard";
 import SliderPkg from 'react-slick';
-import NeighboringTyphoonsDrawer from "./components/typhoonsDrawer";
 import { useQuery } from "@tanstack/react-query";
 import "slick-carousel/slick/slick.css";
 import "slick-carousel/slick/slick-theme.css";
-
+import NeighboringTyphoonsDrawer from "./components/testDrawer";
 export const TyphoonDataContext = createContext();
 
 
@@ -35,11 +34,12 @@ export function App() {
   const [neighborTyphoonsSID, setNeighborTyphoonsSID] = useState([]);
   const [showNeighbor, setShowNeighbor] = useState(null);
   const [database, setDatabase] = useState(TYPHOON_AGENCIES[0]);
+  const [sideDrawerDatabase, setSideDrawerDatabase] = useState(TYPHOON_AGENCIES[0]);
 
   const { data: all_typhoons, isLoading, isSuccess } = useQuery({
-    queryKey: ["all_typhoons"],
+    queryKey: ["all_typhoons", sideDrawerDatabase],
     queryFn: async () => {
-      const res = await fetch(`http://127.0.0.1:8000/all_typhoons/${database}`);
+      const res = await fetch(`http://127.0.0.1:8000/all_typhoons/${sideDrawerDatabase}`);
       return res.json();
     }
   });
@@ -52,7 +52,7 @@ export function App() {
         typhoonLocations, setTyphoonLocations, neighboringTyphoons,
         setNeighboringTyphoons, neighborTyphoonsLocations, setNeighborTyphoonsLocations, neighborTyphoonsSID,
         setNeighborTyphoonsSID, showNeighbor, setShowNeighbor, neighboringTyphoonsNames, setNeighboringTyphoonsNames,
-        setNeighboringTyphoonsAdditionalProperties, database, setDatabase, all_typhoons
+        setNeighboringTyphoonsAdditionalProperties, database, setDatabase, setSideDrawerDatabase, all_typhoons, TYPHOON_AGENCIES
       }}>
 
         <NeighboringTyphoonsDrawer></NeighboringTyphoonsDrawer>
