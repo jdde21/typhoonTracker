@@ -8,16 +8,8 @@ import PriceRangeSlider from "./PriceRangeSlider";
 const TYPHOON_AGENCIES = ["Default", "JTWC", "JMA", "CMA", "HKO", "IMD", "KMA"];
 
 export default function RoutePoints() {
-    const { setTyphoonLocations, setNeighboringTyphoons, setNeighboringTyphoonsNames, setNeighboringTyphoonsAdditionalProperties, database, setDatabase } = useContext(TyphoonDataContext);
+    const { setTyphoonLocations, setNeighboringTyphoons, setNeighboringTyphoonsNames, setNeighboringTyphoonsAdditionalProperties, database, setDatabase, year_range } = useContext(TyphoonDataContext);
     const typhoon_locations = []
-
-    const { data: year_range, isLoading } = useQuery({
-        queryKey: ["year_range"],
-        queryFn: async () => {
-            const res = await fetch("http://127.0.0.1:8000/year_getter");
-            return res.json();
-        }
-    });
 
 
     async function getData(list_coordinates) {

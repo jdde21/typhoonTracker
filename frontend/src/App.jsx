@@ -35,6 +35,7 @@ export function App() {
   const [showNeighbor, setShowNeighbor] = useState(null);
   const [database, setDatabase] = useState(TYPHOON_AGENCIES[0]);
   const [sideDrawerDatabase, setSideDrawerDatabase] = useState(TYPHOON_AGENCIES[0]);
+  const [range, setRange] = useState({minimum: 0, maximum: 0});
 
   const { data: all_typhoons, isLoading, isSuccess } = useQuery({
     queryKey: ["all_typhoons", sideDrawerDatabase],
@@ -44,6 +45,14 @@ export function App() {
     }
   });
 
+  const { data: year_range } = useQuery({
+    queryKey: ["year_range"],
+    queryFn: async () => {
+        const res = await fetch("http://127.0.0.1:8000/year_getter");
+        return res.json();
+    }
+});
+
 
   return (
 
@@ -52,7 +61,7 @@ export function App() {
         typhoonLocations, setTyphoonLocations, neighboringTyphoons,
         setNeighboringTyphoons, neighborTyphoonsLocations, setNeighborTyphoonsLocations, neighborTyphoonsSID,
         setNeighborTyphoonsSID, showNeighbor, setShowNeighbor, neighboringTyphoonsNames, setNeighboringTyphoonsNames,
-        setNeighboringTyphoonsAdditionalProperties, database, setDatabase, setSideDrawerDatabase, all_typhoons, TYPHOON_AGENCIES
+        setNeighboringTyphoonsAdditionalProperties, database, setDatabase, setSideDrawerDatabase, sideDrawerDatabase, all_typhoons, year_range, TYPHOON_AGENCIES, setRange
       }}>
 
         <NeighboringTyphoonsDrawer></NeighboringTyphoonsDrawer>

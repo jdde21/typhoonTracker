@@ -2,6 +2,7 @@ import { useMemo, useState, useContext } from "react";
 import { ChevronLeft, Wind, Gauge, CircleDot } from "lucide-react";
 import { TyphoonDataContext } from '../App';
 import { useQueryClient } from '@tanstack/react-query';
+import PriceRangeSlider from "./PriceRangeSlider";
 
 const CATEGORY_STYLES = {
   TS: { bg: "bg-amber-950", text: "text-amber-300" },
@@ -37,8 +38,8 @@ function StormCard({ storm, selected, onSelect }) {
       type="button"
       onClick={() => onSelect?.(storm)}
       className={`w-full text-left rounded-xl px-3.5 py-3 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 ${selected
-          ? "bg-[#162032] border-2 border-blue-500"
-          : "bg-[#11151f] border border-[#232834] hover:border-[#3a4150]"
+        ? "bg-[#162032] border-2 border-blue-500"
+        : "bg-[#11151f] border border-[#232834] hover:border-[#3a4150]"
         }`}
     >
       <div className="flex items-center justify-between mb-2">
@@ -71,12 +72,18 @@ export default function NeighboringTyphoonsDrawer({
   onSelectStorm,
 }) {
   const queryClient = useQueryClient();
-  const { all_typhoons, setShowNeighbor, sideDrawerDatabase, setDatabase, setSideDrawerDatabase, TYPHOON_AGENCIES } = useContext(TyphoonDataContext);
+  const { all_typhoons, setShowNeighbor, sideDrawerDatabase, setDatabase, setSideDrawerDatabase, TYPHOON_AGENCIES, year_range } = useContext(TyphoonDataContext);
   const [isOpen, setIsOpen] = useState(defaultOpen);
   const [selectedId, setSelectedId] = useState(null);
   const [basin, setBasin] = useState(BASINS[0]);
   const [yearMin, setYearMin] = useState(1884);
   const [yearMax, setYearMax] = useState(2026);
+
+  const handleRangeChange = (year_range) => {
+    setRange([year_range.min, year_range.max])
+  };
+
+  const [range, setRange] = useState([0, 0]);
 
   const visibleStorms = useMemo(() => {
     const lo = Math.min(yearMin, yearMax);
@@ -159,40 +166,21 @@ export default function NeighboringTyphoonsDrawer({
             </div>
 
             <div>
-              <div className="flex justify-between mb-1">
-                <span id="year-range-label" className="text-xs text-slate-500">
-                  Year range
-                </span>
-                <span className="text-xs font-medium text-slate-100">
-                  {Math.min(yearMin, yearMax)} – {Math.max(yearMin, yearMax)}
-                </span>
-              </div>
+          
               <div className="relative h-6">
-                <input
-                  type="range"
-                  min={1884}
-                  max={2026}
-                  step={1}
-                  value={yearMin}
-                  aria-labelledby="year-range-label"
-                  aria-label="Minimum year"
-                  onChange={(e) => setYearMin(parseInt(e.target.value, 10))}
-                  className="absolute w-full top-1.5"
-                />
-                <input
-                  type="range"
-                  min={1884}
-                  max={2026}
-                  step={1}
-                  value={yearMax}
-                  aria-labelledby="year-range-label"
-                  aria-label="Maximum year"
-                  onChange={(e) => setYearMax(parseInt(e.target.value, 10))}
-                  className="absolute w-full top-1.5"
-                />
+                <PriceRangeSlider min={!year_range ? 10 : year_range[sideDrawerDatabase][0]} max={!year_range ? 10 : year_range[sideDrawerDatabase][1]} onChange={handleRangeChange} />
               </div>
+              <button
+                type="button"
+                onClick={() => { }}
+                disabled={() => { }}
+                className={`w-full text-sm font-medium rounded-md py-2 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 bg-blue-600 hover:bg-blue-500 text-white`}
+              >
+                Apply filters
+              </button>
             </div>
           </div>
+
 
           <div className="typhoon-scroll flex flex-col gap-2 px-4 py-3 overflow-y-auto grow">
 

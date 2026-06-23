@@ -100,11 +100,15 @@ def wind_speed_and_pressure_getter(agency):
     
     return neighboring_typhoons_additional_properties
 
-def all_typhoons_tracks_getter(agency):
+def all_typhoons_tracks_getter(agency, year_range=[2000,2024]):
     typhoon_database = get_database_by_agency(agency)
     list_of_sid = typhoon_database["SID"].values.tolist()
     dict_of_tracks = {}
     for sid in list_of_sid:
+        year = int(sid[0:4])
+        if (len(year_range) != 0 and (year < year_range[0] or year > year_range[1])):
+            continue
+        
         row = typhoon_database[typhoon_database["SID"] == sid]
         list_of_coordinates = row["COORDINATES"].values[0]
         coordinates = coordinates_cleaner(list_of_coordinates)

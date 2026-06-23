@@ -1,8 +1,8 @@
 import string
-from fastapi import FastAPI
+from fastapi import FastAPI, Query
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
-from typing import List
+from typing import List, Optional
 import pandas as pd 
 from test import typhoon_tracker, sid_track_scores_dict, names_printer, year_range_getter, wind_speed_and_pressure_getter, all_typhoons_tracks_getter
 
@@ -74,6 +74,7 @@ def get_wind_speed_and_pressure(database: str):
     return wind_speed_and_pressure_getter(database)
 
 @app.get('/all_typhoons/{database}')
-def get_all_typhoons(database: str):
-    print("called")
+def get_all_typhoons(database: str, year_min: Optional[int] = Query(None),
+    year_max: Optional[int] = Query(None)):
+    print("hello")
     return all_typhoons_tracks_getter(database)
