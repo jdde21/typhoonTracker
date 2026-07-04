@@ -66,7 +66,7 @@ def sid_track_scores_dict():
             dict_of_tracks[sid] = [temp.tolist(), score]
             if neighbor_count >= NEIGHBORS:
                 return dict_of_tracks
-
+    
     return dict_of_tracks
 
 
@@ -100,7 +100,7 @@ def wind_speed_and_pressure_getter(agency):
     
     return neighboring_typhoons_additional_properties
 
-def all_typhoons_tracks_getter(agency, year_range=[2000,2024]):
+def all_typhoons_tracks_getter(agency, year_range=[float('-inf'),float('inf')]):
     typhoon_database = get_database_by_agency(agency)
     list_of_sid = typhoon_database["SID"].values.tolist()
     dict_of_tracks = {}

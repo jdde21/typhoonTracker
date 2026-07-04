@@ -68,22 +68,21 @@ function StormCard({ storm, selected, onSelect }) {
 
 export default function NeighboringTyphoonsDrawer({
   storms = DEFAULT_STORMS,
-  defaultOpen = true,
+  defaultOpen = false,
   onSelectStorm,
 }) {
   const queryClient = useQueryClient();
-  const { all_typhoons, setShowNeighbor, sideDrawerDatabase, setDatabase, setSideDrawerDatabase, TYPHOON_AGENCIES, year_range } = useContext(TyphoonDataContext);
+  const { all_typhoons, setShowNeighbor, sideDrawerDatabase, itemsRef, setSideDrawerDatabase, TYPHOON_AGENCIES, year_range, sideDrawerLoading } = useContext(TyphoonDataContext);
   const [isOpen, setIsOpen] = useState(defaultOpen);
   const [selectedId, setSelectedId] = useState(null);
   const [basin, setBasin] = useState(BASINS[0]);
-  const [yearMin, setYearMin] = useState(1884);
-  const [yearMax, setYearMax] = useState(2026);
+  const [yearMin] = useState(1884);
+  const [yearMax] = useState(2026);
 
+  
   const handleRangeChange = (year_range) => {
-    setRange([year_range.min, year_range.max])
+    itemsRef.current[0] = year_range.min; itemsRef.current[1] = year_range.max;
   };
-
-  const [range, setRange] = useState([0, 0]);
 
   const visibleStorms = useMemo(() => {
     const lo = Math.min(yearMin, yearMax);
@@ -118,7 +117,7 @@ export default function NeighboringTyphoonsDrawer({
               <CircleDot size={18} className="text-blue-400" aria-hidden="true" />
               <div>
                 <p className="text-[15px] font-medium text-slate-100">
-                  Neighboring typhoons
+                  Typhoon Database
                 </p>
                 <p className="text-xs text-slate-500">
                   {visibleStorms.length} storm{visibleStorms.length === 1 ? "" : "s"} in range
@@ -166,46 +165,57 @@ export default function NeighboringTyphoonsDrawer({
             </div>
 
             <div>
-          
-              <div className="relative h-6">
-                <PriceRangeSlider min={!year_range ? 10 : year_range[sideDrawerDatabase][0]} max={!year_range ? 10 : year_range[sideDrawerDatabase][1]} onChange={handleRangeChange} />
+              <div>
+                <PriceRangeSlider
+                  min={!year_range ? 10 : year_range[sideDrawerDatabase][0]}
+                  max={!year_range ? 10 : year_range[sideDrawerDatabase][1]}
+                  onChange={handleRangeChange}
+                />
               </div>
-              <button
-                type="button"
-                onClick={() => { }}
-                disabled={() => { }}
-                className={`w-full text-sm font-medium rounded-md py-2 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 bg-blue-600 hover:bg-blue-500 text-white`}
-              >
-                Apply filters
-              </button>
             </div>
+            <button
+              type="button"
+              onClick={() => { queryClient.invalidateQueries({ queryKey: ["all_typhoons"] }); }}
+              disabled={false}
+              className="w-full text-sm font-medium rounded-md py-2 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 bg-blue-600 hover:bg-blue-500 text-white disabled:opacity-50 disabled:cursor-not-allowed mt-2"
+            >
+              Apply filters
+            </button>
           </div>
+
 
 
           <div className="typhoon-scroll flex flex-col gap-2 px-4 py-3 overflow-y-auto grow">
 
-            {all_typhoons && (
-              Object.keys(all_typhoons).map((sid, idx) => (
-                <StormCard
-                  key={idx}
-                  storm={sid}
-                  selected={sid === selectedId}
-                  onSelect={() => {
-                    if (sid == selectedId) {
-                      setSelectedId(null); setShowNeighbor(null);
-                    } else {
-                      setSelectedId(sid); setShowNeighbor(sid);
-                    }
-                  }}
-                />
-              ))
+            {sideDrawerLoading ? (
+              <div className="flex flex-col gap-2">
+                {Array.from({ length: 10 }).map((_, i) => (
+                  <div
+                    key={i}
+                    className="h-16 rounded-lg bg-gray-200 animate-pulse"
+                  />
+                ))}
+              </div>
+            ) : (
+              all_typhoons && (
+                Object.keys(all_typhoons).map((sid, idx) => (
+                  <StormCard
+                    key={idx}
+                    storm={sid}
+                    selected={sid === selectedId}
+                    onSelect={() => {
+                      if (sid == selectedId) {
+                        setSelectedId(null); setShowNeighbor(null);
+                      } else {
+                        setSelectedId(sid); setShowNeighbor(sid);
+                      }
+                    }}
+                  />
+                ))
+              )
             )}
           </div>
 
-          <footer className="flex items-center justify-center gap-1.5 px-4 py-3 border-t border-[#232834] shrink-0">
-            <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
-            <span className="text-xs text-slate-500">Live monitoring active</span>
-          </footer>
         </div>
       </aside>
 

@@ -74,7 +74,7 @@ def get_wind_speed_and_pressure(database: str):
     return wind_speed_and_pressure_getter(database)
 
 @app.get('/all_typhoons/{database}')
-def get_all_typhoons(database: str, year_min: Optional[int] = Query(None),
-    year_max: Optional[int] = Query(None)):
-    print("hello")
-    return all_typhoons_tracks_getter(database)
+def get_all_typhoons(database: str, start: Optional[str] = None, end: Optional[str] = None):
+    if start == "-Infinity" or end == "Infinity":
+        return all_typhoons_tracks_getter(database)
+    return all_typhoons_tracks_getter(database, [int(start), int(end)])

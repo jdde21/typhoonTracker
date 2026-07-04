@@ -8,25 +8,27 @@ import PriceRangeSlider from "./PriceRangeSlider";
 const TYPHOON_AGENCIES = ["Default", "JTWC", "JMA", "CMA", "HKO", "IMD", "KMA"];
 
 export default function RoutePoints() {
-    const { setTyphoonLocations, setNeighboringTyphoons, setNeighboringTyphoonsNames, setNeighboringTyphoonsAdditionalProperties, database, setDatabase, year_range } = useContext(TyphoonDataContext);
+    const { setFetching, setTyphoonLocations, setNeighboringTyphoons, setNeighboringTyphoonsNames, setNeighboringTyphoonsAdditionalProperties, database, setDatabase, year_range } = useContext(TyphoonDataContext);
     const typhoon_locations = []
 
 
     async function getData(list_coordinates) {
         const url = "http://127.0.0.1:8000/input"
         try {
+            setFetching(prev => !prev);
             const response = await fetch(url, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'
                 },
-                body: JSON.stringify({ coordinates: list_coordinates, database: selected, range, neighbors })
+                body: JSON.stringify({ coordinates: list_coordinates, database, range, neighbors })
             });
             if (!response.ok) {
                 throw new Error(`Response status: ${response.status}`);
             }
 
             const result = await response.json();
+            setFetching(prev => !prev);
             return result
         } catch (error) {
             console.error(error.message);
@@ -257,7 +259,6 @@ export default function RoutePoints() {
                         ⊕ Add new point
                     </button>
                     <button onClick={async () => {
-                        let neighborLocations = []
                         let list_coordinates = [];
                         points.forEach((value) => {
                             const temp = [];
