@@ -1,15 +1,16 @@
 import { useState, useContext } from "react";
 import { createPortal } from "react-dom";
+import { ChevronUp, ChevronDown } from "lucide-react";
 import { TyphoonDataContext } from '../App';
 
 const BADGE_STYLES = {
-  CAT1: { bg: "#f39c12", color: "#fff" },
-  CAT2: { bg: "#e67e22", color: "#fff" },
-  CAT3: { bg: "#d35400", color: "#fff" },
-  CAT4: { bg: "#c0392b", color: "#fff" },
-  CAT5: { bg: "#7b241c", color: "#fff" },
-  DEP:  { bg: "#1a2560", color: "#8fa8f8" },
-  TS:   { bg: "#1a3a5c", color: "#7ab8f5" },
+  CAT1: { bg: "rgba(243,156,18,0.18)", color: "#f7b955" },
+  CAT2: { bg: "rgba(230,126,34,0.18)", color: "#f0954f" },
+  CAT3: { bg: "rgba(211,84,0,0.2)", color: "#f0854a" },
+  CAT4: { bg: "rgba(192,57,43,0.2)", color: "#f0736b" },
+  CAT5: { bg: "rgba(123,36,28,0.28)", color: "#e88b83" },
+  DEP:  { bg: "rgba(255,255,255,0.08)", color: "rgba(255,255,255,0.55)" },
+  TS:   { bg: "rgba(243,156,18,0.12)", color: "#f0c67a" },
 };
 
 export default function NeighborTyphoonCard({ name, sid, category, wind, pressure, tracks, score }) {
@@ -32,13 +33,16 @@ export default function NeighborTyphoonCard({ name, sid, category, wind, pressur
           bottom: window.innerHeight - rect.top + 4,
           left: rect.left,
           width: rect.width,
-          background: "#1a1f2e",
-          border: "0.5px solid rgba(255,255,255,0.1)",
-          borderRadius: 8,
+          background: "rgba(26, 30, 38, 0.6)",
+          backdropFilter: "blur(14px)",
+          WebkitBackdropFilter: "blur(14px)",
+          border: "1px solid rgba(255,255,255,0.09)",
+          borderRadius: 10,
           padding: "14px 16px",
           zIndex: 9999,
+          fontFamily: "'Inter', -apple-system, BlinkMacSystemFont, sans-serif",
         }}>
-          <div style={styles.waypointTitle}>Trajectory Waypoints</div>
+          <div style={styles.waypointTitle}>Trajectory waypoints</div>
           {tracks.map((track, i) => (
             <div key={i} style={styles.waypointRow}>
               <span style={styles.waypointLabel}>Pt {i + 1}:</span>
@@ -65,7 +69,9 @@ export default function NeighborTyphoonCard({ name, sid, category, wind, pressur
             <span style={{ ...styles.badge, background: badge.bg, color: badge.color }}>
               {score.toFixed(2)}
             </span>
-            <span style={styles.chevron}>{expanded ? "▲" : "▼"}</span>
+            <span style={styles.chevron}>
+              {expanded ? <ChevronUp size={13} /> : <ChevronDown size={13} />}
+            </span>
           </div>
         </div>
 
@@ -86,13 +92,16 @@ export default function NeighborTyphoonCard({ name, sid, category, wind, pressur
 
 const styles = {
   card: {
-    background: "#1a1f2e",
-    border: "0.5px solid rgba(255,255,255,0.1)",
-    borderRadius: 8,
+    background: "rgba(26, 30, 38, 0.55)",
+    backdropFilter: "blur(14px)",
+    WebkitBackdropFilter: "blur(14px)",
+    border: "1px solid rgba(255,255,255,0.09)",
+    borderRadius: 10,
     padding: "14px 16px",
     minWidth: 180,
     flex: 1,
     transition: "all 0.2s ease",
+    fontFamily: "'Inter', -apple-system, BlinkMacSystemFont, sans-serif",
   },
   header: {
     display: "flex",
@@ -104,14 +113,14 @@ const styles = {
   name: {
     fontSize: 14,
     fontWeight: 500,
-    color: "#fff",
+    color: "rgba(255,255,255,0.9)",
     whiteSpace: "nowrap",
     overflow: "hidden",
     textOverflow: "ellipsis",
   },
   badge: {
     fontSize: 10,
-    fontWeight: 600,
+    fontWeight: 500,
     padding: "3px 8px",
     borderRadius: 4,
     letterSpacing: "0.05em",
@@ -120,31 +129,32 @@ const styles = {
     flexShrink: 0,
   },
   chevron: {
-    fontSize: 9,
-    color: "rgba(255,255,255,0.4)",
+    display: "flex",
+    color: "rgba(255,255,255,0.35)",
   },
   stats: {
     display: "flex",
     gap: 20,
   },
   statLabel: {
-    fontSize: 11,
-    color: "rgba(255,255,255,0.45)",
+    fontSize: 10.5,
+    fontWeight: 500,
+    color: "rgba(255,255,255,0.4)",
     textTransform: "uppercase",
-    letterSpacing: "0.05em",
+    letterSpacing: "0.09em",
     marginBottom: 3,
   },
   statValue: {
     fontSize: 15,
     fontWeight: 500,
-    color: "#e0e6f0",
+    color: "rgba(255,255,255,0.85)",
   },
   waypointTitle: {
-    fontSize: 11,
-    fontWeight: 600,
-    color: "rgba(255,255,255,0.5)",
+    fontSize: 10.5,
+    fontWeight: 500,
+    color: "rgba(255,255,255,0.45)",
     textTransform: "uppercase",
-    letterSpacing: "0.08em",
+    letterSpacing: "0.09em",
     marginBottom: 10,
   },
   waypointRow: {
@@ -156,14 +166,14 @@ const styles = {
   },
   waypointLabel: {
     fontSize: 13,
-    color: "rgba(255,255,255,0.5)",
-    fontFamily: "monospace",
+    color: "rgba(255,255,255,0.45)",
+    fontVariantNumeric: "tabular-nums",
     minWidth: 36,
   },
   waypointValue: {
     fontSize: 13,
-    color: "#c8d8f0",
-    fontFamily: "monospace",
-    letterSpacing: "0.03em",
+    color: "rgba(255,255,255,0.8)",
+    fontVariantNumeric: "tabular-nums",
+    letterSpacing: "0.01em",
   },
 };

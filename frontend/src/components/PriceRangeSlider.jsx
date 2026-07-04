@@ -21,16 +21,17 @@ const snapToNearest = (value, points, threshold) => {
 export default function PriceRangeSlider({
     min,
     max,
-    trackColor = "#ffffff",
+    trackColor = "rgba(255,255,255,0.14)",
     onChange,
-    rangeColor = "#9A7080",
+    rangeColor = "rgba(255,255,255,0.55)",
     valueStyle = valueCSS,
     width = "300px",
     currencyText = "$",
     mobileScreen = false,
     snapPoints = DEFAULT_SNAP_POINTS,
     snapThreshold = 200,
-    thumbSize = 10,
+    thumbSize = 12,
+    showLabel = false,
 }) {
 
     const [minVal, setMinVal] = useState(min);
@@ -97,48 +98,54 @@ export default function PriceRangeSlider({
 
     return (
         <div style={{
-            background: "#1c2130",
-            borderRadius: 10,
-            padding: "14px 10px 20px",
+            background: "transparent",
             width: "100%",
             maxWidth: 560,
             boxSizing: "border-box",
-            fontFamily: "monospace",
+            fontFamily: "'Inter', -apple-system, BlinkMacSystemFont, sans-serif",
         }}>
 
-            <div style={{
-                display: "flex",
-                justifyContent: "space-between",
-                alignItems: "center",
-                marginBottom: 14,
-            }}>
-                <span style={{
-                    fontSize: 11,
-                    fontWeight: 500,
-                    letterSpacing: "0.12em",
-                    textTransform: "uppercase",
-                    color: "#3b82f6",
+            {showLabel && (
+                <div style={{
+                    display: "flex",
+                    justifyContent: "space-between",
+                    alignItems: "center",
+                    marginBottom: 8,
                 }}>
-                    Year Range
-                </span>
-                <span style={{ fontSize: 12, color: "#8a95b0", letterSpacing: "0.05em" }}>
-                    {minVal} — {maxVal}
-                </span>
-            </div>
+                    <span style={{
+                        fontSize: 10.5,
+                        fontWeight: 500,
+                        letterSpacing: "0.09em",
+                        textTransform: "uppercase",
+                        color: "rgba(255,255,255,0.4)",
+                    }}>
+                        Year range
+                    </span>
+                    <span style={{ fontSize: 12, color: "rgba(255,255,255,0.55)", fontVariantNumeric: "tabular-nums" }}>
+                        {minVal} — {maxVal}
+                    </span>
+                </div>
+            )}
 
             {/* Scoped thumb-size override */}
             <style>{`
                 #${uid} .thumb::-webkit-slider-thumb {
                     width: ${thumbSize}px;
                     height: ${thumbSize}px;
+                    background: #e8e8e6;
+                    border: 2px solid rgba(11,15,20,0.9);
+                    box-shadow: 0 0 0 1px rgba(255,255,255,0.25);
                 }
                 #${uid} .thumb::-moz-range-thumb {
                     width: ${thumbSize}px;
                     height: ${thumbSize}px;
+                    background: #e8e8e6;
+                    border: 2px solid rgba(11,15,20,0.9);
+                    box-shadow: 0 0 0 1px rgba(255,255,255,0.25);
                 }
             `}</style>
 
-      
+
 
             {/* Slider */}
             <div id={uid} className="multi-slide-input-container" style={{ width: sliderWidth }}>
@@ -168,7 +175,7 @@ export default function PriceRangeSlider({
                 />
                 <div className="slider">
                     <div style={{ backgroundColor: trackColor }} className="track-slider" />
-                    <div ref={range} style={{ backgroundColor: "#3b82f6" }} className="range-slider" />
+                    <div ref={range} style={{ backgroundColor: rangeColor }} className="range-slider" />
                 </div>
             </div>
 

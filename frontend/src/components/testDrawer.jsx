@@ -37,28 +37,28 @@ function StormCard({ storm, selected, onSelect }) {
     <button
       type="button"
       onClick={() => onSelect?.(storm)}
-      className={`w-full text-left rounded-xl px-3.5 py-3 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 ${selected
-        ? "bg-[#162032] border-2 border-blue-500"
-        : "bg-[#11151f] border border-[#232834] hover:border-[#3a4150]"
+      className={`w-full text-left rounded-lg px-3.5 py-3 transition-colors focus:outline-none focus-visible:ring-1 focus-visible:ring-white/40 ${selected
+        ? "bg-white/[0.07] border border-white/25"
+        : "bg-white/[0.02] border border-white/[0.07] hover:border-white/20"
         }`}
     >
       <div className="flex items-center justify-between mb-2">
-        <span className={`font-mono text-sm font-medium ${selected ? "text-blue-300" : "text-blue-400"}`}>
+        <span className={`font-mono text-[13px] font-medium ${selected ? "text-white/90" : "text-white/65"}`}>
           {storm}
         </span>
         <span
-          className={`text-[11px] font-medium px-2.5 py-0.5 rounded-md ${style.bg} ${style.text}`}
+          className={`text-[10.5px] font-medium px-2.5 py-0.5 rounded-md ${style.bg} ${style.text}`}
         >
           {category}
         </span>
       </div>
       <div className="flex gap-5">
-        <span className="flex items-center gap-1.5 text-xs text-slate-400">
-          <Wind size={14} className="text-slate-500" aria-hidden="true" />
+        <span className="flex items-center gap-1.5 text-xs text-white/40">
+          <Wind size={13} className="text-white/30" aria-hidden="true" />
           {storm.wind ?? "–"} kt
         </span>
-        <span className="flex items-center gap-1.5 text-xs text-slate-400">
-          <Gauge size={14} className="text-slate-500" aria-hidden="true" />
+        <span className="flex items-center gap-1.5 text-xs text-white/40">
+          <Gauge size={13} className="text-white/30" aria-hidden="true" />
           {storm.pres ?? "–"} hPa
         </span>
       </div>
@@ -79,19 +79,11 @@ export default function NeighboringTyphoonsDrawer({
   const [yearMin] = useState(1884);
   const [yearMax] = useState(2026);
 
-  
+
   const handleRangeChange = (year_range) => {
     itemsRef.current[0] = year_range.min; itemsRef.current[1] = year_range.max;
   };
 
-  const visibleStorms = useMemo(() => {
-    const lo = Math.min(yearMin, yearMax);
-    const hi = Math.max(yearMin, yearMax);
-    return storms.filter((s) => {
-      const year = yearFromStormId(s.id);
-      return year >= lo && year <= hi;
-    });
-  }, [storms, yearMin, yearMax]);
 
   return (
     <>
@@ -103,24 +95,30 @@ export default function NeighboringTyphoonsDrawer({
         .typhoon-scroll::-webkit-scrollbar { width: 8px; }
         .typhoon-scroll::-webkit-scrollbar-track { background: transparent; }
         .typhoon-scroll::-webkit-scrollbar-thumb {
-          background-color: #2a2f3a;
+          background-color: rgba(255,255,255,0.12);
           border-radius: 8px;
-          border: 2px solid #0d1117;
+          border: 2px solid transparent;
+          background-clip: padding-box;
         }
-        .typhoon-scroll::-webkit-scrollbar-thumb:hover { background-color: #3a4150; }
-        .typhoon-scroll { scrollbar-width: thin; scrollbar-color: #2a2f3a transparent; }
+        .typhoon-scroll::-webkit-scrollbar-thumb:hover { background-color: rgba(255,255,255,0.22); }
+        .typhoon-scroll { scrollbar-width: thin; scrollbar-color: rgba(255,255,255,0.12) transparent; }
       `}</style>
 
-        <div className="h-full bg-[#0d1117] border-r border-[#2a2f3a] flex flex-col font-sans shadow-2xl">
-          <header className="flex items-center justify-between px-4 pt-4 pb-3 border-b border-[#232834] shrink-0">
+        <div
+          style={{
+            background: "rgba(20, 24, 30, 0.55)",
+            backdropFilter: "blur(14px)",
+            WebkitBackdropFilter: "blur(14px)",
+            fontFamily: "'Inter', -apple-system, BlinkMacSystemFont, sans-serif",
+          }}
+          className="h-full border-r border-white/[0.08] flex flex-col shadow-[0_8px_30px_rgba(0,0,0,0.35)]"
+        >
+          <header className="flex items-center justify-between px-4 pt-4 pb-3.5 border-b border-white/[0.07] shrink-0">
             <div className="flex items-center gap-2.5">
-              <CircleDot size={18} className="text-blue-400" aria-hidden="true" />
+              <CircleDot size={16} className="text-white/50" aria-hidden="true" />
               <div>
-                <p className="text-[15px] font-medium text-slate-100">
-                  Typhoon Database
-                </p>
-                <p className="text-xs text-slate-500">
-                  {visibleStorms.length} storm{visibleStorms.length === 1 ? "" : "s"} in range
+                <p className="text-[14px] font-medium text-white/90">
+                  Typhoon database
                 </p>
               </div>
             </div>
@@ -128,13 +126,13 @@ export default function NeighboringTyphoonsDrawer({
               type="button"
               onClick={() => setIsOpen(false)}
               aria-label="Hide panel"
-              className="text-slate-500 hover:text-slate-300 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 rounded-md"
+              className="text-white/35 hover:text-white/70 focus:outline-none focus-visible:ring-1 focus-visible:ring-white/40 rounded-md transition-colors"
             >
-              <ChevronLeft size={18} />
+              <ChevronLeft size={17} />
             </button>
           </header>
 
-          <div className="px-4 py-3.5 border-b border-[#232834] flex flex-col gap-3 shrink-0">
+          <div className="px-4 py-4 border-b border-white/[0.07] flex flex-col gap-3.5 shrink-0">
             <div className="flex gap-2">
               <label className="flex-1">
                 <span className="sr-only">Database</span>
@@ -143,10 +141,10 @@ export default function NeighboringTyphoonsDrawer({
                   onChange={(e) => {
                     setSideDrawerDatabase(e.target.value);
                   }}
-                  className="w-full bg-[#161b25] border border-[#2a2f3a] text-slate-100 rounded-md px-2.5 py-2 text-[13px] focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
+                  className="w-full bg-white/[0.04] border border-white/[0.09] text-white/85 rounded-md px-2.5 py-2 text-[13px] focus:outline-none focus-visible:ring-1 focus-visible:ring-white/30 focus:border-white/25"
                 >
                   {TYPHOON_AGENCIES.map((db) => (
-                    <option key={db}>{db}</option>
+                    <option key={db} className="bg-[#181c24]">{db}</option>
                   ))}
                 </select>
               </label>
@@ -155,44 +153,40 @@ export default function NeighboringTyphoonsDrawer({
                 <select
                   value={basin}
                   onChange={(e) => setBasin(e.target.value)}
-                  className="w-full bg-[#161b25] border border-[#2a2f3a] text-slate-100 rounded-md px-2.5 py-2 text-[13px] focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
+                  className="w-full bg-white/[0.04] border border-white/[0.09] text-white/85 rounded-md px-2.5 py-2 text-[13px] focus:outline-none focus-visible:ring-1 focus-visible:ring-white/30 focus:border-white/25"
                 >
                   {BASINS.map((b) => (
-                    <option key={b}>{b}</option>
+                    <option key={b} className="bg-[#181c24]">{b}</option>
                   ))}
                 </select>
               </label>
             </div>
 
-            <div>
-              <div>
-                <PriceRangeSlider
-                  min={!year_range ? 10 : year_range[sideDrawerDatabase][0]}
-                  max={!year_range ? 10 : year_range[sideDrawerDatabase][1]}
-                  onChange={handleRangeChange}
-                />
-              </div>
-            </div>
+            <PriceRangeSlider
+              showLabel
+              min={!year_range ? 10 : year_range[sideDrawerDatabase][0]}
+              max={!year_range ? 10 : year_range[sideDrawerDatabase][1]}
+              onChange={handleRangeChange}
+            />
+
             <button
               type="button"
               onClick={() => { queryClient.invalidateQueries({ queryKey: ["all_typhoons"] }); }}
               disabled={false}
-              className="w-full text-sm font-medium rounded-md py-2 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 bg-blue-600 hover:bg-blue-500 text-white disabled:opacity-50 disabled:cursor-not-allowed mt-2"
+              className="w-full text-[13px] font-medium rounded-md py-2.5 transition-colors focus:outline-none focus-visible:ring-1 focus-visible:ring-white/40 bg-white/90 hover:bg-white text-[#12151b] disabled:opacity-50 disabled:cursor-not-allowed"
             >
               Apply filters
             </button>
           </div>
 
-
-
-          <div className="typhoon-scroll flex flex-col gap-2 px-4 py-3 overflow-y-auto grow">
+          <div className="typhoon-scroll flex flex-col gap-2 px-4 py-3.5 overflow-y-auto grow">
 
             {sideDrawerLoading ? (
               <div className="flex flex-col gap-2">
                 {Array.from({ length: 10 }).map((_, i) => (
                   <div
                     key={i}
-                    className="h-16 rounded-lg bg-gray-200 animate-pulse"
+                    className="h-16 rounded-lg bg-white/[0.05] animate-pulse"
                   />
                 ))}
               </div>
@@ -223,7 +217,12 @@ export default function NeighboringTyphoonsDrawer({
         type="button"
         onClick={() => setIsOpen(true)}
         aria-label="Show neighboring typhoons panel"
-        className={`absolute top-4 left-0 z-10 bg-[#0d1117] border border-[#2a2f3a] border-l-0 rounded-r-md p-2 text-slate-400 hover:text-slate-200 transition-opacity duration-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 ${isOpen ? "opacity-0 pointer-events-none" : "opacity-100"
+        style={{
+          background: "rgba(20, 24, 30, 0.55)",
+          backdropFilter: "blur(14px)",
+          WebkitBackdropFilter: "blur(14px)",
+        }}
+        className={`absolute top-4 left-0 z-10 border border-white/[0.08] border-l-0 rounded-r-md p-2 text-white/40 hover:text-white/75 transition-opacity duration-200 focus:outline-none focus-visible:ring-1 focus-visible:ring-white/40 ${isOpen ? "opacity-0 pointer-events-none" : "opacity-100"
           }`}
       >
         <CircleDot size={16} aria-hidden="true" />
