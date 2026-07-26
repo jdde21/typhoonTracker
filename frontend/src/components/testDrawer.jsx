@@ -1,5 +1,6 @@
-import { useMemo, useState, useContext } from "react";
+import { useState, useContext } from "react";
 import { ChevronLeft, Wind, Gauge, CircleDot } from "lucide-react";
+import { WiHurricane } from "react-icons/wi";
 import { TyphoonDataContext } from '../App';
 import { useQueryClient } from '@tanstack/react-query';
 import PriceRangeSlider from "./PriceRangeSlider";
@@ -72,7 +73,7 @@ export default function NeighboringTyphoonsDrawer({
   onSelectStorm,
 }) {
   const queryClient = useQueryClient();
-  const { all_typhoons, setShowNeighbor, sideDrawerDatabase, itemsRef, setSideDrawerDatabase, TYPHOON_AGENCIES, year_range, sideDrawerLoading } = useContext(TyphoonDataContext);
+  const { all_typhoons, setShowTyphoon, sideDrawerDatabase, itemsRef, setSideDrawerDatabase, TYPHOON_AGENCIES, year_range, sideDrawerLoading } = useContext(TyphoonDataContext);
   const [isOpen, setIsOpen] = useState(defaultOpen);
   const [selectedId, setSelectedId] = useState(null);
   const [basin, setBasin] = useState(BASINS[0]);
@@ -115,7 +116,7 @@ export default function NeighboringTyphoonsDrawer({
         >
           <header className="flex items-center justify-between px-4 pt-4 pb-3.5 border-b border-white/[0.07] shrink-0">
             <div className="flex items-center gap-2.5">
-              <CircleDot size={16} className="text-white/50" aria-hidden="true" />
+              <WiHurricane size={35} color="rgba(255,255,255,0.5)" />
               <div>
                 <p className="text-[14px] font-medium text-white/90">
                   Typhoon database
@@ -164,6 +165,7 @@ export default function NeighboringTyphoonsDrawer({
 
             <PriceRangeSlider
               showLabel
+              width="100%"
               min={!year_range ? 10 : year_range[sideDrawerDatabase][0]}
               max={!year_range ? 10 : year_range[sideDrawerDatabase][1]}
               onChange={handleRangeChange}
@@ -199,9 +201,9 @@ export default function NeighboringTyphoonsDrawer({
                     selected={sid === selectedId}
                     onSelect={() => {
                       if (sid == selectedId) {
-                        setSelectedId(null); setShowNeighbor(null);
+                        setSelectedId(null); setShowTyphoon(null);
                       } else {
-                        setSelectedId(sid); setShowNeighbor(sid);
+                        setSelectedId(sid); setShowTyphoon(sid);
                       }
                     }}
                   />
@@ -221,11 +223,13 @@ export default function NeighboringTyphoonsDrawer({
           background: "rgba(20, 24, 30, 0.55)",
           backdropFilter: "blur(14px)",
           WebkitBackdropFilter: "blur(14px)",
+          fontFamily: "'Inter', -apple-system, BlinkMacSystemFont, sans-serif",
         }}
-        className={`absolute top-4 left-0 z-10 border border-white/[0.08] border-l-0 rounded-r-md p-2 text-white/40 hover:text-white/75 transition-opacity duration-200 focus:outline-none focus-visible:ring-1 focus-visible:ring-white/40 ${isOpen ? "opacity-0 pointer-events-none" : "opacity-100"
+        className={`absolute top-4 left-0 z-10 flex items-center border border-white/[0.08] border-l-0 rounded-r-md px-3 py-2 text-white/40 hover:text-white/75 text-[13px] font-medium transition-opacity duration-200 focus:outline-none focus-visible:ring-1 focus-visible:ring-white/40 ${isOpen ? "opacity-0 pointer-events-none" : "opacity-100"
           }`}
       >
-        <CircleDot size={16} aria-hidden="true" />
+        <WiHurricane size={25} color="currentColor" />
+        Typhoon database
       </button>
     </>
   );

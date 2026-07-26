@@ -32,16 +32,13 @@ export function App() {
 
   const [neighborTyphoonsLocations, setNeighborTyphoonsLocations] = useState([]);
   const [neighborTyphoonsSID, setNeighborTyphoonsSID] = useState([]);
-  const [showNeighbor, setShowNeighbor] = useState(null);
+  const [showNeighbor, setShowNeighbor] = useState([]);
+  const [showTyphoon, setShowTyphoon] = useState(null);
   const [database, setDatabase] = useState(TYPHOON_AGENCIES[0]);
   const [sideDrawerDatabase, setSideDrawerDatabase] = useState(TYPHOON_AGENCIES[0]);
   const [fetching, setFetching] = useState(false);
   const itemsRef = useRef([0, 0]);
 
-
-  useEffect(() => {
-    console.log(fetching)
-  }, [fetching])
 
   const { data: all_typhoons, isFetching: sideDrawerLoading } = useQuery({
     queryKey: ["all_typhoons"],
@@ -72,7 +69,8 @@ export function App() {
         typhoonLocations, setTyphoonLocations, neighboringTyphoons,
         setNeighboringTyphoons, neighborTyphoonsLocations, setNeighborTyphoonsLocations, neighborTyphoonsSID,
         setNeighborTyphoonsSID, showNeighbor, setShowNeighbor, neighboringTyphoonsNames, setNeighboringTyphoonsNames,
-        setNeighboringTyphoonsAdditionalProperties, database, setDatabase, setSideDrawerDatabase, sideDrawerDatabase, all_typhoons, year_range, TYPHOON_AGENCIES, itemsRef, sideDrawerLoading, setFetching
+        setNeighboringTyphoonsAdditionalProperties, database, setDatabase, setSideDrawerDatabase, sideDrawerDatabase, 
+        all_typhoons, year_range, TYPHOON_AGENCIES, itemsRef, sideDrawerLoading, setFetching, showTyphoon, setShowTyphoon
       }}>
 
         <NeighboringTyphoonsDrawer></NeighboringTyphoonsDrawer>

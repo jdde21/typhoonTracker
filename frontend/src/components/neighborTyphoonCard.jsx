@@ -59,7 +59,11 @@ export default function NeighborTyphoonCard({ name, sid, category, wind, pressur
         ref={setCardRef}
         style={{ ...styles.card, cursor: "pointer" }}
         onClick={() => {
-          setShowNeighbor(expanded ? null : sid);
+          if (!expanded) {
+            setShowNeighbor(prev => [sid, ...prev]);
+          } else {
+            setShowNeighbor(prev => prev.filter(item => item !== sid));
+          }
           setExpanded((prev) => !prev);
         }}
       >

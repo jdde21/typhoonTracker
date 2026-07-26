@@ -148,7 +148,7 @@ export default function PriceRangeSlider({
 
 
             {/* Slider */}
-            <div id={uid} className="multi-slide-input-container" style={{ width: sliderWidth }}>
+            <div id={uid} className="multi-slide-input-container" style={{ width: sliderWidth, position: "relative" }}>
                 <input
                     type="range"
                     min={min}

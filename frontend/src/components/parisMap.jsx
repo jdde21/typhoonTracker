@@ -11,25 +11,7 @@ const DEFAULT_ZOOM = 4
 
 export default function ParisMap() {
 
-  const { typhoonLocations, all_typhoons, showNeighbor, neighboringTyphoons } = useContext(TyphoonDataContext);
-
-  const pathGeoJSON = {
-    type: 'Feature',
-    geometry: {
-      type: 'LineString',
-      coordinates: typhoonLocations.map(loc => [loc.lng, loc.lat])
-    }
-  };
-  
-  const lineLayer = {
-    id: 'typhoon-path',
-    type: 'line',
-    paint: {
-      'line-color': '#3b82f6',
-      'line-width': 2,
-      'line-dasharray': [2, 1]
-    }
-  };
+  const { typhoonLocations, all_typhoons, showNeighbor, showTyphoon, neighboringTyphoons } = useContext(TyphoonDataContext);
 
   
   return (
@@ -61,7 +43,7 @@ export default function ParisMap() {
         {
           Object.keys(neighboringTyphoons).map((sid) => {
             const tracks = neighboringTyphoons[sid][0];
-            if (sid !== showNeighbor) {
+            if (showNeighbor.length == 0 || sid !== showNeighbor[0]) {
               return null;
             }
             return tracks.map((values, index) => {
@@ -91,7 +73,7 @@ export default function ParisMap() {
         {
           all_typhoons && Object.keys(all_typhoons).map((sid) => {
             const tracks = all_typhoons[sid];
-            if (sid !== showNeighbor) {
+            if (sid !== showTyphoon) {
               return null;
             }
             return tracks.map((values, index) => {

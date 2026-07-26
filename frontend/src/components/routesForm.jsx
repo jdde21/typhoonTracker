@@ -201,7 +201,7 @@ export default function RoutePoints() {
                         </div>
 
                         <div className="flex flex-col gap-1 w-[90%] mx-auto mt-5">
-                            <PriceRangeSlider showLabel min={!year_range ? 10 : year_range[database][0]} max={!year_range ? 10 : year_range[database][1]} onChange={handleRangeChange} />
+                            <PriceRangeSlider showLabel width="100%" min={!year_range ? 10 : year_range[database][0]} max={!year_range ? 10 : year_range[database][1]} onChange={handleRangeChange} />
                         </div>
 
                         {/* scrollable list */}

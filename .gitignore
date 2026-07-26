@@ -2,3 +2,8 @@
 backend/__pycache__/
 backend/*.py[cod]
 backend/*$py.class
+backend/.env
+backend/Subtropical Cyclone BAVI (INDAY_09W) _ Final.csv
+backend/Tropical Disturbance (LPA) _Formerly JOSIE_HAISHAN_97W_ _ Final.csv
+backend/bin/*
+backend/lib/*

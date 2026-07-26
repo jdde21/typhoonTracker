@@ -1,10 +1,19 @@
-import string
-from fastapi import FastAPI, Query
-from fastapi.middleware.cors import CORSMiddleware
-from pydantic import BaseModel
-from typing import List, Optional
-import pandas as pd 
 from test import typhoon_tracker, sid_track_scores_dict, names_printer, year_range_getter, wind_speed_and_pressure_getter, all_typhoons_tracks_getter
+from fastapi.middleware.cors import CORSMiddleware
+from fastapi.encoders import jsonable_encoder
+from datetime import timezone, datetime
+from fastapi import FastAPI, Query
+from typing import List, Optional
+from pymongo import MongoClient
+from dotenv import load_dotenv
+from pydantic import BaseModel
+from zoneinfo import ZoneInfo
+import pandas as pd 
+import re
+import os
+
+PATTERN = re.compile(r'\b[A-Z]{2,}\b')
+ACCEPTABLE_HOURS = 12
 
 app = FastAPI()
 
@@ -36,6 +45,14 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+load_dotenv()
+MONGO_URI = os.environ["MONGO_URI"]
+CLIENT = MongoClient(MONGO_URI)
+DB = CLIENT["typhoon_tracker"]
+COLLECTION = DB["storm_records"]
+WEATHER_DISTURBANCES_COLLECTION = DB["live_weather_disturbances"]
+
 
 @app.get('/')
 def root():
@@ -78,3 +95,54 @@ def get_all_typhoons(database: str, start: Optional[str] = None, end: Optional[s
     if start == "-Infinity" or end == "Infinity":
         return all_typhoons_tracks_getter(database)
     return all_typhoons_tracks_getter(database, [int(start), int(end)])
+
+@app.get("/get_live_typhoons")
+def get_live_typhoons():
+    live_typhoon_list = WEATHER_DISTURBANCES_COLLECTION.find_one()["names"]
+    typhoon_records = []
+    for live_typhoon in live_typhoon_list:
+        typhoon_records.append(COLLECTION.find_one({"name": live_typhoon}))
+    print(typhoon_records)
+    
+    
+
+# @app.get('/most_recent')
+# def get_most_recent():
+#     most_recent = collection.find_one(sort=[("timestamp", -1)])
+#     utc_time = most_recent["timestamp"].replace(tzinfo=timezone.utc)
+#     hours = gap_hours(utc_time)
+#     most_recent["_id"] = str(most_recent["_id"])
+#     if hours <= ACCEPTABLE_HOURS:
+#         temp = PATTERN.search(most_recent["name"])
+#         name = temp.group(0) if temp else None
+#         print("name", name)
+#         coordinates = most_recent["coordinates"]
+#         year = utc_time.year
+#         add(f"{name} {year}", coordinates, utc_time)
+    
+#     return jsonable_encoder(most_recent)
+
+# def gap_hours(utc_time):
+#     ph_time = utc_time.astimezone(ZoneInfo("Asia/Manila"))
+#     ph_now = datetime.now(ZoneInfo("Asia/Manila"))
+#     gap = ph_now - ph_time
+#     return int(gap.total_seconds() // 3600)
+
+# def add(name, coordinates, most_recent):
+#     doc = permanent_collection.find_one({"name": name})
+
+#     if doc:
+#         coordinates_timegap = doc["coordinates_timegap"]
+#         recent_timestamp = doc["recent_timestamp"].replace(tzinfo=timezone.utc)
+#         if recent_timestamp == most_recent:
+#             return
+        
+#     else:
+#         coords = [float(x.strip()) for x in coordinates.split(",")]
+#         coords.append(0)
+#         new_doc = {
+#             "name": name,
+#             "coordinates_timegap": [coords], 
+#             "recent_timestamp": most_recent
+#         }
+#         permanent_collection.insert_one(new_doc)
