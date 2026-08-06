@@ -128,15 +128,20 @@ def coordinates_to_dict(typhoon_database, year_range, unique_sid, inputs):
                     current_index_increment += index + 1 # index + 1 is the number of elements removed
                     break
                 else:
-                    closest_time_index = [index + current_index_increment, abs(current_time - input_time)] if closest_time_index[1] > abs(current_time - input_time) else closest_time_index 
+                    # the line of code below ay para ata ma determine which is the closest time index para sa input time and ginagamit yung absolute value ng current_time - input time to determine that
+                    # for example (input time is 8) 1st iter: current time is 3 (abs diff is 5 since first time, the below line of code will evaluate to true yung ternary). 2nd iter: current time is 6 (abs diff is 2. mas mababa kaya ternary will evaluate to true)
+                    # 3rd iter: current time is 9 (abs diff is 1. mas mababa kesa sa previous one kaya ternary operator will evaluate to true and yung sunod na if branch will break the loop)
+                    closest_time_index = [index + current_index_increment, abs(current_time - input_time)] if (closest_time_index[1] > abs(current_time - input_time) or closest_time_index[1] == float('-inf')) else closest_time_index 
                     if current_time > input_time:
-                        # print(typhoon_iso_time, index + 1, closest_time_index[0])
+                        # print("pumunta dito: ", typhoon_iso_time, index + 1, closest_time_index[0])
                         typhoon_iso_time = np.delete(typhoon_iso_time, slice(0, index))
                         current_index_increment += index
+                        # print(closest_time_index[1], abs(current_time - input_time))
                         break
                 
             typhoon_indices.append(closest_time_index[0])
         
+        # print(typhoon_indices)
         try:
             distance_of_tracks = np.linalg.norm(inputs[:, :2] - recent_typhoons_dict[sid][typhoon_indices, :2]) # frobenius
             # distance_of_tracks = np.sum(np.linalg.norm(inputs[:, :2] - recent_typhoons_dict[sid][typhoon_indices, :2], axis = 1)) # per point euclidean distance
@@ -144,8 +149,8 @@ def coordinates_to_dict(typhoon_database, year_range, unique_sid, inputs):
             #     secret += 1
             #     print("frobenius", distance_of_tracks)
             #     print("per-point", np.sum(np.linalg.norm(inputs[:, :2] - recent_typhoons_dict[sid][typhoon_indices, :2], axis = 1)))
-
-        except:
+        except Exception as e:
+            print("error")
             continue
         score = distance_of_tracks.mean()
         

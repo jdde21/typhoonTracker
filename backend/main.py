@@ -97,14 +97,23 @@ def get_all_typhoons(database: str, start: Optional[str] = None, end: Optional[s
     return all_typhoons_tracks_getter(database, [int(start), int(end)])
 
 @app.get("/get_live_typhoons")
+def get_live_typhoons(name: str):
+    live_typhoon_list = WEATHER_DISTURBANCES_COLLECTION.find_one()["names"]
+    if name not in live_typhoon_list:
+        return 
+    
+    typhoon_records = []
+    typhoon_records.append(COLLECTION.find_one({"name": name}))
+    
+    # as of now, kaya pa lang ma display isang live typhoon
+    record = typhoon_records[0]
+    coordinates = record['coordinates_timegap']
+    return coordinates
+
+@app.get("/get_live_typhoons_names")
 def get_live_typhoons():
     live_typhoon_list = WEATHER_DISTURBANCES_COLLECTION.find_one()["names"]
-    typhoon_records = []
-    for live_typhoon in live_typhoon_list:
-        typhoon_records.append(COLLECTION.find_one({"name": live_typhoon}))
-    print(typhoon_records)
-    
-    
+    return live_typhoon_list
 
 # @app.get('/most_recent')
 # def get_most_recent():

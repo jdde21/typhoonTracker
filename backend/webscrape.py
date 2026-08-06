@@ -44,7 +44,7 @@ def save_data(data):
             typhoon_name = sanitize_filename(name)
             new_typhoon_names.append(typhoon_name)
             new_coords = [float(coords[0]), float(coords[1])]
-
+    
             last_record = get_last_coords(typhoon_name)
     
             if last_record and coordinates_comparer(new_coords, last_record["coordinates_timegap"][-1]):
@@ -68,17 +68,15 @@ def save_data(data):
             else:
                 new_record = {
                     "name": typhoon_name,
-                    "coordinates_timegap": [*new_coords, 0],
-                    "timestamp": datetime.now(timezone.utc)
+                    "coordinates_timegap": [[*new_coords, 0]],
+                    "recent_timestamp": datetime.now(timezone.utc)
                 }
                 COLLECTION.insert_one(new_record)
                 print(f"Change detected, inserted: {typhoon_name}")
                 
-    live_typhoons = LIVE_TYPHOON_LIST["names"]
-    live_typhoons = list(set([*live_typhoons, *new_typhoon_names])) # converted to set then converted again to list to remove duplicates
     WEATHER_DISTURBANCES_COLLECTION.update_one(
         {"_id": LIVE_TYPHOON_LIST["_id"]},
-        {"$set": {"names": live_typhoons}}
+        {"$set": {"names": new_typhoon_names}}
     )
     
 def coordinates_comparer(new_coords, last_coords):

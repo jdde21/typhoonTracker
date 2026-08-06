@@ -6,9 +6,16 @@ import PriceRangeSlider from "./PriceRangeSlider";
 
 
 const TYPHOON_AGENCIES = ["Default", "JTWC", "JMA", "CMA", "HKO", "IMD", "KMA"];
+const dummyTyphoons = [
+    { id: 1, name: "Typhoon Co-may" },
+    { id: 2, name: "Typhoon Francisco" },
+    { id: 3, name: "Typhoon Krosa" },
+];
 
 export default function RoutePoints() {
-    const { setFetching, setTyphoonLocations, setNeighboringTyphoons, setNeighboringTyphoonsNames, setNeighboringTyphoonsAdditionalProperties, database, setDatabase, year_range } = useContext(TyphoonDataContext);
+    const { setFetching, setTyphoonLocations, setNeighboringTyphoons,
+        setNeighboringTyphoonsNames, setNeighboringTyphoonsAdditionalProperties,
+        database, setDatabase, year_range, get_live_typhoons_names } = useContext(TyphoonDataContext);
     const typhoon_locations = []
 
 
@@ -35,16 +42,15 @@ export default function RoutePoints() {
         }
     }
 
-    async function getAutoTrackData() {
-        const url = "http://127.0.0.1:8000/auto_track"
+    async function getAutoTrackData(name) {
+        const url = `http://127.0.0.1:8000/get_live_typhoons?name=${name}`
         try {
             setFetching(prev => !prev);
             const response = await fetch(url, {
-                method: 'POST',
+                method: 'GET',
                 headers: {
                     'Content-Type': 'application/json'
                 },
-                body: JSON.stringify({ database, range, neighbors })
             });
             if (!response.ok) {
                 throw new Error(`Response status: ${response.status}`);
@@ -116,6 +122,7 @@ export default function RoutePoints() {
     const [pos, setPos] = useState({ x: 900, y: 100 });
     const dragging = useRef(false);
     const offset = useRef({ x: 0, y: 0 });
+    const [neighborsError, setNeighborsError] = useState(false);
 
     // automatic mode state
     const [autoTracking, setAutoTracking] = useState(false);
@@ -156,6 +163,12 @@ export default function RoutePoints() {
         setPoints(points.filter((_, idx) => idx !== i));
     };
 
+    const updateNeighbors = (e) => {
+        const number_of_neighbors = Number(e.target.value);
+
+        if (number_of_neighbors > 0) setNeighbors(number_of_neighbors);
+    }
+
     useEffect(() => {
         if (year_range) {
             const first_year = year_range[database][0];
@@ -186,8 +199,20 @@ export default function RoutePoints() {
         setNeighboringTyphoonsAdditionalProperties(additionalProperties);
     }
 
+    function validSubmit() {
+        if (neighbors <= 0) {
+            setNeighborsError(true);
+            return false;
+        }
+        setNeighborsError(false);
+        return true;
+    }
+
     async function handleManualSubmit() {
+        if (!validSubmit()) return;
+
         let list_coordinates = [];
+
         points.forEach((value) => {
             const temp = [];
             temp.push(Number(value.lat));
@@ -200,19 +225,24 @@ export default function RoutePoints() {
         setPoints([{ lat: "", lng: "", timegap: "" }]);
     }
 
-    async function handleAutoTrackToggle() {
+    async function handleAutoTrackToggle(name) {
+        if (!validSubmit()) return;
+
         if (autoTracking) {
             setAutoTracking(false);
             return;
         }
         setAutoTracking(true);
-        const list = await getAutoTrackData();
+        const temp = await getAutoTrackData(name);
+        const list = await getData(temp);
         if (list) {
-            setAutoPreview(list);
+            // setAutoPreview(list);
             await applyResult(list);
         }
         setAutoTracking(false);
     }
+
+
 
     return (
         <div
@@ -289,15 +319,20 @@ export default function RoutePoints() {
                                 </select>
                             </div>
 
-                            {/* Neighbors */}
                             <div className="flex flex-col gap-1.5 flex-1">
                                 <label className="text-[10.5px] font-medium tracking-widest text-white/40 uppercase">Neighbors</label>
                                 <input
                                     type="number"
-                                    onChange={(e) => setNeighbors(Number(e.target.value))}
+                                    onChange={(e) => updateNeighbors(e)}
                                     value={neighbors}
-                                    className="w-full bg-white/[0.04] text-white/85 text-[13px] px-3 py-2 border border-white/[0.09] rounded-md focus:outline-none focus:border-white/25"
+                                    className={`w-full bg-white/[0.04] text-white/85 text-[13px] px-3 py-2 border rounded-md focus:outline-none ${neighborsError
+                                        ? "border-red-500/60 focus:border-red-500"
+                                        : "border-white/[0.09] focus:border-white/25"
+                                        }`}
                                 />
+                                {neighborsError && (
+                                    <span className="text-[11px] text-red-400">Invalid input</span>
+                                )}
                             </div>
                         </div>
 
@@ -357,7 +392,29 @@ export default function RoutePoints() {
                         ) : (
                             <>
                                 <div className="px-5 py-4 flex flex-col gap-4">
-                                    <div className="flex flex-col items-center gap-3 rounded-lg border border-white/[0.09] bg-white/[0.03] px-4 py-6">
+
+                                    <div className="flex flex-col gap-2">
+                                        <span className="text-[10.5px] font-medium tracking-widest text-white/40 uppercase">
+                                            Available Typhoons
+                                        </span>
+
+                                        <div className="flex flex-col gap-1.5 max-h-[240px] overflow-y-auto pr-0.5">
+                                            {get_live_typhoons_names.map((storm, idx) => (
+                                                <button
+                                                    key={idx}
+                                                    onClick={() => handleAutoTrackToggle(storm)}
+                                                    className="flex items-center justify-between rounded-md border border-white/[0.07] bg-white/[0.02] px-3 py-2 hover:bg-white/[0.05] transition-colors"
+                                                >
+                                                    <span className="text-[13px] text-white/80">
+                                                        {storm}
+                                                    </span>
+
+                                                    <Radar size={14} className="text-emerald-400/70" />
+                                                </button>
+                                            ))}
+                                        </div>
+                                    </div>
+                                    {/* <div className="flex flex-col items-center gap-3 rounded-lg border border-white/[0.09] bg-white/[0.03] px-4 py-6">
                                         <div className="relative flex h-12 w-12 items-center justify-center">
                                             {autoTracking && (
                                                 <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-400/20" />
@@ -393,7 +450,7 @@ export default function RoutePoints() {
                                         >
                                             {autoTracking ? "Tracking…" : "Start auto-track"}
                                         </button>
-                                    </div>
+                                    </div> */}
 
                                     {autoPreview.length > 0 && !autoTracking && (
                                         <div className="flex flex-col gap-2">

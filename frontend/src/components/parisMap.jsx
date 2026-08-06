@@ -2,12 +2,12 @@ import React, { useContext } from 'react'
 import { Map, MapControls, MapMarker, MarkerContent, MarkerTooltip, MarkerPopup } from './ui/map'
 import { Card } from './ui/card'
 import { TyphoonDataContext } from '../App';
-import { Source, Layer } from 'react-map-gl/maplibre';
 
 
 
 const DEFAULT_COORDINATES = [128.6, 8.1]
 const DEFAULT_ZOOM = 4
+
 
 export default function ParisMap() {
 
@@ -19,13 +19,13 @@ export default function ParisMap() {
       <Map typhoonCoordinates={typhoonLocations} center={DEFAULT_COORDINATES} zoom={DEFAULT_ZOOM}>
         <MapControls recenterTarget={{ center: DEFAULT_COORDINATES, zoom: DEFAULT_ZOOM }}></MapControls>
         {
-          typhoonLocations.map((location) => (
+          typhoonLocations.map((location, idx) => (
             <MapMarker
               key={location.id}
               longitude={location.lng}
               latitude={location.lat}
             >
-              <MarkerContent>
+              <MarkerContent pulsating={typhoonLocations.length == idx + 1 ? true : false}>
                 <div className="size-4 rounded-full bg-primary border-2 border-white shadow-lg" />
               </MarkerContent>
               <MarkerTooltip>{`${(location.lat).toFixed(2)}, ${(location.lng).toFixed(2)}`}</MarkerTooltip>

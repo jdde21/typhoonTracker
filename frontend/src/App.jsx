@@ -61,6 +61,14 @@ export function App() {
     }
   });
 
+  const { data: get_live_typhoons_names } = useQuery({
+    queryKey: ["live_typhoons_names"],
+    queryFn: async () => {
+      const res = await fetch("http://127.0.0.1:8000/get_live_typhoons_names");
+      return res.json();
+    }
+  });
+
 
   return (
 
@@ -70,7 +78,8 @@ export function App() {
         setNeighboringTyphoons, neighborTyphoonsLocations, setNeighborTyphoonsLocations, neighborTyphoonsSID,
         setNeighborTyphoonsSID, showNeighbor, setShowNeighbor, neighboringTyphoonsNames, setNeighboringTyphoonsNames,
         setNeighboringTyphoonsAdditionalProperties, database, setDatabase, setSideDrawerDatabase, sideDrawerDatabase, 
-        all_typhoons, year_range, TYPHOON_AGENCIES, itemsRef, sideDrawerLoading, setFetching, showTyphoon, setShowTyphoon
+        all_typhoons, year_range, TYPHOON_AGENCIES, itemsRef, sideDrawerLoading, setFetching, showTyphoon, setShowTyphoon,
+        get_live_typhoons_names
       }}>
 
         <NeighboringTyphoonsDrawer></NeighboringTyphoonsDrawer>

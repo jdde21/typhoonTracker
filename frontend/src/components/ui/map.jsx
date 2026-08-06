@@ -235,37 +235,19 @@ const Map = forwardRef(function Map(
   useEffect(() => {
     if (!mapInstance || !isLoaded) return;
 
-    let coordinates;
-    Object.keys(neighboringTyphoons).forEach((sid) => {
-      const tracks = neighboringTyphoons[sid];
-      if (sid === showNeighbor) {
-        coordinates = (tracks.map((values, index) => {
-          const longitude = values[1];
-          const latitude = values[0];
-          return [longitude, latitude]
-        }));
-      }
-    });
+    const coordinates = typhoonLocations.map((track) => [track.lng, track.lat]);
 
-
-
-
-    const source = mapInstance.getSource('neighbor-route');
-    if (source && !coordinates) {
-      source.setData({
-        type: 'Feature',
-        properties: {},
-        geometry: { type: 'LineString', coordinates: [] }
-      });
-    } else if (source) {
+    const source = mapInstance.getSource('route');
+    if (source) {
       source.setData({
         type: 'Feature',
         properties: {},
         geometry: { type: 'LineString', coordinates }
       });
     } else {
-      mapInstance.addSource('neighbor-route', {
+      mapInstance.addSource('route', {
         type: 'geojson',
+        lineMetrics: true, // required for line-gradient to work
         data: {
           type: 'Feature',
           properties: {},
@@ -274,15 +256,21 @@ const Map = forwardRef(function Map(
       });
 
       mapInstance.addLayer({
-        id: 'neighbor-route',
+        id: 'route',
         type: 'line',
-        source: 'neighbor-route',
+        source: 'route',
         layout: { 'line-join': 'round', 'line-cap': 'round' },
-        paint: { 'line-color': '#888', 'line-width': 8 }
+        paint: {
+          'line-width': 5,
+          'line-gradient': [
+            'interpolate', ['linear'], ['line-progress'],
+            0, '#6b7280',   // gray-500 at the oldest point
+            1, '#10b981'    // emerald-500 near the live position
+          ]
+        }
       });
     }
-
-  }, [mapInstance, isLoaded, neighboringTyphoons, showNeighbor]);
+  }, [mapInstance, isLoaded, typhoonLocations]);
 
   // draws the line for the incoming typhoon
   useEffect(() => {
@@ -515,19 +503,50 @@ function MapMarker({
 
 function MarkerContent({
   children,
-  className
+  className,
+  pulsating = false,
+  pulseColor = "#10b981",
+  size = 14,
 }) {
   const { marker } = useMarkerContext();
 
-  return createPortal(<div className={cn("relative cursor-pointer", className)}>
-    {children || <DefaultMarkerIcon />}
-  </div>, marker.getElement());
+  return createPortal(
+    <div className={cn("relative cursor-pointer", className)}>
+      {pulsating ? (
+        <div
+          className="relative flex items-center justify-center"
+          style={{ width: size * 2.5, height: size * 2.5 }}
+        >
+          <span
+            className="absolute inline-flex h-full w-full rounded-full opacity-60 animate-ping"
+            style={{ backgroundColor: pulseColor }}
+          />
+          <span
+            className="relative inline-flex rounded-full border-2 border-white/80 shadow-md"
+            style={{ backgroundColor: pulseColor, width: size, height: size }}
+          />
+        </div>
+      ) : (
+        <DefaultMarkerIcon />
+      )}
+    </div>,
+    marker.getElement()
+  );
 }
 
-function DefaultMarkerIcon() {
+function DefaultMarkerIcon({ size = 14 }) {
   return (
     <div
-      className="relative h-4 w-4 rounded-full border-2 border-white bg-blue-500 shadow-lg" />
+      className="relative flex items-center justify-center transition-transform hover:scale-110"
+      style={{ width: size * 1.8, height: size * 1.8 }}
+    >
+
+      {/* solid dot */}
+      <div
+        className="relative rounded-full bg-white border-2 border-[#1a1e26] shadow-[0_2px_5px_rgba(0,0,0,0.5)]"
+        style={{ width: size, height: size }}
+      />
+    </div>
   );
 }
 
@@ -733,7 +752,7 @@ function MapControls({
   showLocate = false,
   showFullscreen = false,
   showRecenter = true,
-  recenterTarget, 
+  recenterTarget,
   className,
   onLocate,
 }) {
