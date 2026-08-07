@@ -111,7 +111,7 @@ def get_live_typhoons(name: str):
     return coordinates
 
 @app.get("/get_live_typhoons_names")
-def get_live_typhoons():
+def get_live_typhoons_names():
     live_typhoon_list = WEATHER_DISTURBANCES_COLLECTION.find_one()["names"]
     return live_typhoon_list
 

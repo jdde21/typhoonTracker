@@ -3,6 +3,7 @@ import { Trash2, ChevronDown, ChevronUp, Plus, Radar, MapPin, Clock, Loader2 } f
 import { TyphoonDataContext } from '../App';
 import { useQuery } from "@tanstack/react-query";
 import PriceRangeSlider from "./PriceRangeSlider";
+import "./scrollbars.css";
 
 
 const TYPHOON_AGENCIES = ["Default", "JTWC", "JMA", "CMA", "HKO", "IMD", "KMA"];
@@ -398,19 +399,20 @@ export default function RoutePoints() {
                                             Available Typhoons
                                         </span>
 
-                                        <div className="flex flex-col gap-1.5 max-h-[240px] overflow-y-auto pr-0.5">
+                                        <div className="typhoon-outer-scroll flex flex-col gap-1.5 max-h-60 overflow-y-scroll pr-0.5">
                                             {get_live_typhoons_names.map((storm, idx) => (
-                                                <button
-                                                    key={idx}
-                                                    onClick={() => handleAutoTrackToggle(storm)}
-                                                    className="flex items-center justify-between rounded-md border border-white/[0.07] bg-white/[0.02] px-3 py-2 hover:bg-white/[0.05] transition-colors"
-                                                >
-                                                    <span className="text-[13px] text-white/80">
-                                                        {storm}
-                                                    </span>
+                                                <TyphoonListItem storm={storm} onClick={() => handleAutoTrackToggle(storm)}></TyphoonListItem>
+                                                // <button
+                                                //     key={idx}
+                                                //     onClick={() => handleAutoTrackToggle(storm)}
+                                                //     className="flex items-center justify-between rounded-md border border-white/[0.07] bg-white/[0.02] px-3 py-2 hover:bg-white/[0.05] transition-colors"
+                                                // >
+                                                //     <span className="text-[13px] text-white/80">
+                                                //         {storm}
+                                                //     </span>
 
-                                                    <Radar size={14} className="text-emerald-400/70" />
-                                                </button>
+                                                //     <Radar size={14} className="text-emerald-400/70" />
+                                                // </button>
                                             ))}
                                         </div>
                                     </div>
@@ -484,3 +486,77 @@ export default function RoutePoints() {
         </div>
     );
 }
+
+function TyphoonListItem({ storm, onClick }) {
+    const [isOpen, setIsOpen] = useState(false);
+    const [typhoonCoordinates, setTyphoonCoordinates] = useState([]);
+  
+    // hardcoded for now — swap for storm.track once live data is wired up
+    const coordinates = [
+      { lat: 13.412, lng: 123.877 },
+      { lat: 13.998, lng: 122.541 },
+      { lat: 14.653, lng: 121.309 },
+      { lat: 15.204, lng: 120.187 },
+      { lat: 15.881, lng: 118.932 },
+      { lat: 16.442, lng: 117.803 },
+      { lat: 17.015, lng: 116.998 },
+    ];
+
+    async function getAutoTrackData(name) {
+        const url = `http://127.0.0.1:8000/get_live_typhoons?name=${name}`
+        try {
+            const response = await fetch(url, {
+                method: 'GET',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+            });
+            if (!response.ok) {
+                throw new Error(`Response status: ${response.status}`);
+            }
+
+            const result = await response.json();
+            return result;
+        } catch (error) {
+            console.error(error.message);
+        }
+    }
+
+    async function clicked(storm) {
+        setTyphoonCoordinates(await getAutoTrackData(storm));
+        setIsOpen((prev) => !prev)
+    }
+  
+    return (
+      <div className="flex flex-col gap-1.5">
+  
+        <button
+          onClick={() => clicked(storm)}
+          className="w-full flex items-center justify-between rounded-md border border-white/[0.09] bg-white/[0.04] px-3 py-2 hover:bg-white/[0.06] transition-colors"
+        >
+          <span className="text-[13px] text-white/85">{storm}</span>
+          <Radar size={14} className="text-emerald-400/70" />
+        </button>
+  
+        <div
+          className={`grid transition-[grid-template-rows] duration-300 ease-out ${
+            isOpen ? "grid-rows-[1fr]" : "grid-rows-[0fr]"
+          }`}
+        >
+          <div className="overflow-hidden">
+            <div className="coord-scroll flex flex-col gap-1 rounded-md border border-white/[0.09] bg-white/[0.04] px-3 py-2 max-h-[120px] overflow-y-auto">
+              {typhoonCoordinates.map((coord, i) => (
+                <div
+                  key={i}
+                  className="flex items-center justify-between text-[12px] text-white/60 py-0.5 shrink-0"
+                >
+                  <span className="text-white/35">{i + 1}</span>
+                  <span>{coord[0]}, {coord[1]}</span>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
