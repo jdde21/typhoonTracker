@@ -516,6 +516,7 @@ function TyphoonListItem({ storm, onClick }) {
             }
 
             const result = await response.json();
+            console.log("clicked")
             return result;
         } catch (error) {
             console.error(error.message);
@@ -523,7 +524,7 @@ function TyphoonListItem({ storm, onClick }) {
     }
 
     async function clicked(storm) {
-        setTyphoonCoordinates(await getAutoTrackData(storm));
+        if (!isOpen) setTyphoonCoordinates(await getAutoTrackData(storm));
         setIsOpen((prev) => !prev)
     }
   
