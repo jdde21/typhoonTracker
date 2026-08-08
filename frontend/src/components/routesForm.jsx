@@ -1,8 +1,8 @@
+import { getAutoTrackData, getNeighbors, getNames, getNeighborsWindSpeedAndPressure, getData } from "../api/typhoons.js";
+import { Trash2, ChevronDown, ChevronUp, Plus, Radar, MapPin, Clock } from "lucide-react";
 import { useState, useRef, useContext, useEffect } from "react";
-import { Trash2, ChevronDown, ChevronUp, Plus, Radar, MapPin, Clock, Loader2 } from "lucide-react";
-import { TyphoonDataContext } from '../App';
-import { useQuery } from "@tanstack/react-query";
 import PriceRangeSlider from "./PriceRangeSlider";
+import { TyphoonDataContext } from '../App';
 import "./scrollbars.css";
 
 
@@ -17,105 +17,6 @@ export default function RoutePoints() {
     const { setFetching, setTyphoonLocations, setNeighboringTyphoons,
         setNeighboringTyphoonsNames, setNeighboringTyphoonsAdditionalProperties,
         database, setDatabase, year_range, get_live_typhoons_names } = useContext(TyphoonDataContext);
-    const typhoon_locations = []
-
-
-    async function getData(list_coordinates) {
-        const url = "http://127.0.0.1:8000/input"
-        try {
-            setFetching(prev => !prev);
-            const response = await fetch(url, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({ coordinates: list_coordinates, database, range, neighbors })
-            });
-            if (!response.ok) {
-                throw new Error(`Response status: ${response.status}`);
-            }
-
-            const result = await response.json();
-            setFetching(prev => !prev);
-            return result
-        } catch (error) {
-            console.error(error.message);
-        }
-    }
-
-    async function getAutoTrackData(name) {
-        const url = `http://127.0.0.1:8000/get_live_typhoons?name=${name}`
-        try {
-            setFetching(prev => !prev);
-            const response = await fetch(url, {
-                method: 'GET',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-            });
-            if (!response.ok) {
-                throw new Error(`Response status: ${response.status}`);
-            }
-
-            const result = await response.json();
-            setFetching(prev => !prev);
-            return result;
-        } catch (error) {
-            console.error(error.message);
-            setFetching(prev => !prev);
-        }
-    }
-
-    async function getNeighbors() {
-        const url = "http://127.0.0.1:8000/neighbors"
-        try {
-            const response = await fetch(url, {
-                method: 'GET',
-            });
-            if (!response.ok) {
-                throw new Error(`Response status: ${response.status}`);
-            }
-
-            const result = await response.json();
-            return result;
-        } catch (error) {
-            console.error(error.message);
-        }
-    }
-
-    async function getNames() {
-        const url = "http://127.0.0.1:8000/neighbors_names"
-        try {
-            const response = await fetch(url, {
-                method: 'GET',
-            });
-            if (!response.ok) {
-                throw new Error(`Response status: ${response.status}`);
-            }
-
-            const result = await response.json();
-            return result;
-        } catch (error) {
-            console.error(error.message);
-        }
-    }
-
-    async function getNeighborsWindSpeedAndPressure() {
-        const url = `http://127.0.0.1:8000/neighbors_wind_speed_and_pressure/${database}`
-        try {
-            const response = await fetch(url, {
-                method: 'GET',
-            });
-            if (!response.ok) {
-                throw new Error(`Response status: ${response.status}`);
-            }
-
-            const result = await response.json();
-            return result;
-        } catch (error) {
-            console.error(error.message);
-        }
-    }
 
     const [mode, setMode] = useState("manual");
     const [neighbors, setNeighbors] = useState(0);
@@ -192,7 +93,7 @@ export default function RoutePoints() {
 
         const neighboringTyphoons = await getNeighbors();
         const neighboringTyphoonsNames = await getNames();
-        const additionalProperties = await getNeighborsWindSpeedAndPressure();
+        const additionalProperties = await getNeighborsWindSpeedAndPressure(database);
 
         setTyphoonLocations(locations);
         setNeighboringTyphoons(neighboringTyphoons);
@@ -221,7 +122,7 @@ export default function RoutePoints() {
             temp.push(Number(value.timegap));
             list_coordinates.push(temp);
         })
-        const list = await getData(list_coordinates);
+        const list = await getData(list_coordinates, database, range, neighbors);
         await applyResult(list);
         setPoints([{ lat: "", lng: "", timegap: "" }]);
     }
@@ -234,10 +135,11 @@ export default function RoutePoints() {
             return;
         }
         setAutoTracking(true);
+        setFetching(prev => !prev);
         const temp = await getAutoTrackData(name);
-        const list = await getData(temp);
-        if (list) {
-            // setAutoPreview(list);
+        const list = await getData(temp, database, range, neighbors);
+        setFetching(prev => !prev);
+        if (list) { 
             await applyResult(list);
         }
         setAutoTracking(false);
@@ -490,74 +392,55 @@ export default function RoutePoints() {
 function TyphoonListItem({ storm, onClick }) {
     const [isOpen, setIsOpen] = useState(false);
     const [typhoonCoordinates, setTyphoonCoordinates] = useState([]);
-  
-    // hardcoded for now — swap for storm.track once live data is wired up
-    const coordinates = [
-      { lat: 13.412, lng: 123.877 },
-      { lat: 13.998, lng: 122.541 },
-      { lat: 14.653, lng: 121.309 },
-      { lat: 15.204, lng: 120.187 },
-      { lat: 15.881, lng: 118.932 },
-      { lat: 16.442, lng: 117.803 },
-      { lat: 17.015, lng: 116.998 },
-    ];
-
-    async function getAutoTrackData(name) {
-        const url = `http://127.0.0.1:8000/get_live_typhoons?name=${name}`
-        try {
-            const response = await fetch(url, {
-                method: 'GET',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-            });
-            if (!response.ok) {
-                throw new Error(`Response status: ${response.status}`);
-            }
-
-            const result = await response.json();
-            console.log("clicked")
-            return result;
-        } catch (error) {
-            console.error(error.message);
-        }
-    }
+    const shownTyphoonCoords = useRef([]);
 
     async function clicked(storm) {
         if (!isOpen) setTyphoonCoordinates(await getAutoTrackData(storm));
+        else shownTyphoonCoords.current = [];
+
         setIsOpen((prev) => !prev)
     }
-  
+
+    function checkboxChecked(i, coord) {
+        const temp = {};
+        temp.id = i; temp.lat = coord[0]; temp.lng = coord[1];
+        shownTyphoonCoords.current.push(temp);
+    }
+
     return (
-      <div className="flex flex-col gap-1.5">
-  
-        <button
-          onClick={() => clicked(storm)}
-          className="w-full flex items-center justify-between rounded-md border border-white/[0.09] bg-white/[0.04] px-3 py-2 hover:bg-white/[0.06] transition-colors"
-        >
-          <span className="text-[13px] text-white/85">{storm}</span>
-          <Radar size={14} className="text-emerald-400/70" />
-        </button>
-  
-        <div
-          className={`grid transition-[grid-template-rows] duration-300 ease-out ${
-            isOpen ? "grid-rows-[1fr]" : "grid-rows-[0fr]"
-          }`}
-        >
-          <div className="overflow-hidden">
-            <div className="coord-scroll flex flex-col gap-1 rounded-md border border-white/[0.09] bg-white/[0.04] px-3 py-2 max-h-[120px] overflow-y-auto">
-              {typhoonCoordinates.map((coord, i) => (
-                <div
-                  key={i}
-                  className="flex items-center justify-between text-[12px] text-white/60 py-0.5 shrink-0"
-                >
-                  <span className="text-white/35">{i + 1}</span>
-                  <span>{coord[0]}, {coord[1]}</span>
+        <div className="flex flex-col gap-1.5">
+
+            <button
+                onClick={() => clicked(storm)}
+                className="w-full flex items-center justify-between rounded-md border border-white/[0.09] bg-white/[0.04] px-3 py-2 hover:bg-white/[0.06] transition-colors"
+            >
+                <span className="text-[13px] text-white/85">{storm}</span>
+                <Radar size={14} className="text-emerald-400/70" />
+            </button>
+
+            <div
+                className={`grid transition-[grid-template-rows] duration-300 ease-out ${isOpen ? "grid-rows-[1fr]" : "grid-rows-[0fr]"
+                    }`}
+            >
+                <div className="overflow-hidden">
+                    <div className="coord-scroll flex flex-col gap-1 rounded-md border border-white/[0.09] bg-white/[0.04] px-3 py-2 max-h-[120px] overflow-y-auto">
+                        {typhoonCoordinates.map((coord, i) => (
+                            <div
+                                key={i}
+                                className="flex items-center gap-2 text-[12px] text-white/60 py-0.5 shrink-0"
+                            >
+                                <input
+                                    type="checkbox"
+                                    onChange={() => checkboxChecked(i, coord)}
+                                    className="appearance-none w-3 h-3 rounded-sm border border-white/[0.15] bg-white/[0.04] checked:bg-emerald-400/80 checked:border-emerald-400/80 cursor-pointer transition-colors"
+                                />
+                                <span className="text-white/35">{i + 1}</span>
+                                <span className="ml-auto">{coord[0]}, {coord[1]}</span>
+                            </div>
+                        ))}
+                    </div>
                 </div>
-              ))}
             </div>
-          </div>
         </div>
-      </div>
     );
-  }
+}

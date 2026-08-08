@@ -1,5 +1,5 @@
 import { useState, useContext } from "react";
-import { ChevronLeft, Wind, Gauge, CircleDot } from "lucide-react";
+import { ChevronLeft, Wind, Gauge } from "lucide-react";
 import { WiHurricane } from "react-icons/wi";
 import { TyphoonDataContext } from '../App';
 import { useQueryClient } from '@tanstack/react-query';

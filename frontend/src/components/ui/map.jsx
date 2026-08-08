@@ -540,10 +540,9 @@ function DefaultMarkerIcon({ size = 14 }) {
       className="relative flex items-center justify-center transition-transform hover:scale-110"
       style={{ width: size * 1.8, height: size * 1.8 }}
     >
-
       {/* solid dot */}
       <div
-        className="relative rounded-full bg-white border-2 border-[#1a1e26] shadow-[0_2px_5px_rgba(0,0,0,0.5)]"
+        className="relative rounded-full bg-emerald-400 border-2 border-[#ffffff] shadow-[0_2px_5px_rgba(0,0,0,0.5)]"
         style={{ width: size, height: size }}
       />
     </div>
