@@ -13,6 +13,7 @@ export default function ParisMap() {
 
   const { typhoonLocations, all_typhoons, showNeighbor, showTyphoon, neighboringTyphoons } = useContext(TyphoonDataContext);
 
+  console.log(typhoonLocations)
   return (
     <Card className="flex h-full w-full p-0 overflow-hidden">
       <Map typhoonCoordinates={typhoonLocations} center={DEFAULT_COORDINATES} zoom={DEFAULT_ZOOM}>

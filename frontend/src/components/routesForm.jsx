@@ -391,24 +391,43 @@ export default function RoutePoints() {
 
 function TyphoonListItem({ storm, onClick }) {
     const { setTyphoonLocations, typhoonLocations } = useContext(TyphoonDataContext);
-
-    const [isOpen, setIsOpen] = useState(false);
     const [typhoonCoordinates, setTyphoonCoordinates] = useState([]);
+    const [typhoonIncluded, setTyphoonIncluded] = useState([]);
+    const [isOpen, setIsOpen] = useState(false);
     const coordinatesIncluded = useRef([]);
 
-    async function clicked(storm) {
-        if (!isOpen) setTyphoonCoordinates(await getAutoTrackData(storm));
-        else setTyphoonLocations([]);
+    useEffect(() => {
+        const temp = [...Array(typhoonCoordinates.length).keys()];
+        setTyphoonIncluded(temp);
+    }, [typhoonCoordinates])
 
-        setIsOpen((prev) => !prev)
+    async function clicked(storm) {
+        if (!isOpen) {
+            const list = await getAutoTrackData(storm); 
+            setTyphoonCoordinates(list); 
+            applyResult(list);
+        } 
+        else setTyphoonLocations([]);
+        setIsOpen((prev) => !prev);
+    }
+
+    async function applyResult(list) {
+        const locations = [];
+        list.forEach((value, index) => {
+            let location = { id: index + 1, lat: value[0], lng: value[1], name: "foo" };
+            locations.push(location);
+        })
+        setTyphoonLocations(locations);
     }
 
     function checkboxChecked(i, coord) {
         const previousLocations = typhoonLocations;
-        if (coordinatesIncluded.current.includes(i)) {
+        if (typhoonIncluded.includes(i)) {
+            const temp = typhoonIncluded.slice(0, i);
             const index = previousLocations.findIndex((item) => item.id === i);
             previousLocations.splice(index, 1);
             setTyphoonLocations([...previousLocations]);
+            setTyphoonIncluded(temp);
         } else {
             coordinatesIncluded.current.push(i);
             const temp = {};
@@ -441,6 +460,7 @@ function TyphoonListItem({ storm, onClick }) {
                             >
                                 <input
                                     type="checkbox"
+                                    checked={typhoonIncluded.includes(i)}
                                     onChange={() => checkboxChecked(i, coord)}
                                     className="appearance-none w-3 h-3 rounded-sm border border-white/[0.15] bg-white/[0.04] checked:bg-emerald-400/80 checked:border-emerald-400/80 cursor-pointer transition-colors"
                                 />
@@ -448,6 +468,12 @@ function TyphoonListItem({ storm, onClick }) {
                                 <span className="ml-auto">{coord[0]}, {coord[1]}</span>
                             </div>
                         ))}
+                        <button
+                            onClick={() => submitRoute(storm)}
+                            className="w-full text-[12.5px] font-medium rounded-md py-2 transition-colors bg-emerald-400/90 hover:bg-emerald-400 text-[#12151b]"
+                        >
+                            Submit route
+                        </button>
                     </div>
                 </div>
             </div>
