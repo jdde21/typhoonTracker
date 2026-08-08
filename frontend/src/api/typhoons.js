@@ -14,7 +14,6 @@ async function getAutoTrackData(name) {
         }
 
         const result = await response.json();
-        console.log("clicked")
         return result;
     } catch (error) {
         console.error(error.message);

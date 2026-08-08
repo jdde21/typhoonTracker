@@ -13,7 +13,6 @@ export default function ParisMap() {
 
   const { typhoonLocations, all_typhoons, showNeighbor, showTyphoon, neighboringTyphoons } = useContext(TyphoonDataContext);
 
-  
   return (
     <Card className="flex h-full w-full p-0 overflow-hidden">
       <Map typhoonCoordinates={typhoonLocations} center={DEFAULT_COORDINATES} zoom={DEFAULT_ZOOM}>
@@ -21,11 +20,11 @@ export default function ParisMap() {
         {
           typhoonLocations.map((location, idx) => (
             <MapMarker
-              key={location.id}
+              key={idx}
               longitude={location.lng}
               latitude={location.lat}
             >
-              <MarkerContent pulsating={typhoonLocations.length == idx + 1 ? true : false}>
+              <MarkerContent pulsating={typhoonLocations.length == idx + 1 ? true : false} total={typhoonLocations.length} index={idx}>
                 <div className="size-4 rounded-full bg-primary border-2 border-white shadow-lg" />
               </MarkerContent>
               <MarkerTooltip>{`${(location.lat).toFixed(2)}, ${(location.lng).toFixed(2)}`}</MarkerTooltip>

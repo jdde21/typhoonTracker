@@ -139,7 +139,7 @@ export default function RoutePoints() {
         const temp = await getAutoTrackData(name);
         const list = await getData(temp, database, range, neighbors);
         setFetching(prev => !prev);
-        if (list) { 
+        if (list) {
             await applyResult(list);
         }
         setAutoTracking(false);
@@ -303,7 +303,7 @@ export default function RoutePoints() {
 
                                         <div className="typhoon-outer-scroll flex flex-col gap-1.5 max-h-60 overflow-y-scroll pr-0.5">
                                             {get_live_typhoons_names.map((storm, idx) => (
-                                                <TyphoonListItem storm={storm} onClick={() => handleAutoTrackToggle(storm)}></TyphoonListItem>
+                                                <TyphoonListItem key={idx} storm={storm} onClick={() => handleAutoTrackToggle(storm)}></TyphoonListItem>
                                                 // <button
                                                 //     key={idx}
                                                 //     onClick={() => handleAutoTrackToggle(storm)}
@@ -390,21 +390,31 @@ export default function RoutePoints() {
 }
 
 function TyphoonListItem({ storm, onClick }) {
+    const { setTyphoonLocations, typhoonLocations } = useContext(TyphoonDataContext);
+
     const [isOpen, setIsOpen] = useState(false);
     const [typhoonCoordinates, setTyphoonCoordinates] = useState([]);
-    const shownTyphoonCoords = useRef([]);
+    const coordinatesIncluded = useRef([]);
 
     async function clicked(storm) {
         if (!isOpen) setTyphoonCoordinates(await getAutoTrackData(storm));
-        else shownTyphoonCoords.current = [];
+        else setTyphoonLocations([]);
 
         setIsOpen((prev) => !prev)
     }
 
     function checkboxChecked(i, coord) {
-        const temp = {};
-        temp.id = i; temp.lat = coord[0]; temp.lng = coord[1];
-        shownTyphoonCoords.current.push(temp);
+        const previousLocations = typhoonLocations;
+        if (coordinatesIncluded.current.includes(i)) {
+            const index = previousLocations.findIndex((item) => item.id === i);
+            previousLocations.splice(index, 1);
+            setTyphoonLocations([...previousLocations]);
+        } else {
+            coordinatesIncluded.current.push(i);
+            const temp = {};
+            temp.id = i; temp.lat = coord[0]; temp.lng = coord[1]; temp.name = "foo";
+            setTyphoonLocations([...previousLocations, temp]);
+        }
     }
 
     return (

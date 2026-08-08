@@ -503,6 +503,8 @@ function MapMarker({
 
 function MarkerContent({
   children,
+  index,
+  total,
   className,
   pulsating = false,
   pulseColor = "#10b981",
@@ -527,14 +529,27 @@ function MarkerContent({
           />
         </div>
       ) : (
-        <DefaultMarkerIcon />
+        <DefaultMarkerIcon index={index} total={total}/>
       )}
     </div>,
     marker.getElement()
   );
 }
 
-function DefaultMarkerIcon({ size = 14 }) {
+function DefaultMarkerIcon({ size = 14, index = 0, total = 1 }) {
+  // progress: 0 at start of list, 1 at the end
+  const progress = total > 1 ? index / (total - 1) : 1;
+
+  // interpolate from a dim gray-green toward full emerald as progress increases
+  const startColor = [107, 114, 128]; // gray-500
+  const endColor = [16, 185, 129];    // emerald-500
+
+  const r = Math.round(startColor[0] + (endColor[0] - startColor[0]) * progress);
+  const g = Math.round(startColor[1] + (endColor[1] - startColor[1]) * progress);
+  const b = Math.round(startColor[2] + (endColor[2] - startColor[2]) * progress);
+
+  const color = `rgb(${r}, ${g}, ${b})`;
+
   return (
     <div
       className="relative flex items-center justify-center transition-transform hover:scale-110"
@@ -542,8 +557,8 @@ function DefaultMarkerIcon({ size = 14 }) {
     >
       {/* solid dot */}
       <div
-        className="relative rounded-full bg-emerald-400 border-2 border-[#ffffff] shadow-[0_2px_5px_rgba(0,0,0,0.5)]"
-        style={{ width: size, height: size }}
+        className="relative rounded-full border-2 border-white shadow-[0_2px_5px_rgba(0,0,0,0.5)]"
+        style={{ width: size, height: size, backgroundColor: color }}
       />
     </div>
   );
