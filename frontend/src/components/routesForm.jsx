@@ -403,10 +403,10 @@ function TyphoonListItem({ storm, onClick }) {
 
     async function clicked(storm) {
         if (!isOpen) {
-            const list = await getAutoTrackData(storm); 
-            setTyphoonCoordinates(list); 
+            const list = await getAutoTrackData(storm);
+            setTyphoonCoordinates(list);
             applyResult(list);
-        } 
+        }
         else setTyphoonLocations([]);
         setIsOpen((prev) => !prev);
     }
@@ -417,6 +417,7 @@ function TyphoonListItem({ storm, onClick }) {
             let location = { id: index + 1, lat: value[0], lng: value[1], name: "foo" };
             locations.push(location);
         })
+        coordinatesIncluded.current = [...locations];
         setTyphoonLocations(locations);
     }
 
@@ -425,14 +426,14 @@ function TyphoonListItem({ storm, onClick }) {
         if (typhoonIncluded.includes(i)) {
             const temp = typhoonIncluded.slice(0, i);
             const index = previousLocations.findIndex((item) => item.id === i);
-            previousLocations.splice(index, 1);
-            setTyphoonLocations([...previousLocations]);
+            previousLocations.splice(index + 1);
             setTyphoonIncluded(temp);
+            setTyphoonLocations([...previousLocations]);
         } else {
-            coordinatesIncluded.current.push(i);
-            const temp = {};
-            temp.id = i; temp.lat = coord[0]; temp.lng = coord[1]; temp.name = "foo";
-            setTyphoonLocations([...previousLocations, temp]);
+            const last = typhoonIncluded.at(-1);
+            const rangeToAdd = Array.from({length: i - last}, (_, idx) => (idx + 1) + last);
+            setTyphoonIncluded([...typhoonIncluded, ...rangeToAdd]);
+            setTyphoonLocations([...previousLocations, ...coordinatesIncluded.current.slice(last + 1, i + 1)]);
         }
     }
 
@@ -447,10 +448,7 @@ function TyphoonListItem({ storm, onClick }) {
                 <Radar size={14} className="text-emerald-400/70" />
             </button>
 
-            <div
-                className={`grid transition-[grid-template-rows] duration-300 ease-out ${isOpen ? "grid-rows-[1fr]" : "grid-rows-[0fr]"
-                    }`}
-            >
+            <div className={`grid transition-[grid-template-rows] duration-300 ease-out ${isOpen ? "grid-rows-[1fr]" : "grid-rows-[0fr]"}`}>
                 <div className="overflow-hidden">
                     <div className="coord-scroll flex flex-col gap-1 rounded-md border border-white/[0.09] bg-white/[0.04] px-3 py-2 max-h-[120px] overflow-y-auto">
                         {typhoonCoordinates.map((coord, i) => (
