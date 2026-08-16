@@ -10,7 +10,7 @@ TRACKS = []
 NEIGHBORING_TYPHOON_NAMES = {}
 NEIGHBORS = 0
 
-def typhoon_tracker(coordinates=None, agency="Default", year_range = [], neighbors=7):
+def typhoon_tracker(coordinates=None, agency="Default", year_range = [], neighbors=7, model="Per-point"):
     
     typhoon_database = get_database_by_agency(agency)
 
@@ -26,7 +26,7 @@ def typhoon_tracker(coordinates=None, agency="Default", year_range = [], neighbo
     # typhoon_scores is a dict containing the euclidean distance as a key and the sid as the value
     # scores is a list containing the euclidean distance of each typhoon 
     # the function coordinates_to_dict() primarily converts the tracks/coordinates in the typhoon_database into clean data and place inside a dict
-    recent_typhoons_dict_closest_to_farthest, typhoon_names, typhoon_scores, scores = coordinates_to_dict(typhoon_database, year_range, unique_sid, inputs)
+    recent_typhoons_dict_closest_to_farthest, typhoon_names, typhoon_scores, scores = coordinates_to_dict(typhoon_database, year_range, unique_sid, inputs, model)
    
     # pag compute ng weights ay 1/(distance + 1e-8). nilagyan ng 1e-8 para if distance is 0, di magka error. the lower the denominator, the higher the weight
     # this gets the minimum amount of records contained dun sa mga tracks ng pinakamalapit na typhoons in terms of coordinates

@@ -71,7 +71,7 @@ async function getNeighborsWindSpeedAndPressure(database) {
     }
 }
 
-async function getData(list_coordinates, database, range, neighbors) {
+async function getData(list_coordinates, database, range, neighbors, model) {
     const url = "http://127.0.0.1:8000/input"
     try {
         const response = await fetch(url, {
@@ -79,7 +79,7 @@ async function getData(list_coordinates, database, range, neighbors) {
             headers: {
                 'Content-Type': 'application/json'
             },
-            body: JSON.stringify({ coordinates: list_coordinates, database, range, neighbors })
+            body: JSON.stringify({ coordinates: list_coordinates, database, range, neighbors, model })
         });
         if (!response.ok) {
             throw new Error(`Response status: ${response.status}`);

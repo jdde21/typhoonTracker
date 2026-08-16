@@ -7,16 +7,12 @@ import "./scrollbars.css";
 
 
 const TYPHOON_AGENCIES = ["Default", "JTWC", "JMA", "CMA", "HKO", "IMD", "KMA"];
-const dummyTyphoons = [
-    { id: 1, name: "Typhoon Co-may" },
-    { id: 2, name: "Typhoon Francisco" },
-    { id: 3, name: "Typhoon Krosa" },
-];
+const MODELS = ["Per-point", "Nearest centroid"];
 
 export default function RoutePoints() {
     const { setFetching, setTyphoonLocations, setNeighboringTyphoons,
         setNeighboringTyphoonsNames, setNeighboringTyphoonsAdditionalProperties,
-        database, setDatabase, year_range, get_live_typhoons_names } = useContext(TyphoonDataContext);
+        database, setDatabase, year_range, get_live_typhoons_names, model, setModel } = useContext(TyphoonDataContext);
 
     const [mode, setMode] = useState("manual");
     const [neighbors, setNeighbors] = useState(0);
@@ -122,7 +118,7 @@ export default function RoutePoints() {
             temp.push(Number(value.timegap));
             list_coordinates.push(temp);
         })
-        const list = await getData(list_coordinates, database, range, neighbors);
+        const list = await getData(list_coordinates, database, range, neighbors, model);
         await applyResult(list);
         setPoints([{ lat: "", lng: "", timegap: "" }]);
     }
@@ -206,36 +202,56 @@ export default function RoutePoints() {
                             </div>
                         </div>
 
-                        <div className="flex flex-row px-5 pt-5 gap-3">
-                            {/* Database */}
-                            <div className="flex flex-col gap-1.5 flex-2">
-                                <label className="text-[10.5px] font-medium tracking-widest text-white/40 uppercase">Database</label>
-                                <select
-                                    defaultValue={database}
-                                    onMouseDown={(e) => e.stopPropagation()}
-                                    onChange={(e) => setDatabase(e.target.value)}
-                                    className="w-full bg-white/[0.04] text-white/85 text-[13px] px-3 py-2 border border-white/[0.09] rounded-md focus:outline-none focus:border-white/25 cursor-pointer appearance-none"
-                                >
-                                    {TYPHOON_AGENCIES.map((agency, i) => (
-                                        <option key={i} value={agency} className="bg-[#1a1e26]">{agency}</option>
-                                    ))}
-                                </select>
+                        <div className="flex flex-col gap-3 px-5 pt-5">
+                            {/* Row 1 */}
+                            <div className="flex flex-row gap-3">
+                                {/* Database */}
+                                <div className="flex flex-col gap-1.5 flex-2">
+                                    <label className="text-[10.5px] font-medium tracking-widest text-white/40 uppercase">Database</label>
+                                    <select
+                                        defaultValue={database}
+                                        onMouseDown={(e) => e.stopPropagation()}
+                                        onChange={(e) => setDatabase(e.target.value)}
+                                        className="w-full bg-white/[0.04] text-white/85 text-[13px] px-3 py-2 border border-white/[0.09] rounded-md focus:outline-none focus:border-white/25 cursor-pointer appearance-none"
+                                    >
+                                        {TYPHOON_AGENCIES.map((agency, i) => (
+                                            <option key={i} value={agency} className="bg-[#1a1e26]">{agency}</option>
+                                        ))}
+                                    </select>
+                                </div>
+                                {/* No. of Neighbors */}
+                                <div className="flex flex-col gap-1.5 flex-1">
+                                    <label className="text-[10.5px] font-medium tracking-widest text-white/40 uppercase">Neighbors</label>
+                                    <input
+                                        type="number"
+                                        onChange={(e) => updateNeighbors(e)}
+                                        value={neighbors}
+                                        className={`w-full bg-white/[0.04] text-white/85 text-[13px] px-3 py-2 border rounded-md focus:outline-none ${neighborsError
+                                            ? "border-red-500/60 focus:border-red-500"
+                                            : "border-white/[0.09] focus:border-white/25"
+                                            }`}
+                                    />
+                                    {neighborsError && (
+                                        <span className="text-[11px] text-red-400">Invalid input</span>
+                                    )}
+                                </div>
                             </div>
 
-                            <div className="flex flex-col gap-1.5 flex-1">
-                                <label className="text-[10.5px] font-medium tracking-widest text-white/40 uppercase">Neighbors</label>
-                                <input
-                                    type="number"
-                                    onChange={(e) => updateNeighbors(e)}
-                                    value={neighbors}
-                                    className={`w-full bg-white/[0.04] text-white/85 text-[13px] px-3 py-2 border rounded-md focus:outline-none ${neighborsError
-                                        ? "border-red-500/60 focus:border-red-500"
-                                        : "border-white/[0.09] focus:border-white/25"
-                                        }`}
-                                />
-                                {neighborsError && (
-                                    <span className="text-[11px] text-red-400">Invalid input</span>
-                                )}
+                            {/* Row 2 */}
+                            <div className="flex flex-row gap-3">
+                                <div className="flex flex-col gap-1.5 flex-1">
+                                    <label className="text-[10.5px] font-medium tracking-widest text-white/40 uppercase">Type of Model</label>
+                                    <select
+                                        defaultValue={model}
+                                        onMouseDown={(e) => e.stopPropagation()}
+                                        onChange={(e) => setModel(e.target.value)}
+                                        className="w-full bg-white/[0.04] text-white/85 text-[13px] px-3 py-2 border border-white/[0.09] rounded-md focus:outline-none focus:border-white/25 cursor-pointer appearance-none"
+                                    >
+                                        {MODELS.map((agency, i) => (
+                                            <option key={i} value={agency} className="bg-[#1a1e26]">{agency}</option>
+                                        ))}
+                                    </select>
+                                </div>
                             </div>
                         </div>
 
@@ -303,58 +319,10 @@ export default function RoutePoints() {
 
                                         <div className="typhoon-outer-scroll flex flex-col gap-1.5 max-h-60 overflow-y-scroll pr-0.5">
                                             {get_live_typhoons_names.map((storm, idx) => (
-                                                <TyphoonListItem key={idx} storm={storm} onClick={() => handleAutoTrackToggle(storm)}></TyphoonListItem>
-                                                // <button
-                                                //     key={idx}
-                                                //     onClick={() => handleAutoTrackToggle(storm)}
-                                                //     className="flex items-center justify-between rounded-md border border-white/[0.07] bg-white/[0.02] px-3 py-2 hover:bg-white/[0.05] transition-colors"
-                                                // >
-                                                //     <span className="text-[13px] text-white/80">
-                                                //         {storm}
-                                                //     </span>
-
-                                                //     <Radar size={14} className="text-emerald-400/70" />
-                                                // </button>
+                                                <TyphoonListItem key={idx} storm={storm} onClick={() => handleAutoTrackToggle(storm)} range={range} neighbors={neighbors}></TyphoonListItem>
                                             ))}
                                         </div>
                                     </div>
-                                    {/* <div className="flex flex-col items-center gap-3 rounded-lg border border-white/[0.09] bg-white/[0.03] px-4 py-6">
-                                        <div className="relative flex h-12 w-12 items-center justify-center">
-                                            {autoTracking && (
-                                                <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-400/20" />
-                                            )}
-                                            <div
-                                                className={`flex h-10 w-10 items-center justify-center rounded-full border ${autoTracking ? "border-emerald-400/40 bg-emerald-400/10" : "border-white/[0.09] bg-white/[0.04]"}`}
-                                            >
-                                                {autoTracking ? (
-                                                    <Loader2 size={18} className="animate-spin text-emerald-400" />
-                                                ) : (
-                                                    <Radar size={18} className="text-white/40" />
-                                                )}
-                                            </div>
-                                        </div>
-
-                                        <div className="text-center">
-                                            <p className="text-[13px] font-medium text-white/85">
-                                                {autoTracking ? "Fetching live track" : autoPreview.length > 0 ? "Track ready" : "Auto-track idle"}
-                                            </p>
-                                            <p className="mt-0.5 text-[11.5px] text-white/40">
-                                                {autoTracking
-                                                    ? "Pulling the latest coordinates for this database"
-                                                    : autoPreview.length > 0
-                                                        ? `${autoPreview.length} points detected`
-                                                        : "Fetch the active typhoon's coordinates automatically"}
-                                            </p>
-                                        </div>
-
-                                        <button
-                                            onClick={handleAutoTrackToggle}
-                                            disabled={autoTracking}
-                                            className="mt-1 w-full rounded-md border border-white/[0.09] bg-white/[0.04] hover:bg-white/[0.07] text-white/85 py-2.5 text-[13px] font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-                                        >
-                                            {autoTracking ? "Tracking…" : "Start auto-track"}
-                                        </button>
-                                    </div> */}
 
                                     {autoPreview.length > 0 && !autoTracking && (
                                         <div className="flex flex-col gap-2">
@@ -389,8 +357,10 @@ export default function RoutePoints() {
     );
 }
 
-function TyphoonListItem({ storm, onClick }) {
-    const { setTyphoonLocations, typhoonLocations } = useContext(TyphoonDataContext);
+function TyphoonListItem({ storm, onClick, range, neighbors }) {
+    const { typhoonLocations, setTyphoonLocations, setNeighboringTyphoons,
+        setNeighboringTyphoonsNames, setNeighboringTyphoonsAdditionalProperties,
+        database, model } = useContext(TyphoonDataContext);
     const [typhoonCoordinates, setTyphoonCoordinates] = useState([]);
     const [typhoonIncluded, setTyphoonIncluded] = useState([]);
     const [isOpen, setIsOpen] = useState(false);
@@ -421,6 +391,29 @@ function TyphoonListItem({ storm, onClick }) {
         setTyphoonLocations(locations);
     }
 
+    async function applyResultFinal(list) {
+        const locations = [];
+        list.forEach((value, index) => {
+            let location = { id: index + 1, lat: value[0], lng: value[1], name: `hours` };
+            locations.push(location);
+        })
+
+        const neighboringTyphoons = await getNeighbors();
+        const neighboringTyphoonsNames = await getNames();
+        const additionalProperties = await getNeighborsWindSpeedAndPressure(database);
+
+        setTyphoonLocations(locations);
+        setNeighboringTyphoons(neighboringTyphoons);
+        setNeighboringTyphoonsNames(neighboringTyphoonsNames);
+        setNeighboringTyphoonsAdditionalProperties(additionalProperties);
+    }
+
+    async function handleAutomaticSubmit(list_coordinates) {
+        const temp_list_coordinates = list_coordinates.slice(0, typhoonIncluded.at(-1) + 1);
+        const list = await getData(temp_list_coordinates, database, range, neighbors, model);
+        await applyResultFinal(list);
+    }
+
     function checkboxChecked(i, coord) {
         const previousLocations = typhoonLocations;
         if (typhoonIncluded.includes(i)) {
@@ -431,7 +424,7 @@ function TyphoonListItem({ storm, onClick }) {
             setTyphoonLocations([...previousLocations]);
         } else {
             const last = typhoonIncluded.at(-1);
-            const rangeToAdd = Array.from({length: i - last}, (_, idx) => (idx + 1) + last);
+            const rangeToAdd = Array.from({ length: i - last }, (_, idx) => (idx + 1) + last);
             setTyphoonIncluded([...typhoonIncluded, ...rangeToAdd]);
             setTyphoonLocations([...previousLocations, ...coordinatesIncluded.current.slice(last + 1, i + 1)]);
         }
@@ -467,7 +460,7 @@ function TyphoonListItem({ storm, onClick }) {
                             </div>
                         ))}
                         <button
-                            onClick={() => submitRoute(storm)}
+                            onClick={() => handleAutomaticSubmit(typhoonCoordinates)}
                             className="w-full text-[12.5px] font-medium rounded-md py-2 transition-colors bg-emerald-400/90 hover:bg-emerald-400 text-[#12151b]"
                         >
                             Submit route

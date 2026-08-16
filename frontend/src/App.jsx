@@ -13,6 +13,7 @@ export const TyphoonDataContext = createContext();
 
 const Slider = SliderPkg.default;
 const TYPHOON_AGENCIES = ["Default", "JTWC", "JMA", "CMA", "HKO", "IMD", "KMA"];
+const MODELS = ["Per-point", "Nearest centroid"];
 
 export function App() {
 
@@ -35,6 +36,7 @@ export function App() {
   const [showNeighbor, setShowNeighbor] = useState([]);
   const [showTyphoon, setShowTyphoon] = useState(null);
   const [database, setDatabase] = useState(TYPHOON_AGENCIES[0]);
+  const [model, setModel] = useState(MODELS[0]);
   const [sideDrawerDatabase, setSideDrawerDatabase] = useState(TYPHOON_AGENCIES[0]);
   const [fetching, setFetching] = useState(false);
   const itemsRef = useRef([0, 0]);
@@ -79,7 +81,7 @@ export function App() {
         setNeighborTyphoonsSID, showNeighbor, setShowNeighbor, neighboringTyphoonsNames, setNeighboringTyphoonsNames,
         setNeighboringTyphoonsAdditionalProperties, database, setDatabase, setSideDrawerDatabase, sideDrawerDatabase, 
         all_typhoons, year_range, TYPHOON_AGENCIES, itemsRef, sideDrawerLoading, setFetching, showTyphoon, setShowTyphoon,
-        get_live_typhoons_names
+        get_live_typhoons_names, model, setModel
       }}>
 
         <NeighboringTyphoonsDrawer></NeighboringTyphoonsDrawer>

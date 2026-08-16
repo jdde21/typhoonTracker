@@ -47,7 +47,7 @@ def coordinates_cleaner(list_of_coordinates):
     list_of_coordinates = list_of_coordinates.replace(']', '')
     return re.findall(r"\(\d+\.\d+, \d+\.\d+, \d\)", list_of_coordinates)
 
-def coordinates_to_dict(typhoon_database, year_range, unique_sid, inputs):
+def coordinates_to_dict(typhoon_database, year_range, unique_sid, inputs, model):
     recent_typhoons_dict = {}
     recent_typhoons_dict_closest_to_farthest = {}
     typhoon_names = {}
@@ -76,7 +76,7 @@ def coordinates_to_dict(typhoon_database, year_range, unique_sid, inputs):
 
 
         # this loop finds the closest point of the typhoon in the database to the first point of the new typhoon
-        for index, coordinate in enumerate(coordinates): # para makuha yung index
+        for index, coordinate in enumerate(coordinates): # gumamit enumerate para makuha yung index
             temp = coordinate
             temp = temp.replace('(', '')
             temp = temp.replace(')', '')
@@ -143,7 +143,16 @@ def coordinates_to_dict(typhoon_database, year_range, unique_sid, inputs):
         
         # print(typhoon_indices)
         try:
-            distance_of_tracks = np.linalg.norm(inputs[:, :2] - recent_typhoons_dict[sid][typhoon_indices, :2]) # frobenius
+            # the euclidean distance will be obtained using the user inputted coordinates and the coordinates of the previous typhoons
+            # although, not all coordinates of the previous typhoons will be used. only the elements found in the indices contained in typhoon_indices
+            # the number of elements in recent_typhoons_dict[sid][typhoon_indices, :2] should be equal to inputs[:, :2]
+            if model == "Per-point":
+                distance_of_tracks = np.linalg.norm(inputs[:, :2] - recent_typhoons_dict[sid][typhoon_indices, :2]) # frobenius
+            else:
+                user_input = np.mean(inputs[:, :2])
+                previous_typhoon_input = np.mean(recent_typhoons_dict[sid][typhoon_indices, :2])
+                distance_of_tracks = np.linalg.norm(user_input - previous_typhoon_input) # nearest centroid classifier
+
             # distance_of_tracks = np.sum(np.linalg.norm(inputs[:, :2] - recent_typhoons_dict[sid][typhoon_indices, :2], axis = 1)) # per point euclidean distance
             # if secret < 6:
             #     secret += 1
@@ -152,8 +161,9 @@ def coordinates_to_dict(typhoon_database, year_range, unique_sid, inputs):
         except Exception as e:
             print("error")
             continue
-        score = distance_of_tracks.mean()
-        
+
+        score = distance_of_tracks.mean() # i think .mean will only make a difference if ginamit yung per point euclidean distance. otherwise, walang difference
+
         recent_typhoons_dict_closest_to_farthest[sid] = recent_typhoons_dict[sid][typhoon_indices + list(range(typhoon_indices[-1] + 1, recent_typhoons_dict[sid].shape[0])), :]
 
         typhoon_names[sid] = row['NAME']
