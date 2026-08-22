@@ -26,6 +26,10 @@ def main():
                 if name:
                     clean["NAME"].append(row["NAME"])
                     name = False
+                else: # this is for random forest setup. comment out this block if not random forest
+                    coordinates[-1] += (row["LAT"],)
+                    coordinates[-1] += (row["LON"],)
+                    
                 temp_coordinates += (row["LAT"],)
                 temp_coordinates += (row["LON"],)
             
@@ -45,6 +49,7 @@ def main():
             else:
                 recent_typhoons = recent_typhoons.reset_index(drop=True)
                 break
+        del coordinates[-1] # this is for random forest setup. comment out this line if not random forest
         clean["COORDINATES"].append(coordinates)
         clean["SID"].append(sid)
 
@@ -52,7 +57,7 @@ def main():
 
     new = pd.DataFrame(clean)
 
-    new.to_csv("new_data.csv", index = False)
+    new.to_csv("rf_new_data.csv", index = False)
 
     end = time.time()
     print("Elapsed time:", end - start, "seconds")

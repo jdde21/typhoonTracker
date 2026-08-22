@@ -1,3 +1,5 @@
+from sklearn.model_selection import train_test_split
+from sklearn.ensemble import RandomForestRegressor
 import pandas as pd 
 import numpy as np
 import re
@@ -18,7 +20,7 @@ def get_database_by_agency(agency):
         case "KMA":
             typhoon_database = pd.read_csv('cleaned/cleaned_korea.csv', encoding = 'latin-1')
         case _:
-            typhoon_database = pd.read_csv('new_data.csv', encoding = 'latin-1')
+            typhoon_database = pd.read_csv('rf_new_data.csv', encoding = 'latin-1')
     
     return typhoon_database
 
@@ -45,6 +47,7 @@ def get_database_by_agency_additional_properties(agency):
 def coordinates_cleaner(list_of_coordinates):
     list_of_coordinates = list_of_coordinates.replace('[', '')
     list_of_coordinates = list_of_coordinates.replace(']', '')
+    #return re.findall(r"\(\d+\.\d+, \d+\.\d+, \d, \d+\.\d+, \d+\.\d+,\)", list_of_coordinates)
     return re.findall(r"\(\d+\.\d+, \d+\.\d+, \d\)", list_of_coordinates)
 
 def coordinates_to_dict(typhoon_database, year_range, unique_sid, inputs, model):
@@ -66,14 +69,16 @@ def coordinates_to_dict(typhoon_database, year_range, unique_sid, inputs, model)
         # just removes all the unnecessary characters inside the coordinates
         list_of_coordinates = list_of_coordinates.replace('[', '')
         list_of_coordinates = list_of_coordinates.replace(']', '')
-        coordinates = re.findall(r"\(\d+\.\d+, \d+\.\d+, \d\)", list_of_coordinates)
-        
+        if model == "Random forest":
+            coordinates = re.findall(r"\(\d+\.\d+, \d+\.\d+, \d, \d+\.\d+, \d+\.\d+\)", list_of_coordinates)
+        else:
+            coordinates = re.findall(r"\(\d+\.\d+, \d+\.\d+, \d\)", list_of_coordinates)
         sid = unique_sid[index]
-        recent_typhoons_dict[sid] = np.empty((0,3)) # initializing an empty 2d np array
+        recent_typhoons_dict[sid] = np.empty((0,5)) # initializing an empty 2d np array
+        #recent_typhoons_dict[sid] = np.empty((0,3)) # initializing an empty 2d np array
 
  
         closest_index = [-1,-1] # will contain the index of the coordinate sa typhoon in the current iteration is closest dun sa first coordinate nung bagong typhoon; first element is index, second element is yung distance niya compared to the first coordinate ng bagyo
-
 
         # this loop finds the closest point of the typhoon in the database to the first point of the new typhoon
         for index, coordinate in enumerate(coordinates): # gumamit enumerate para makuha yung index
@@ -83,9 +88,7 @@ def coordinates_to_dict(typhoon_database, year_range, unique_sid, inputs, model)
             temp = temp.split(',')
             temp = np.array(list(map(float, temp))) # converted the coordinates to a float instead of a string
        
-
             distance = np.linalg.norm(temp[:2] - inputs[0,:2])
-     
             # hinahanap neto yung i coconsider as first point sa mga bagyo sa training set
             if closest_index[0] == -1:
                 closest_index[0] = index
@@ -95,7 +98,6 @@ def coordinates_to_dict(typhoon_database, year_range, unique_sid, inputs, model)
                 closest_index[1] = distance
 
             recent_typhoons_dict[sid] = np.vstack((recent_typhoons_dict[sid], temp))
-        
         
 
 
@@ -141,7 +143,6 @@ def coordinates_to_dict(typhoon_database, year_range, unique_sid, inputs, model)
                 
             typhoon_indices.append(closest_time_index[0])
         
-        # print(typhoon_indices)
         try:
             # the euclidean distance will be obtained using the user inputted coordinates and the coordinates of the previous typhoons
             # although, not all coordinates of the previous typhoons will be used. only the elements found in the indices contained in typhoon_indices
@@ -159,13 +160,12 @@ def coordinates_to_dict(typhoon_database, year_range, unique_sid, inputs, model)
             #     print("frobenius", distance_of_tracks)
             #     print("per-point", np.sum(np.linalg.norm(inputs[:, :2] - recent_typhoons_dict[sid][typhoon_indices, :2], axis = 1)))
         except Exception as e:
-            print("error")
+            #print("error")
             continue
 
         score = distance_of_tracks.mean() # i think .mean will only make a difference if ginamit yung per point euclidean distance. otherwise, walang difference
 
-        recent_typhoons_dict_closest_to_farthest[sid] = recent_typhoons_dict[sid][typhoon_indices + list(range(typhoon_indices[-1] + 1, recent_typhoons_dict[sid].shape[0])), :]
-
+        recent_typhoons_dict_closest_to_farthest[sid] = recent_typhoons_dict[sid][typhoon_indices + list(range(typhoon_indices[-1] + 1, recent_typhoons_dict[sid].shape[0])), :] # every row index that comes after the last one already in typhoon_indices, through the end of the array.
         typhoon_names[sid] = row['NAME']
             
         if score in typhoon_scores:
@@ -217,15 +217,41 @@ def predicted_track(recent_typhoons_dict_closest_to_farthest, typhoon_scores, sc
             temp_tracks = np.empty((minimum,3))
             temp_tracks.fill(0)
             for j in range(inputs.shape[0], minimum):
-                temp_tracks[j] += tracks[j] * weights[i] # yung track ng typhoon will now be multiplied by its weight
+                temp_tracks[j] += tracks[j][:3] * weights[i] # yung track ng typhoon will now be multiplied by its weight
             total_tracks += temp_tracks
             i += 1
             if i >= neighbors:
+                print("predicted", total_tracks)
                 return total_tracks
             
         scores_counter += 1
-
     return total_tracks
+
+def rf_predicted_track(recent_typhoons_dict_closest_to_farthest, inputs, unique_sid):
+    training_data = np.empty((0,4))
+    last_element = inputs.shape[0] - 1
+    for sid in unique_sid:
+        try:
+            track = recent_typhoons_dict_closest_to_farthest[sid][last_element]
+            track = np.delete(track, 2)
+            training_data = np.vstack((training_data, track))
+        except Exception as e:
+            continue
+    X = training_data[:, :2]
+    y = training_data[:, 2:]
+    rf = RandomForestRegressor(n_estimators=100, random_state=42)
+    rf.fit(X, y)
+    predicted_track = np.empty((0,2))
+    limit = 12
+    starting_coords = [21.0, 129.0]
+    for _ in range(limit):
+        predictions = rf.predict([starting_coords])
+        lat, long = (x[0] for x in zip(*predictions))
+        new_coords = np.array([lat, long])
+        predicted_track = np.vstack((predicted_track, new_coords))
+        starting_coords = new_coords
+
+    return predicted_track
         
         
         

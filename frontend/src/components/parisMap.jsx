@@ -19,8 +19,9 @@ export default function ParisMap() {
       <Map typhoonCoordinates={typhoonLocations} center={DEFAULT_COORDINATES} zoom={DEFAULT_ZOOM}>
         <MapControls recenterTarget={{ center: DEFAULT_COORDINATES, zoom: DEFAULT_ZOOM }}></MapControls>
         {
-          typhoonLocations.map((location, idx) => (
-            <MapMarker
+          typhoonLocations.map((location, idx) => {
+         
+            return <MapMarker
               key={idx}
               longitude={location.lng}
               latitude={location.lat}
@@ -38,7 +39,7 @@ export default function ParisMap() {
                 </div>
               </MarkerPopup>
             </MapMarker>
-          ))
+})
         }
         {
           Object.keys(neighboringTyphoons).map((sid) => {

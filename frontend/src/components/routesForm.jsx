@@ -7,7 +7,7 @@ import "./scrollbars.css";
 
 
 const TYPHOON_AGENCIES = ["Default", "JTWC", "JMA", "CMA", "HKO", "IMD", "KMA"];
-const MODELS = ["Per-point", "Nearest centroid"];
+const MODELS = ["Per-point", "Nearest centroid", "Random forest"];
 
 export default function RoutePoints() {
     const { setFetching, setTyphoonLocations, setNeighboringTyphoons,
