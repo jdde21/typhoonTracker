@@ -45,6 +45,7 @@ export default function ParisMap() {
           Object.keys(neighboringTyphoons).map((sid) => {
             const tracks = neighboringTyphoons[sid][0];
             if (showNeighbor.length == 0 || sid !== showNeighbor[0]) {
+              console.log(showNeighbor[0], "yolo")
               return null;
             }
             return tracks.map((values, index) => {
@@ -55,7 +56,7 @@ export default function ParisMap() {
                 longitude={longitude}
                 latitude={latitude}
               >
-                <MarkerContent>
+                <MarkerContent pulsating={tracks.length == index + 1 ? true : false} total={tracks.length} index={index} neighbor={true}>
                   <div className="size-4 rounded-full bg-primary border-2 border-red-500 shadow-lg" />
                 </MarkerContent>
                 <MarkerTooltip>{`${latitude.toFixed(2)}, ${longitude.toFixed(2)}`}</MarkerTooltip>

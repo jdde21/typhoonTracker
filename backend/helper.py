@@ -20,7 +20,7 @@ def get_database_by_agency(agency):
         case "KMA":
             typhoon_database = pd.read_csv('cleaned/cleaned_korea.csv', encoding = 'latin-1')
         case _:
-            typhoon_database = pd.read_csv('rf_new_data.csv', encoding = 'latin-1')
+            typhoon_database = pd.read_csv('new_data.csv', encoding = 'latin-1')
     
     return typhoon_database
 
@@ -69,13 +69,15 @@ def coordinates_to_dict(typhoon_database, year_range, unique_sid, inputs, model)
         # just removes all the unnecessary characters inside the coordinates
         list_of_coordinates = list_of_coordinates.replace('[', '')
         list_of_coordinates = list_of_coordinates.replace(']', '')
+        sid = unique_sid[index]
         if model == "Random forest":
             coordinates = re.findall(r"\(\d+\.\d+, \d+\.\d+, \d, \d+\.\d+, \d+\.\d+\)", list_of_coordinates)
+            recent_typhoons_dict[sid] = np.empty((0,5)) # initializing an empty 2d np array
         else:
             coordinates = re.findall(r"\(\d+\.\d+, \d+\.\d+, \d\)", list_of_coordinates)
-        sid = unique_sid[index]
-        recent_typhoons_dict[sid] = np.empty((0,5)) # initializing an empty 2d np array
-        #recent_typhoons_dict[sid] = np.empty((0,3)) # initializing an empty 2d np array
+            recent_typhoons_dict[sid] = np.empty((0,3)) # initializing an empty 2d np array
+        
+        
 
  
         closest_index = [-1,-1] # will contain the index of the coordinate sa typhoon in the current iteration is closest dun sa first coordinate nung bagong typhoon; first element is index, second element is yung distance niya compared to the first coordinate ng bagyo
@@ -221,7 +223,6 @@ def predicted_track(recent_typhoons_dict_closest_to_farthest, typhoon_scores, sc
             total_tracks += temp_tracks
             i += 1
             if i >= neighbors:
-                print("predicted", total_tracks)
                 return total_tracks
             
         scores_counter += 1
@@ -242,16 +243,19 @@ def rf_predicted_track(recent_typhoons_dict_closest_to_farthest, inputs, unique_
     rf = RandomForestRegressor(n_estimators=100, random_state=42)
     rf.fit(X, y)
     predicted_track = np.empty((0,2))
-    limit = 12
-    starting_coords = [21.0, 129.0]
+    limit = 10
+    starting_coords = [inputs[-1][0], inputs[-1][1]]
     for _ in range(limit):
         predictions = rf.predict([starting_coords])
         lat, long = (x[0] for x in zip(*predictions))
         new_coords = np.array([lat, long])
         predicted_track = np.vstack((predicted_track, new_coords))
         starting_coords = new_coords
-
-    return predicted_track
+     
+    # yan ginawa ko sa inputs 2d array dahil currently, yung innermost elements niya is 3. 
+    # sa predicted track's innermost elements, it has two kaya ginawa kong inputs[:, :2]
+    # para same sila ng columns
+    return np.concatenate((inputs[:, :2], predicted_track), axis=0)
         
         
         
