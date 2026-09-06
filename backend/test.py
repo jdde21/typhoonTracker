@@ -12,7 +12,7 @@ NEIGHBORS = 0
 
 def typhoon_tracker(coordinates=None, agency="Default", year_range = [], neighbors=7, model="Per-point"):
     
-    typhoon_database = get_database_by_agency(agency)
+    typhoon_database = get_database_by_agency(agency, model)
 
     unique_sid = list(dict.fromkeys(typhoon_database["SID"].tolist())) # removes duplicates while maintaining the same order
 

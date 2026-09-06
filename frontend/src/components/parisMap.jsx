@@ -20,7 +20,7 @@ export default function ParisMap() {
         <MapControls recenterTarget={{ center: DEFAULT_COORDINATES, zoom: DEFAULT_ZOOM }}></MapControls>
         {
           typhoonLocations.map((location, idx) => {
-         
+
             return <MapMarker
               key={idx}
               longitude={location.lng}

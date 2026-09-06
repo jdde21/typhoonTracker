@@ -216,6 +216,50 @@ const Map = forwardRef(function Map(
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
+    // draws the line for the incoming typhoon
+    useEffect(() => {
+      if (!mapInstance || !isLoaded) return;
+  
+      const coordinates = (typhoonLocations.map((track) => {
+        return [track.lng, track.lat]
+      }));
+  
+      const source = mapInstance.getSource('route');
+      if (source) {
+        source.setData({
+          type: 'Feature',
+          properties: {},
+          geometry: { type: 'LineString', coordinates }
+        });
+      } else {
+        mapInstance.addSource('route', {
+          type: 'geojson',
+          lineMetrics: true, // required for line-gradient to work
+          data: {
+            type: 'Feature',
+            properties: {},
+            geometry: { type: 'LineString', coordinates }
+          }
+        });
+  
+        mapInstance.addLayer({
+          id: 'route',
+          type: 'line',
+          source: 'route',
+          layout: { 'line-join': 'round', 'line-cap': 'round' },
+          paint: {
+            'line-width': 8,
+            'line-gradient': [
+              'interpolate', ['linear'], ['line-progress'],
+              0, '#6b7280',   // start color
+              1, '#10b981'    // end color
+            ]
+          }
+        });
+      }
+  
+    }, [mapInstance, isLoaded, typhoonLocations]);
+
   // draws the line for the selected neighbor typhoon
   useEffect(() => {
     if (!mapInstance || !isLoaded) return;
@@ -264,50 +308,6 @@ const Map = forwardRef(function Map(
       });
     }
   }, [mapInstance, isLoaded, showNeighbor]);
-
-  // draws the line for the incoming typhoon
-  useEffect(() => {
-    if (!mapInstance || !isLoaded) return;
-
-    const coordinates = (typhoonLocations.map((track) => {
-      return [track.lng, track.lat]
-    }));
-
-    const source = mapInstance.getSource('route');
-    if (source) {
-      source.setData({
-        type: 'Feature',
-        properties: {},
-        geometry: { type: 'LineString', coordinates }
-      });
-    } else {
-      mapInstance.addSource('route', {
-        type: 'geojson',
-        lineMetrics: true, // required for line-gradient to work
-        data: {
-          type: 'Feature',
-          properties: {},
-          geometry: { type: 'LineString', coordinates }
-        }
-      });
-
-      mapInstance.addLayer({
-        id: 'route',
-        type: 'line',
-        source: 'route',
-        layout: { 'line-join': 'round', 'line-cap': 'round' },
-        paint: {
-          'line-width': 8,
-          'line-gradient': [
-            'interpolate', ['linear'], ['line-progress'],
-            0, '#6b7280',   // start color
-            1, '#10b981'    // end color
-          ]
-        }
-      });
-    }
-
-  }, [mapInstance, isLoaded, typhoonLocations]);
 
   // Sync controlled viewport to map
   useEffect(() => {
