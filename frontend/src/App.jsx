@@ -8,6 +8,7 @@ import { useQuery } from "@tanstack/react-query";
 import "slick-carousel/slick/slick.css";
 import "slick-carousel/slick/slick-theme.css";
 import NeighboringTyphoonsDrawer from "./components/testDrawer";
+import AiChatWidget from "./components/AiChatWidget";
 export const TyphoonDataContext = createContext();
 
 
@@ -79,7 +80,7 @@ export function App() {
         typhoonLocations, setTyphoonLocations, neighboringTyphoons,
         setNeighboringTyphoons, neighborTyphoonsLocations, setNeighborTyphoonsLocations, neighborTyphoonsSID,
         setNeighborTyphoonsSID, showNeighbor, setShowNeighbor, neighboringTyphoonsNames, setNeighboringTyphoonsNames,
-        setNeighboringTyphoonsAdditionalProperties, database, setDatabase, setSideDrawerDatabase, sideDrawerDatabase, 
+        setNeighboringTyphoonsAdditionalProperties, database, setDatabase, setSideDrawerDatabase, sideDrawerDatabase,
         all_typhoons, year_range, TYPHOON_AGENCIES, itemsRef, sideDrawerLoading, setFetching, showTyphoon, setShowTyphoon,
         get_live_typhoons_names, model, setModel
       }}>
@@ -130,6 +131,17 @@ export function App() {
         </div>
 
       </TyphoonDataContext.Provider>
+      <AiChatWidget
+        onAsk={async (question) => {
+          const res = await fetch("http://127.0.0.1:8000/chat", {
+            method: "POST", headers: {
+              'Content-Type': 'application/json'
+            }, body: JSON.stringify({ question })
+          });
+          const data = await res.json();
+          return data; // shown in the dialog
+        }}
+      />
     </div>
   )
 }

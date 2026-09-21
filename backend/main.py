@@ -1,13 +1,11 @@
 from test import typhoon_tracker, sid_track_scores_dict, names_printer, year_range_getter, wind_speed_and_pressure_getter, all_typhoons_tracks_getter
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.encoders import jsonable_encoder
-from datetime import timezone, datetime
-from fastapi import FastAPI, Query
+from ai_chatbot import define_retriever, chatbot
 from typing import List, Optional
 from pymongo import MongoClient
 from dotenv import load_dotenv
 from pydantic import BaseModel
-from zoneinfo import ZoneInfo
+from fastapi import FastAPI
 import pandas as pd 
 import re
 import os
@@ -27,6 +25,9 @@ class Body(BaseModel):
     range: List[int]
     neighbors: int
     model: str
+    
+class Query(BaseModel):
+    question: str
 
 items = []
 list_coordinates = []
@@ -48,6 +49,7 @@ app.add_middleware(
 )
 
 load_dotenv()
+RETRIEVER = define_retriever()
 MONGO_URI = os.environ["MONGO_URI"]
 CLIENT = MongoClient(MONGO_URI)
 DB = CLIENT["typhoon_tracker"]
@@ -74,6 +76,11 @@ def input_coordinates(body: Body):
     data = typhoon_tracker(list_coordinates, body.database, body.range, body.neighbors, body.model)
     list_coordinates.clear()
     return data
+
+@app.post('/chat')
+def chat(body: Query):
+    response = chatbot(RETRIEVER, body.question)
+    return response
 
 @app.get('/neighbors')
 def get_neighbors():
