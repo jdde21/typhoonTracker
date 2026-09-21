@@ -25,7 +25,7 @@ def define_retriever():
 
 def chatbot(retriever, question):
     docs = retriever.invoke(question)
-    template = """Answer the question based only on the following context:
+    template = """Answer the question based only on the following context and don't say based on the provided context:
         {context}
 
         Question: {question}
