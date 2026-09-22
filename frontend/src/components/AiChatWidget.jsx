@@ -34,186 +34,81 @@ export default function AiChatWidget({
   accentColor = "indigo",
   position = "bottom-left",
 }) {
-  const [isOpen, setIsOpen] = useState(false);
-  const [question, setQuestion] = useState("");
-  const [answer, setAnswer] = useState(null);
-  const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState(null);
 
-  const inputRef = useRef(null);
-  const dialogRef = useRef(null);
+  const [isOpen, setOpen] = useState(false);
+  const [messages, setMessages] = useState([{ "from": "ai", text: "ask away" }])
+  const query = useRef("")
+  const inputRef = useRef(null)
 
-  // Focus the input when the dialog opens
-  useEffect(() => {
-    if (isOpen) {
-      const t = setTimeout(() => inputRef.current?.focus(), 50);
-      return () => clearTimeout(t);
-    }
-  }, [isOpen]);
+  const handleClick = () => {
+    setOpen(prev => !prev)
+  }
 
-  // Close on Escape
-  useEffect(() => {
-    if (!isOpen) return;
-    const handleKeyDown = (e) => {
-      if (e.key === "Escape") setIsOpen(false);
-    };
-    document.addEventListener("keydown", handleKeyDown);
-    return () => document.removeEventListener("keydown", handleKeyDown);
-  }, [isOpen]);
+  const handleType = (e) => {
+    query.current = e.target.value
+    console.log(e.target.value)
+  }
 
-  // Close when clicking outside the dialog
-  useEffect(() => {
-    if (!isOpen) return;
-    const handleClick = (e) => {
-      if (dialogRef.current && !dialogRef.current.contains(e.target)) {
-        setIsOpen(false);
-      }
-    };
-    document.addEventListener("mousedown", handleClick);
-    return () => document.removeEventListener("mousedown", handleClick);
-  }, [isOpen]);
+  const handleSubmit = async () => {
+    inputRef.current.value = ""
+    setMessages(prev => [...prev, { "from": "user", "text": query.current }])
+    const response = await onAsk(query.current)
+    setMessages(prev => [...prev, { "from": "ai", "text": response }])
+  }
 
-  const resetState = () => {
-    setQuestion("");
-    setAnswer(null);
-    setError(null);
-    setIsLoading(false);
-  };
 
-  const handleClose = () => {
-    setIsOpen(false);
-    resetState();
-  };
-
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    const trimmed = question.trim();
-    if (!trimmed || isLoading) return;
-
-    setIsLoading(true);
-    setError(null);
-    setAnswer(null);
-
-    try {
-      const result = await onAsk?.(trimmed);
-      setAnswer(typeof result === "string" ? result : "");
-    } catch (err) {
-      setError(err?.message || "Something went wrong. Please try again.");
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  const positionClasses =
-    position === "bottom-left" ? "left-5 sm:left-6" : "right-5 sm:right-6";
-
-  const accent = {
-    button: `bg-${accentColor}-600 hover:bg-${accentColor}-500`,
-    ring: `focus-visible:ring-${accentColor}-500`,
-    send: `bg-${accentColor}-600 hover:bg-${accentColor}-500 disabled:bg-${accentColor}-300`,
-    dot: `text-${accentColor}-600`,
-  };
-
-  return (
-    <div className={`fixed bottom-5 sm:bottom-6 ${positionClasses} z-50`}>
-      {/* Dialog */}
-      {isOpen && (
-        <div
-          ref={dialogRef}
-          role="dialog"
-          aria-modal="true"
-          aria-labelledby="ai-chat-widget-title"
-          className={`absolute bottom-16 ${
-            position === "bottom-left" ? "left-0" : "right-0"
-          } mb-2 w-[calc(100vw-2.5rem)] max-w-sm rounded-2xl border border-gray-200 bg-white shadow-2xl
-          animate-in fade-in slide-in-from-bottom-2 duration-150`}
+  return <>
+    {
+      !isOpen ?
+        <button
+          onClick={handleClick}
+          aria-label="Open chat assistant"
+          className="fixed bottom-6 left-6 z-9999 flex items-center gap-2 rounded-full bg-white px-[18px] py-2.5 text-sm font-semibold text-black shadow-lg shadow-black/20 border border-black/10 transition-transform duration-150 ease-out hover:-translate-y-0.5 hover:shadow-xl hover:shadow-black/30 active:translate-y-0"
         >
-          {/* Header */}
-          <div className="flex items-center justify-between border-b border-gray-100 px-4 py-3">
-            <div className="flex items-center gap-2">
-              <Sparkles className={`h-4 w-4 ${accent.dot}`} aria-hidden="true" />
-              <h2 id="ai-chat-widget-title" className="text-sm font-semibold text-gray-900">
-                {title}
-              </h2>
-            </div>
-            <button
-              type="button"
-              onClick={handleClose}
-              aria-label="Close dialog"
-              className={`rounded-md p-1 text-gray-400 hover:bg-gray-100 hover:text-gray-600 focus:outline-none focus-visible:ring-2 ${accent.ring}`}
-            >
-              <X className="h-4 w-4" />
+          <Sparkles size={18} className="animate-pulse text-black" />
+          <span>Ask AI</span>
+        </button> :
+        <div className="fixed bottom-20 left-6 z-9999 flex h-96 w-80 flex-col border border-gray-300 bg-white">
+          <div className="flex items-center justify-between border-b border-gray-300 px-3 py-2">
+            <span className="text-sm font-medium">Chat</span>
+            <button onClick={handleClick} className="text-sm text-gray-500">
+              ✕
             </button>
           </div>
 
-          {/* Body */}
-          <div className="max-h-80 overflow-y-auto px-4 py-3">
-            {!answer && !isLoading && !error && (
-              <p className="text-sm text-gray-400">
-                Type a question below and hit send.
-              </p>
-            )}
-
-            {isLoading && (
-              <div className="flex items-center gap-2 text-sm text-gray-500">
-                <Loader2 className="h-4 w-4 animate-spin" aria-hidden="true" />
-                Thinking…
-              </div>
-            )}
-
-            {error && (
-              <p role="alert" className="text-sm text-red-600">
-                {error}
-              </p>
-            )}
-
-            {answer && !isLoading && (
-              <p className="whitespace-pre-wrap text-sm leading-relaxed text-gray-800">
-                {answer}
-              </p>
-            )}
+          <div className="flex-1 overflow-y-auto p-3 text-sm">
+            {
+              messages.map((value, i) => (
+                <div
+                  key={i}
+                  className={`mb-2 flex ${value.from === "user" ? 'justify-end' : 'justify-start'}`}
+                >
+                  <span className="max-w-[75%] rounded-md bg-gray-100 px-2 py-1">
+                    {value.text}
+                  </span>
+                </div>
+              ))
+            }
           </div>
 
-          {/* Input */}
-          <form onSubmit={handleSubmit} className="flex items-center gap-2 border-t border-gray-100 p-3">
-            <label htmlFor="ai-chat-widget-input" className="sr-only">
-              {placeholder}
-            </label>
+          <div className="flex border-t border-gray-300">
             <input
-              id="ai-chat-widget-input"
               ref={inputRef}
+              onChange={handleType}
               type="text"
-              value={question}
-              onChange={(e) => setQuestion(e.target.value)}
-              placeholder={placeholder}
-              disabled={isLoading}
-              className={`flex-1 rounded-lg border border-gray-200 bg-gray-50 px-3 py-2 text-sm text-gray-900
-              placeholder:text-gray-400 focus:outline-none focus-visible:ring-2 ${accent.ring} disabled:opacity-60`}
+              placeholder="Type a message..."
+              className="flex-1 px-3 py-2 text-sm outline-none"
             />
             <button
-              type="submit"
-              disabled={!question.trim() || isLoading}
-              aria-label="Send question"
-              className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-lg text-white transition-colors
-              focus:outline-none focus-visible:ring-2 ${accent.ring} disabled:cursor-not-allowed ${accent.send}`}
+              onClick={handleSubmit}
+              className="border-l border-gray-300 px-3 text-sm"
             >
-              <Send className="h-4 w-4" />
+              Send
             </button>
-          </form>
+          </div>
         </div>
-      )}
+    }
+  </>
 
-      {/* Toggle button */}
-      <button
-        type="button"
-        onClick={() => setIsOpen((prev) => !prev)}
-        aria-expanded={isOpen}
-        aria-label={isOpen ? "Close AI chat" : "Open AI chat"}
-        className={`flex h-12 w-12 items-center justify-center rounded-full text-white shadow-lg transition-transform
-        hover:scale-105 focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 ${accent.ring} ${accent.button}`}
-      >
-        {isOpen ? <X className="h-5 w-5" /> : <Sparkles className="h-5 w-5" />}
-      </button>
-    </div>
-  );
+
 }

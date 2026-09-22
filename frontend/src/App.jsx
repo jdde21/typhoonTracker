@@ -129,9 +129,7 @@ export function App() {
             )}
           </div>
         </div>
-
-      </TyphoonDataContext.Provider>
-      <AiChatWidget
+        <AiChatWidget
         onAsk={async (question) => {
           const res = await fetch("http://127.0.0.1:8000/chat", {
             method: "POST", headers: {
@@ -142,6 +140,7 @@ export function App() {
           return data; // shown in the dialog
         }}
       />
+      </TyphoonDataContext.Provider>
     </div>
   )
 }
