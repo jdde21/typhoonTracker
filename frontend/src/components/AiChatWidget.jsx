@@ -1,32 +1,7 @@
 import { useState, useRef, useEffect } from "react";
-import { Sparkles, X, Send, Loader2 } from "lucide-react";
+import { Sparkles } from "lucide-react";
+import { AnimatePresence, motion } from 'framer-motion';
 
-/**
- * AiChatWidget
- * ------------
- * A floating icon button that opens a small dialog where the user can type
- * a question. This component does NOT call any API itself — you own that.
- *
- * Usage:
- *   <AiChatWidget
- *     onAsk={async (question) => {
- *       // call your own backend / model here
- *       const res = await fetch("/api/ask", { method: "POST", body: JSON.stringify({ question }) });
- *       const data = await res.json();
- *       return data.answer; // returned string is shown as the response
- *     }}
- *   />
- *
- * Props:
- *   onAsk(question: string) => Promise<string> | string
- *     Called when the user submits a question. Return (or resolve to) the
- *     answer text to display. If it throws, an error state is shown.
- *
- *   title?: string                 Dialog heading. Default "Ask AI".
- *   placeholder?: string           Input placeholder. Default "Ask a question…".
- *   accentColor?: string           Tailwind color stem, e.g. "indigo", "emerald", "rose". Default "indigo".
- *   position?: "bottom-right" | "bottom-left"   Default "bottom-right".
- */
 export default function AiChatWidget({
   onAsk,
   title = "Ask AI",
@@ -57,9 +32,9 @@ export default function AiChatWidget({
   }
 
 
-  return <>
-    {
-      !isOpen ?
+  return (
+    <>
+      {!isOpen && (
         <button
           onClick={handleClick}
           aria-label="Open chat assistant"
@@ -67,48 +42,68 @@ export default function AiChatWidget({
         >
           <Sparkles size={18} className="animate-pulse text-black" />
           <span>Ask AI</span>
-        </button> :
-        <div className="fixed bottom-20 left-6 z-9999 flex h-96 w-80 flex-col border border-gray-300 bg-white">
-          <div className="flex items-center justify-between border-b border-gray-300 px-3 py-2">
-            <span className="text-sm font-medium">Chat</span>
-            <button onClick={handleClick} className="text-sm text-gray-500">
-              ✕
-            </button>
-          </div>
+        </button>
+      )}
 
-          <div className="flex-1 overflow-y-auto p-3 text-sm">
-            {
-              messages.map((value, i) => (
+      <AnimatePresence>
+        {isOpen && (
+          <motion.div
+            key="box"
+            initial={{ opacity: 0, scale: 0.8, y: 16 }}
+            animate={{ opacity: 1, scale: 1, y: 0 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.18, ease: 'easeOut' }}
+            style={{ transformOrigin: 'bottom left' }}
+            className="fixed bottom-6 left-6 z-9999 pointer-events-auto border border-white/10 rounded-xl w-90 flex h-96 flex-col overflow-hidden bg-neutral-900/90 backdrop-blur text-white select-none shadow-[0_8px_30px_rgba(0,0,0,0.35)]"
+          >
+            <div className="flex items-center justify-between border-b border-white/10 px-4 py-3">
+              <span className="text-sm font-semibold">Chat</span>
+              <button
+                onClick={handleClick}
+                className="rounded-full p-1 text-white/60 transition hover:bg-white/10 hover:text-white"
+              >
+                ✕
+              </button>
+            </div>
+
+            <div className="flex-1 overflow-y-auto p-3 text-sm">
+              {messages.map((value, i) => (
                 <div
                   key={i}
-                  className={`mb-2 flex ${value.from === "user" ? 'justify-end' : 'justify-start'}`}
+                  className={`mb-2 flex ${value.from === 'user' ? 'justify-end' : 'justify-start'}`}
                 >
-                  <span className="max-w-[75%] rounded-md bg-gray-100 px-2 py-1">
+                  <span
+                    className={`max-w-[75%] rounded-xl px-3 py-1.5 ${value.from === 'user'
+                        ? 'rounded-br-sm bg-white text-black'
+                        : 'rounded-bl-sm bg-white/10 text-white'
+                      }`}
+                  >
                     {value.text}
                   </span>
                 </div>
-              ))
-            }
-          </div>
+              ))}
+            </div>
 
-          <div className="flex border-t border-gray-300">
-            <input
-              ref={inputRef}
-              onChange={handleType}
-              type="text"
-              placeholder="Type a message..."
-              className="flex-1 px-3 py-2 text-sm outline-none"
-            />
-            <button
-              onClick={handleSubmit}
-              className="border-l border-gray-300 px-3 text-sm"
-            >
-              Send
-            </button>
-          </div>
-        </div>
-    }
-  </>
+            <div className="flex items-center gap-2 border-t border-white/10 p-2">
+              <input
+                ref={inputRef}
+                type="text"
+                onChange={handleType}
+                placeholder="Type a message..."
+                className="flex-1 rounded-full bg-white/10 px-4 py-2 text-sm text-white placeholder-white/40 outline-none focus:ring-2 focus:ring-white/30"
+              />
+              <button
+                onClick={handleSubmit}
+                className="rounded-full bg-white px-4 py-2 text-sm font-medium text-black transition hover:bg-white/80"
+              >
+                Send
+              </button>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </>
+  )
 
 
 }
