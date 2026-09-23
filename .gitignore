@@ -8,3 +8,8 @@ backend/Tropical Disturbance (LPA) _Formerly JOSIE_HAISHAN_97W_ _ Final.csv
 backend/bin/*
 backend/lib/*
 backend/typhoons.csv
+backend/lib/
+backend/bin/
+backend/pyvenv.cfg
+__pycache__/
+*.pyc
