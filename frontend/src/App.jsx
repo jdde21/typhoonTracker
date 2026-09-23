@@ -1,57 +1,20 @@
 import ParisMap from "./components/parisMap"
-import Cabinet from "./components/cabinet"
-import { createContext, useState } from "react"
+import { createContext, useState, useRef, useEffect } from "react"
 import './App.css';
 import RoutePoints from "./components/routesForm"
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import NeighborTyphoonCard from "./components/neighborTyphoonCard";
 import SliderPkg from 'react-slick';
+import { useQuery } from "@tanstack/react-query";
 import "slick-carousel/slick/slick.css";
 import "slick-carousel/slick/slick-theme.css";
-
+import NeighboringTyphoonsDrawer from "./components/testDrawer";
+import AiChatWidget from "./components/AiChatWidget";
 export const TyphoonDataContext = createContext();
-export const queryClient = new QueryClient();
 
-const typhoons = [
-  {
-    name: "Typhoon Mawar",
-    category: "CAT4",
-    wind: 240,
-    pressure: 935,
-  },
-  {
-    name: "Typhoon Bolaven",
-    category: "CAT2",
-    wind: 175,
-    pressure: 960,
-  },
-  {
-    name: "Active Cell TD-04",
-    category: "DEP",
-    wind: 55,
-    pressure: 1004,
-  },
-  {
-    name: "Typhoon Khanun",
-    category: "CAT3",
-    wind: 205,
-    pressure: 945,
-  },
-  {
-    name: "Typhoon Saola",
-    category: "CAT5",
-    wind: 260,
-    pressure: 915,
-  },
-  {
-    name: "Tropical Storm Nalgae",
-    category: "TS",
-    wind: 95,
-    pressure: 992,
-  },
-];
 
 const Slider = SliderPkg.default;
+const TYPHOON_AGENCIES = ["Default", "JTWC", "JMA", "CMA", "HKO", "IMD", "KMA"];
+const MODELS = ["Per-point", "Nearest centroid"];
 
 export function App() {
 
@@ -66,50 +29,118 @@ export function App() {
   const [typhoonLocations, setTyphoonLocations] = useState([]);
   const [neighboringTyphoons, setNeighboringTyphoons] = useState({});
   const [neighboringTyphoonsNames, setNeighboringTyphoonsNames] = useState({});
+  const [neighboringTyphoonsAdditionalProperties, setNeighboringTyphoonsAdditionalProperties] = useState({});
 
 
   const [neighborTyphoonsLocations, setNeighborTyphoonsLocations] = useState([]);
   const [neighborTyphoonsSID, setNeighborTyphoonsSID] = useState([]);
-  const [showNeighbor, setShowNeighbor] = useState(null);
+  const [showNeighbor, setShowNeighbor] = useState([]);
+  const [showTyphoon, setShowTyphoon] = useState(null);
+  const [database, setDatabase] = useState(TYPHOON_AGENCIES[0]);
+  const [model, setModel] = useState(MODELS[0]);
+  const [sideDrawerDatabase, setSideDrawerDatabase] = useState(TYPHOON_AGENCIES[0]);
+  const [fetching, setFetching] = useState(false);
+  const itemsRef = useRef([0, 0]);
+
+
+  const { data: all_typhoons, isFetching: sideDrawerLoading } = useQuery({
+    queryKey: ["all_typhoons"],
+    queryFn: async () => {
+      const params = new URLSearchParams({
+        start: itemsRef.current[0],
+        end: itemsRef.current[1],
+      });
+      const res = await fetch(`http://127.0.0.1:8000/all_typhoons/${sideDrawerDatabase}?${params.toString()}`);
+      return res.json();
+    },
+    refetchOnWindowFocus: false,
+  });
+
+  const { data: year_range } = useQuery({
+    queryKey: ["year_range"],
+    queryFn: async () => {
+      const res = await fetch("http://127.0.0.1:8000/year_getter");
+      return res.json();
+    }
+  });
+
+  const { data: get_live_typhoons_names } = useQuery({
+    queryKey: ["live_typhoons_names"],
+    queryFn: async () => {
+      const res = await fetch("http://127.0.0.1:8000/get_live_typhoons_names");
+      return res.json();
+    }
+  });
 
 
   return (
 
     <div className="relative h-screen">
-      <QueryClientProvider client={queryClient}>
-        <TyphoonDataContext.Provider value={{
-          typhoonLocations, setTyphoonLocations, neighboringTyphoons,
-          setNeighboringTyphoons, neighborTyphoonsLocations, setNeighborTyphoonsLocations, neighborTyphoonsSID,
-          setNeighborTyphoonsSID, showNeighbor, setShowNeighbor, neighboringTyphoonsNames, setNeighboringTyphoonsNames
-        }}>
-          <div className="h-full w-full">
-            <ParisMap />
-          </div>
+      <TyphoonDataContext.Provider value={{
+        typhoonLocations, setTyphoonLocations, neighboringTyphoons,
+        setNeighboringTyphoons, neighborTyphoonsLocations, setNeighborTyphoonsLocations, neighborTyphoonsSID,
+        setNeighborTyphoonsSID, showNeighbor, setShowNeighbor, neighboringTyphoonsNames, setNeighboringTyphoonsNames,
+        setNeighboringTyphoonsAdditionalProperties, database, setDatabase, setSideDrawerDatabase, sideDrawerDatabase,
+        all_typhoons, year_range, TYPHOON_AGENCIES, itemsRef, sideDrawerLoading, setFetching, showTyphoon, setShowTyphoon,
+        get_live_typhoons_names, model, setModel
+      }}>
 
-          <div className="absolute top-[5%] w-[20%] h-[90%] z-10">
-            {/* <PopUpDrawer /> */}
-            <RoutePoints />
-          </div>
+        <NeighboringTyphoonsDrawer></NeighboringTyphoonsDrawer>
+        <div className="h-full w-full">
+          <ParisMap />
+        </div>
 
-          {/* <div className="absolute top-[14%] left-[1%] w-[20%] z-10">
-            <Cabinet
-              neighboringTyphoons={neighboringTyphoons}
-              onSelect={(item) => console.log("selected", item)}
-            />
-          </div> */}
+        <div className="absolute top-[5%] w-[20%] h-[90%] z-10">
+          <RoutePoints />
+        </div>
 
-          <div className="absolute bottom-4 left-1/2 -translate-x-1/2 z-10 w-full">
-            <div className="w-[80%] m-auto">
+        <div className="absolute bottom-4 left-1/2 -translate-x-1/2 z-10 w-full">
+          <div className="w-[80%] m-auto">
+            {fetching ? (
+              <div className="flex items-center justify-center py-8">
+                <div className="flex flex-col items-center gap-3">
+                  <div className="w-8 h-8 border-4 border-gray-200 border-t-blue-500 rounded-full animate-spin" />
+                  <span className="text-sm text-gray-300">Loading neighboring typhoons...</span>
+                </div>
+              </div>
+            ) : (
               <Slider {...settings}>
-                {
-                  Object.keys(neighboringTyphoons).map((sid) => <NeighborTyphoonCard name={neighboringTyphoonsNames[sid]} sid={sid} category={'CAT 5'} wind={'1000'} pressure={'100'} tracks={neighboringTyphoons[sid][0]} score={neighboringTyphoons[sid][1]}/>)
-                }
+                {Object.keys(neighboringTyphoons).map((sid) => (
+                  <NeighborTyphoonCard
+                    key={sid}
+                    name={neighboringTyphoonsNames[sid]}
+                    sid={sid}
+                    category={'CAT 5'}
+                    wind={
+                      neighboringTyphoonsAdditionalProperties[sid].length !== 0
+                        ? `${neighboringTyphoonsAdditionalProperties[sid][1]} knots`
+                        : "No Data"
+                    }
+                    pressure={
+                      neighboringTyphoonsAdditionalProperties[sid].length !== 0
+                        ? `${neighboringTyphoonsAdditionalProperties[sid][2]} mb`
+                        : "No Data"
+                    }
+                    tracks={neighboringTyphoons[sid][0]}
+                    score={neighboringTyphoons[sid][1]}
+                  />
+                ))}
               </Slider>
-            </div>
+            )}
           </div>
-
-        </TyphoonDataContext.Provider>
-      </QueryClientProvider>
+        </div>
+        <AiChatWidget
+        onAsk={async (question) => {
+          const res = await fetch("http://127.0.0.1:8000/chat", {
+            method: "POST", headers: {
+              'Content-Type': 'application/json'
+            }, body: JSON.stringify({ question })
+          });
+          const data = await res.json();
+          return data; // shown in the dialog
+        }}
+      />
+      </TyphoonDataContext.Provider>
     </div>
   )
 }

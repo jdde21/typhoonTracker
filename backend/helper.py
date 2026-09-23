@@ -1,8 +1,10 @@
+from sklearn.model_selection import train_test_split
+from sklearn.ensemble import RandomForestRegressor
 import pandas as pd 
 import numpy as np
 import re
 
-def get_database_by_agency(agency):
+def get_database_by_agency(agency, model="Per-point"):
 
     match agency:
         case "JMA":
@@ -18,18 +20,46 @@ def get_database_by_agency(agency):
         case "KMA":
             typhoon_database = pd.read_csv('cleaned/cleaned_korea.csv', encoding = 'latin-1')
         case _:
-            typhoon_database = pd.read_csv('new_data.csv', encoding = 'latin-1')
+            if model == "Random forest":
+                typhoon_database = pd.read_csv('test_new_data.csv', encoding = 'latin-1')
+            else:
+                typhoon_database = pd.read_csv('new_data.csv', encoding = 'latin-1')
     
     return typhoon_database
 
+def get_database_by_agency_additional_properties(agency):
+    match agency:
+        case "JMA":
+            typhoon_database = pd.read_csv('additional_properties/TOKYO_typhoons_additional_properties.csv', encoding = 'latin-1')
+        case "JTWC":
+            typhoon_database = pd.read_csv('additional_properties/USA_typhoons_additional_properties.csv', encoding = 'latin-1')
+        case "CMA":
+            typhoon_database = pd.read_csv('additional_properties/CMA_typhoons_additional_properties.csv', encoding = 'latin-1')
+        case "HKO":
+            typhoon_database = pd.read_csv('additional_properties/HKO_typhoons_additional_properties.csv', encoding = 'latin-1')
+        case "IMD":
+            typhoon_database = pd.read_csv('additional_properties/NEWDELHI_typhoons_additional_properties.csv', encoding = 'latin-1')
+        case "KMA":
+            typhoon_database = pd.read_csv('additional_properties/KMA_typhoons_additional_properties.csv', encoding = 'latin-1')
+        case _:
+            typhoon_database = pd.read_csv('additional_properties/WMO_typhoons_additional_properties.csv', encoding = 'latin-1')
+    
+    return typhoon_database
+    
 
-def coordinates_to_dict(typhoon_database, year_range, unique_sid, inputs):
-    secret = 0
+def coordinates_cleaner(list_of_coordinates):
+    list_of_coordinates = list_of_coordinates.replace('[', '')
+    list_of_coordinates = list_of_coordinates.replace(']', '')
+    #return re.findall(r"\(\d+\.\d+, \d+\.\d+, \d, \d+\.\d+, \d+\.\d+,\)", list_of_coordinates)
+    return re.findall(r"\(\d+\.\d+, \d+\.\d+, \d\)", list_of_coordinates)
+
+def coordinates_to_dict(typhoon_database, year_range, unique_sid, inputs, model):
     recent_typhoons_dict = {}
     recent_typhoons_dict_closest_to_farthest = {}
     typhoon_names = {}
     typhoon_scores = {} # gagamitin ko eto para malaman ko kung ano yung sid nung top k typhoons sa scores. yung score ay key tapos yung sid yung value. may ran into a problem if may parehong score pero i think improbable
     scores = [] # will hold the distance scores of each typhoon compared to the new typhoon
+    dirs = {'ORIGIN': 0,'N': 1,'NE': 2,'E': 3,'SE': 4,'S': 5,'SW': 6,'W': 7,'NW': 8}
 
     # nilalagay sa recent typhoons dict yung mga coordinates per typhoon (sid ginagamit as key, yung coordinates (naka 2dimensional array siya) ginagamit as value)
     for index, row in typhoon_database.iterrows():
@@ -43,26 +73,37 @@ def coordinates_to_dict(typhoon_database, year_range, unique_sid, inputs):
         # just removes all the unnecessary characters inside the coordinates
         list_of_coordinates = list_of_coordinates.replace('[', '')
         list_of_coordinates = list_of_coordinates.replace(']', '')
-        coordinates = re.findall(r"\(\d+\.\d+, \d+\.\d+, \d\)", list_of_coordinates)
-        
         sid = unique_sid[index]
-        recent_typhoons_dict[sid] = np.empty((0,3)) # initializing an empty 2d np array
+        if model == "Random forest":
+            coordinates = re.findall(r"\(\d+\.\d+, \d+\.\d+, \d, '\w+', \d+\.\d+, \d+\.\d+\)", list_of_coordinates)
+            recent_typhoons_dict[sid] = np.empty((0,6)) # initializing an empty 2d np array
+        else:
+            coordinates = re.findall(r"\(\d+\.\d+, \d+\.\d+, \d\)", list_of_coordinates)
+            recent_typhoons_dict[sid] = np.empty((0,3)) # initializing an empty 2d np array
+        
+        
 
  
         closest_index = [-1,-1] # will contain the index of the coordinate sa typhoon in the current iteration is closest dun sa first coordinate nung bagong typhoon; first element is index, second element is yung distance niya compared to the first coordinate ng bagyo
 
-
         # this loop finds the closest point of the typhoon in the database to the first point of the new typhoon
-        for index, coordinate in enumerate(coordinates): # para makuha yung index
+        for index, coordinate in enumerate(coordinates): # gumamit enumerate para makuha yung index
             temp = coordinate
             temp = temp.replace('(', '')
             temp = temp.replace(')', '')
             temp = temp.split(',')
-            temp = np.array(list(map(float, temp))) # converted the coordinates to a float instead of a string
-       
+            
+            if model == "Per-point":
+                temp = np.array(list(map(float, temp))) # converted the coordinates to a float instead of a string
+            else:
+                # for random forest, tinatanggal ko muna yung direction kasi di gagana yung map function kung may isang string na element
+                # ni lilinisan ko muna rin since may single quotes tas white space pa
+                direction = temp.pop(3)
+                direction = direction.replace("'", "").strip()
+                temp = np.array(list(map(float, temp)))
+                temp = np.append(temp, dirs[direction])
 
             distance = np.linalg.norm(temp[:2] - inputs[0,:2])
-     
             # hinahanap neto yung i coconsider as first point sa mga bagyo sa training set
             if closest_index[0] == -1:
                 closest_index[0] = index
@@ -72,7 +113,6 @@ def coordinates_to_dict(typhoon_database, year_range, unique_sid, inputs):
                 closest_index[1] = distance
 
             recent_typhoons_dict[sid] = np.vstack((recent_typhoons_dict[sid], temp))
-        
         
 
 
@@ -105,32 +145,49 @@ def coordinates_to_dict(typhoon_database, year_range, unique_sid, inputs):
                     current_index_increment += index + 1 # index + 1 is the number of elements removed
                     break
                 else:
-                    closest_time_index = [index + current_index_increment, abs(current_time - input_time)] if closest_time_index[1] > abs(current_time - input_time) else closest_time_index 
+                    # the line of code below ay para ata ma determine which is the closest time index para sa input time and ginagamit yung absolute value ng current_time - input time to determine that
+                    # for example (input time is 8) 1st iter: current time is 3 (abs diff is 5 since first time, the below line of code will evaluate to true yung ternary). 2nd iter: current time is 6 (abs diff is 2. mas mababa kaya ternary will evaluate to true)
+                    # 3rd iter: current time is 9 (abs diff is 1. mas mababa kesa sa previous one kaya ternary operator will evaluate to true and yung sunod na if branch will break the loop)
+                    closest_time_index = [index + current_index_increment, abs(current_time - input_time)] if (closest_time_index[1] > abs(current_time - input_time) or closest_time_index[1] == float('-inf')) else closest_time_index 
                     if current_time > input_time:
-                        # print(typhoon_iso_time, index + 1, closest_time_index[0])
+                        # print("pumunta dito: ", typhoon_iso_time, index + 1, closest_time_index[0])
                         typhoon_iso_time = np.delete(typhoon_iso_time, slice(0, index))
                         current_index_increment += index
+                        # print(closest_time_index[1], abs(current_time - input_time))
                         break
                 
             typhoon_indices.append(closest_time_index[0])
         
         try:
-            distance_of_tracks = np.linalg.norm(inputs[:, :2] - recent_typhoons_dict[sid][typhoon_indices, :2]) # frobenius
+            # the euclidean distance will be obtained using the user inputted coordinates and the coordinates of the previous typhoons
+            # although, not all coordinates of the previous typhoons will be used. only the elements found in the indices contained in typhoon_indices
+            # the number of elements in recent_typhoons_dict[sid][typhoon_indices, :2] should be equal to inputs[:, :2]
+            if model == "Per-point":
+                distance_of_tracks = np.linalg.norm(inputs[:, :2] - recent_typhoons_dict[sid][typhoon_indices, :2]) # frobenius
+            else:
+                user_input = np.mean(inputs[:, :2])
+                previous_typhoon_input = np.mean(recent_typhoons_dict[sid][typhoon_indices, :2])
+                distance_of_tracks = np.linalg.norm(user_input - previous_typhoon_input) # nearest centroid classifier
+
             # distance_of_tracks = np.sum(np.linalg.norm(inputs[:, :2] - recent_typhoons_dict[sid][typhoon_indices, :2], axis = 1)) # per point euclidean distance
             # if secret < 6:
             #     secret += 1
             #     print("frobenius", distance_of_tracks)
             #     print("per-point", np.sum(np.linalg.norm(inputs[:, :2] - recent_typhoons_dict[sid][typhoon_indices, :2], axis = 1)))
-
-        except:
+        except Exception as e:
+            #print("error")
             continue
-        score = distance_of_tracks.mean()
-        
-        recent_typhoons_dict_closest_to_farthest[sid] = recent_typhoons_dict[sid][typhoon_indices + list(range(typhoon_indices[-1] + 1, recent_typhoons_dict[sid].shape[0])), :]
 
+        score = distance_of_tracks.mean() # i think .mean will only make a difference if ginamit yung per point euclidean distance. otherwise, walang difference
+
+        recent_typhoons_dict_closest_to_farthest[sid] = recent_typhoons_dict[sid][typhoon_indices + list(range(typhoon_indices[-1] + 1, recent_typhoons_dict[sid].shape[0])), :] # every row index that comes after the last one already in typhoon_indices, through the end of the array.
         typhoon_names[sid] = row['NAME']
-        typhoon_scores[score] = sid
-        scores.append(score)
+            
+        if score in typhoon_scores:
+            typhoon_scores[score].append(sid)
+        else:
+            typhoon_scores[score] = [sid]        
+            scores.append(score)
         scores = sorted(scores)
 
     return [recent_typhoons_dict_closest_to_farthest, typhoon_names, typhoon_scores, scores]
@@ -141,12 +198,19 @@ def coordinates_to_dict(typhoon_database, year_range, unique_sid, inputs):
 def determine_weights(recent_typhoons_dict_closest_to_farthest, typhoon_scores, scores, neighbors):
     minimum = float('inf')  # random high number lang eto
     weights = []
-    for i in range(neighbors):
-        sid = typhoon_scores[scores[i]]
-        weights.append(1/(scores[i] + 1e-8))
-        tracks = recent_typhoons_dict_closest_to_farthest[sid]
-        if len(tracks) < minimum:
-            minimum = len(tracks)
+    i = 0
+    while i < neighbors:
+        list_of_sid = typhoon_scores[scores[i]]
+        for sid in list_of_sid:
+            weights.append(1/(scores[i] + 1e-8))
+            tracks = recent_typhoons_dict_closest_to_farthest[sid]
+            if len(tracks) < minimum:
+                minimum = len(tracks)
+            i += 1
+            if i >= neighbors:
+                return [weights, minimum]
+            
+            
     return [weights, minimum]
 
 def predicted_track(recent_typhoons_dict_closest_to_farthest, typhoon_scores, scores, weights, inputs, minimum, neighbors):
@@ -157,17 +221,95 @@ def predicted_track(recent_typhoons_dict_closest_to_farthest, typhoon_scores, sc
     total_tracks[0:inputs.shape[0], :] += inputs
     # ginagawa naman dito ay from all the neighbors, kukunin yung values from index [inputs.shape[0], minimum] -- this is because yung index 0 to inputs.shape - 1 ay binigay na ng user --
     # (continuation) at i-aadd sa total tracks.
-    for i in range(neighbors):
-        sid = typhoon_scores[scores[i]]
-        tracks = recent_typhoons_dict_closest_to_farthest[sid]
- 
-        temp_tracks = np.empty((minimum,3))
-        temp_tracks.fill(0)
-        for j in range(inputs.shape[0], minimum):
-            temp_tracks[j] += tracks[j] * weights[i] # yung track ng typhoon will now be multiplied by its weight
-        total_tracks += temp_tracks
-
+    i = 0
+    scores_counter = 0
+    while i < neighbors:
+        list_of_sid = typhoon_scores[scores[scores_counter]]
+        
+        for sid in list_of_sid:
+            tracks = recent_typhoons_dict_closest_to_farthest[sid]
+    
+            temp_tracks = np.empty((minimum,3))
+            temp_tracks.fill(0)
+            for j in range(inputs.shape[0], minimum):
+                temp_tracks[j] += tracks[j][:3] * weights[i] # yung track ng typhoon will now be multiplied by its weight
+            total_tracks += temp_tracks
+            i += 1
+            if i >= neighbors:
+                return total_tracks
+            
+        scores_counter += 1
     return total_tracks
+
+def direction_getter(dx, dy):
+    angles = np.arctan2(dy, dx)
+    angles_deg = np.degrees(angles) 
+    bearing = (angles_deg + 360) % 360
+    dirs = ['N','NE','E','SE','S','SW','W','NW']
+    direction = dirs[int(((bearing + 22.5) % 360) // 45)]
+    return direction
+
+def direction_converter(code):
+    code = int(code)
+    dirs = {0: 'ORIGIN', 1: 'N', 2: 'NE', 3: 'E', 4: 'SE', 5: 'S', 6: 'SW', 7: 'W', 8: 'NW'}
+    return dirs[code]
+
+def training_data_generator(unique_sid, recent_typhoons_dict_closest_to_farthest, element_index, direction, starting_coords):
+    training_data = np.empty((0,5))
+    for sid in unique_sid:
+        try:
+            # ginamit ata dito last element dahil yung important lng naman sa random forest ay yung pinaka latest na coordinate
+            # kaya yung index ng last element yung gagamitin din natin dun sa historical typhoons
+            track = recent_typhoons_dict_closest_to_farthest[sid][element_index] 
+            track = np.delete(track, 2)
+            dx = track[0] - starting_coords[0]
+            dy = track[1] -  starting_coords[1]
+            track_direction = direction_getter(dx, dy)
+            if track_direction != direction:
+                continue
+
+            training_data = np.vstack((training_data, track))
+        except Exception as _:
+            continue
+    return training_data
+    
+def rf_predicted_track(recent_typhoons_dict_closest_to_farthest, inputs, unique_sid):
+    dx = inputs[-1][0] - inputs[-2][0]
+    dy = inputs[-1][1] - inputs[-2][1]
+    starting_coords = [inputs[-1][0], inputs[-1][1]]
+    direction = direction_getter(dx, dy)
+
+    
+    last_element = inputs.shape[0] - 1
+    training_data = training_data_generator(unique_sid, recent_typhoons_dict_closest_to_farthest, last_element, direction, starting_coords)
+    X = training_data[:, :2]
+    y = training_data[:, 2:-1] #ineexclude ko yung last element since direction yun
+    rf = RandomForestRegressor(n_estimators=100, random_state=42)
+    rf.fit(X, y)
+    predicted_track = np.empty((0,2))
+    limit = 10
+    for _ in range(limit):
+        try:
+            predictions = rf.predict([starting_coords])
+            lat, long = (x[0] for x in zip(*predictions))
+            new_coords = np.array([lat, long])
+            dx = lat - starting_coords[0]
+            dy = long - starting_coords[1]
+            predicted_track = np.vstack((predicted_track, new_coords))
+            starting_coords = new_coords
+            last_element += 1
+            training_data = training_data_generator(unique_sid, recent_typhoons_dict_closest_to_farthest, last_element, direction, starting_coords)
+            X = training_data[:, :2]
+            y = training_data[:, 2:-1] #ineexclude ko yung last element since direction yun
+            rf = RandomForestRegressor(n_estimators=100, random_state=42)
+            rf.fit(X, y)
+        except Exception:
+            break
+     
+    # yan ginawa ko sa inputs 2d array dahil currently, yung innermost elements niya is 3. 
+    # sa predicted track's innermost elements, it has two kaya ginawa kong inputs[:, :2]
+    # para same sila ng columns
+    return np.concatenate((inputs[:, :2], predicted_track), axis=0)
         
         
         

@@ -177,22 +177,7 @@ const Map = forwardRef(function Map(
       ...viewport,
     });
 
-    const coordinates = (typhoonLocations.map((track) => {
-      return [track.lng, track.lat]
-    }));
-
-    const neighborCoordinates = Object.keys(neighboringTyphoons).map((sid) => {
-      const tracks = neighboringTyphoons[sid];
-      if (sid !== showNeighbor) {
-        return null;
-      }
-      return tracks.map((values, index) => {
-        const longitude = values[1];
-        const latitude = values[0];
-        return [longitude, latitude]
-      })
-    });
-
+  
     const styleDataHandler = () => {
       clearStyleTimeout();
       // Delay to ensure style is fully processed before allowing layer operations
@@ -231,33 +216,66 @@ const Map = forwardRef(function Map(
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
+    // draws the line for the incoming typhoon
+    useEffect(() => {
+      if (!mapInstance || !isLoaded) return;
+  
+      const coordinates = (typhoonLocations.map((track) => {
+        return [track.lng, track.lat]
+      }));
+  
+      const source = mapInstance.getSource('route');
+      if (source) {
+        source.setData({
+          type: 'Feature',
+          properties: {},
+          geometry: { type: 'LineString', coordinates }
+        });
+      } else {
+        mapInstance.addSource('route', {
+          type: 'geojson',
+          lineMetrics: true, // required for line-gradient to work
+          data: {
+            type: 'Feature',
+            properties: {},
+            geometry: { type: 'LineString', coordinates }
+          }
+        });
+  
+        mapInstance.addLayer({
+          id: 'route',
+          type: 'line',
+          source: 'route',
+          layout: { 'line-join': 'round', 'line-cap': 'round' },
+          paint: {
+            'line-width': 8,
+            'line-gradient': [
+              'interpolate', ['linear'], ['line-progress'],
+              0, '#6b7280',   // start color
+              1, '#10b981'    // end color
+            ]
+          }
+        });
+      }
+  
+    }, [mapInstance, isLoaded, typhoonLocations]);
+
   // draws the line for the selected neighbor typhoon
   useEffect(() => {
     if (!mapInstance || !isLoaded) return;
 
-    let coordinates;
-    Object.keys(neighboringTyphoons).forEach((sid) => {
-      const tracks = neighboringTyphoons[sid];
-      if (sid === showNeighbor) {
-        coordinates = (tracks.map((values, index) => {
-          const longitude = values[1];
-          const latitude = values[0];
-          return [longitude, latitude]
-        }));
+    let coordinates = [];
+    for (const sid of Object.keys(neighboringTyphoons)) {
+      if (sid == showNeighbor[0]) {
+        for (const track of neighboringTyphoons[sid][0]) {
+          coordinates.push([track[1], track[0]]);
+        }
+        break;
       }
-    });
-
-
-
-
+    }
+    
     const source = mapInstance.getSource('neighbor-route');
-    if (source && !coordinates) {
-      source.setData({
-        type: 'Feature',
-        properties: {},
-        geometry: { type: 'LineString', coordinates: [] }
-      });
-    } else if (source) {
+    if (source) {
       source.setData({
         type: 'Feature',
         properties: {},
@@ -266,6 +284,7 @@ const Map = forwardRef(function Map(
     } else {
       mapInstance.addSource('neighbor-route', {
         type: 'geojson',
+        lineMetrics: true, // required for line-gradient to work
         data: {
           type: 'Feature',
           properties: {},
@@ -278,47 +297,17 @@ const Map = forwardRef(function Map(
         type: 'line',
         source: 'neighbor-route',
         layout: { 'line-join': 'round', 'line-cap': 'round' },
-        paint: { 'line-color': '#888', 'line-width': 8 }
-      });
-    }
-
-  }, [mapInstance, isLoaded, neighboringTyphoons, showNeighbor]);
-
-  // draws the line for the incoming typhoon
-  useEffect(() => {
-    if (!mapInstance || !isLoaded) return;
-
-    const coordinates = (typhoonLocations.map((track) => {
-      return [track.lng, track.lat]
-    }));
-
-    const source = mapInstance.getSource('route');
-    if (source) {
-      source.setData({
-        type: 'Feature',
-        properties: {},
-        geometry: { type: 'LineString', coordinates }
-      });
-    } else {
-      mapInstance.addSource('route', {
-        type: 'geojson',
-        data: {
-          type: 'Feature',
-          properties: {},
-          geometry: { type: 'LineString', coordinates }
+        paint: {
+          'line-width': 5,
+          'line-gradient': [
+            'interpolate', ['linear'], ['line-progress'],
+            0, '#fde68a',   // amber-200 at the oldest point
+            1, '#f59e0b'    // amber-500 near the live position
+          ]
         }
       });
-
-      mapInstance.addLayer({
-        id: 'route',
-        type: 'line',
-        source: 'route',
-        layout: { 'line-join': 'round', 'line-cap': 'round' },
-        paint: { 'line-color': '#888', 'line-width': 8 }
-      });
     }
-
-  }, [mapInstance, isLoaded, typhoonLocations]);
+  }, [mapInstance, isLoaded, showNeighbor]);
 
   // Sync controlled viewport to map
   useEffect(() => {
@@ -515,19 +504,72 @@ function MapMarker({
 
 function MarkerContent({
   children,
-  className
+  neighbor = false,
+  index,
+  total,
+  className,
+  pulsating = false,
+  pulseColor = neighbor ? "#f59e0b" : "#10b981",
+  size = 14,
 }) {
   const { marker } = useMarkerContext();
 
-  return createPortal(<div className={cn("relative cursor-pointer", className)}>
-    {children || <DefaultMarkerIcon />}
-  </div>, marker.getElement());
+  return createPortal(
+    <div className={cn("relative cursor-pointer", className)}>
+      {pulsating ? (
+        <div
+          className="relative flex items-center justify-center"
+          style={{ width: size * 2.5, height: size * 2.5 }}
+        >
+          <span
+            className="absolute inline-flex h-full w-full rounded-full opacity-60 animate-ping"
+            style={{ backgroundColor: pulseColor }}
+          />
+          <span
+            className="relative inline-flex rounded-full border-2 border-white/80 shadow-md"
+            style={{ backgroundColor: pulseColor, width: size, height: size }}
+          />
+        </div>
+      ) : (
+        <DefaultMarkerIcon index={index} total={total} neighbor={neighbor}/>
+      )}
+    </div>,
+    marker.getElement()
+  );
 }
 
-function DefaultMarkerIcon() {
+function DefaultMarkerIcon({ size = 14, index = 0, total = 1, neighbor = false}) {
+  // progress: 0 at start of list, 1 at the end
+  const progress = total > 1 ? index / (total - 1) : 1;
+
+  // interpolate from a dim gray-green toward full emerald as progress increases
+  let startColor;
+  let endColor;
+  if (!neighbor) {
+    startColor = [107, 114, 128]; 
+    endColor = [16, 185, 129];    
+  } else {
+    startColor = [253, 230, 138]; 
+    endColor = [245, 158, 11];  
+  }
+
+  const r = Math.round(startColor[0] + (endColor[0] - startColor[0]) * progress);
+  const g = Math.round(startColor[1] + (endColor[1] - startColor[1]) * progress);
+  const b = Math.round(startColor[2] + (endColor[2] - startColor[2]) * progress);
+
+  const color = `rgb(${r}, ${g}, ${b})`;
+
   return (
     <div
-      className="relative h-4 w-4 rounded-full border-2 border-white bg-blue-500 shadow-lg" />
+      className="relative flex items-center justify-center transition-transform hover:scale-110"
+      style={{ width: size * 1.8, height: size * 1.8 }}
+    >
+      {/* solid dot */}
+      <div
+        className="relative rounded-full border-2 border-white shadow-[0_2px_5px_rgba(0,0,0,0.5)]"
+        style={{ width: size, height: size, backgroundColor: color }}
+      />
+    </div>
   );
 }
 
@@ -733,7 +775,7 @@ function MapControls({
   showLocate = false,
   showFullscreen = false,
   showRecenter = true,
-  recenterTarget, 
+  recenterTarget,
   className,
   onLocate,
 }) {

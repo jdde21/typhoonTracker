@@ -65,35 +65,3 @@ export default function Cabinet({ neighboringTyphoons = [], onSelect }) {
         </div>
     );
 }
-
-// (tracks) => (
-//     tracks.map((item, idx) => (
-//         <div
-//           key={item.id ?? idx}
-//           className="flex items-center gap-2.5 px-3 py-2.5 border-b border-zinc-100 dark:border-zinc-800 last:border-b-0 hover:bg-zinc-50 dark:hover:bg-zinc-800 cursor-pointer transition-colors"
-//           onClick={() => onSelect?.(item)}
-//         >
-//           {/* Icon slot */}
-//           <span className="text-zinc-400 text-base shrink-0">🌀</span>
-
-//           {/* Label + meta */}
-//           <div className="flex-1 min-w-0">
-//             <p className="font-medium text-zinc-800 dark:text-zinc-100 truncate">
-//               {item.label}
-//             </p>
-//             <p className="text-[11px] text-zinc-400">{item.meta}</p>
-//           </div>
-
-//           {/* Badge */}
-//           <span
-//             className={`text-[10px] font-medium px-2 py-0.5 rounded-full shrink-0 ${
-//               BADGE_STYLES[item.category] ?? "bg-zinc-100 text-zinc-600"
-//             }`}
-//           >
-//             {BADGE_LABELS[item.category] ?? item.category}
-//           </span>
-
-//           <span className="text-zinc-300 text-xs">›</span>
-//         </div>
-//       )
-// ))
