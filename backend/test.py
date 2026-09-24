@@ -1,5 +1,5 @@
 import numpy as np
-from helper import get_database_by_agency, coordinates_to_dict, determine_weights, predicted_track, get_database_by_agency_additional_properties, coordinates_cleaner, rf_predicted_track, interval_getter
+from helper import get_database_by_agency, coordinates_to_dict, determine_weights, predicted_track, get_database_by_agency_additional_properties, coordinates_cleaner, rf_predicted_track, typhoons_within_proximity
 
 
 SCORES = []
@@ -126,24 +126,34 @@ def all_typhoons_tracks_getter(agency, year_range=[float('-inf'),float('inf')]):
         dict_of_tracks[sid] = total_list_of_coordinates
     return dict_of_tracks
 
-def typhoons_within_proximity(center, typhoon_coords):
-    radius_in_kilometers = 50
-    km_per_degree_longitude = {0: 111.3, 15: 107.5, 30: 96.4, 45: 78.7, 60: 55.8, 80: 19.3}
-    
-    latitude, longitude = center
-    typhoon_lat, typhoon_long = typhoon_coords
-    
-    denominator = km_per_degree_longitude[interval_getter(latitude)]
-    radius = radius_in_kilometers/denominator
-    
-    vertical_diff = (latitude - typhoon_lat)**2
-    horizontal_diff = (longitude - typhoon_long)**2
-    sum_of_differences = vertical_diff + horizontal_diff
-    
-    if (sum_of_differences <= radius**2):
-        return True
-    return False
+def typhoon_identifier(agency, year_range):
+    typhoon_database = get_database_by_agency(agency)
+    list_of_sid = typhoon_database["SID"].values.tolist()
+    dict_of_tracks = {}
+    naga_city = [13.6218, 123.1948]
+    for sid in list_of_sid:
+        within_proximity = False
+        year = int(sid[0:4])
+        if (len(year_range) != 0 and (year < year_range[0] or year > year_range[1])):
+            continue
         
+        row = typhoon_database[typhoon_database["SID"] == sid]
+        list_of_coordinates = row["COORDINATES"].values[0]
+        coordinates = coordinates_cleaner(list_of_coordinates)
+        total_list_of_coordinates = []
+        for coordinate in coordinates: # para makuha yung index
+            temp = coordinate
+            temp = temp.replace('(', '')
+            temp = temp.replace(')', '')
+            temp = temp.split(',')
+            temp = list(map(float, temp)) # converted the coordinates to a float instead of a string
+            typhoon_coords = [temp[0], temp[1]]
+            if typhoons_within_proximity(naga_city, typhoon_coords) and not within_proximity:
+                within_proximity = True
+            total_list_of_coordinates.append(temp)
+        
+        if within_proximity:
+            dict_of_tracks[sid] = total_list_of_coordinates
 
 if __name__ == "__main__":
     year_range_getter()

@@ -1,4 +1,4 @@
-from test import typhoon_tracker, sid_track_scores_dict, names_printer, year_range_getter, wind_speed_and_pressure_getter, all_typhoons_tracks_getter, typhoons_within_proximity
+from test import typhoon_tracker, sid_track_scores_dict, names_printer, year_range_getter, wind_speed_and_pressure_getter, all_typhoons_tracks_getter, typhoon_identifier
 from fastapi.middleware.cors import CORSMiddleware
 from ai_chatbot import define_retriever, chatbot
 from typing import List, Optional
@@ -127,7 +127,7 @@ def get_live_typhoons_names():
 def test():
     center = [14.5995, 120.9842]
     typhoon_coords = [13.7565, 121.0583]
-    return typhoons_within_proximity(center, typhoon_coords)
+    return typhoon_identifier("default",[])
 
 
 # @app.get('/most_recent')
