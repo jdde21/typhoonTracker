@@ -1,5 +1,5 @@
 import numpy as np
-from helper import get_database_by_agency, coordinates_to_dict, determine_weights, predicted_track, get_database_by_agency_additional_properties, coordinates_cleaner, rf_predicted_track
+from helper import get_database_by_agency, coordinates_to_dict, determine_weights, predicted_track, get_database_by_agency_additional_properties, coordinates_cleaner, rf_predicted_track, interval_getter
 
 
 SCORES = []
@@ -125,6 +125,24 @@ def all_typhoons_tracks_getter(agency, year_range=[float('-inf'),float('inf')]):
             
         dict_of_tracks[sid] = total_list_of_coordinates
     return dict_of_tracks
+
+def typhoons_within_proximity(center, typhoon_coords):
+    radius_in_kilometers = 50
+    km_per_degree_longitude = {0: 111.3, 15: 107.5, 30: 96.4, 45: 78.7, 60: 55.8, 80: 19.3}
+    
+    latitude, longitude = center
+    typhoon_lat, typhoon_long = typhoon_coords
+    
+    denominator = km_per_degree_longitude[interval_getter(latitude)]
+    radius = radius_in_kilometers/denominator
+    
+    vertical_diff = (latitude - typhoon_lat)**2
+    horizontal_diff = (longitude - typhoon_long)**2
+    sum_of_differences = vertical_diff + horizontal_diff
+    
+    if (sum_of_differences <= radius**2):
+        return True
+    return False
         
 
 if __name__ == "__main__":

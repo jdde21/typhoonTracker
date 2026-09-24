@@ -312,4 +312,15 @@ def rf_predicted_track(recent_typhoons_dict_closest_to_farthest, inputs, unique_
     return np.concatenate((inputs[:, :2], predicted_track), axis=0)
         
         
+def interval_getter(latitude):
+    if latitude < 15:
+        return 0
+    elif latitude < 30:
+        return 15
+    elif latitude < 45:
+        return 30
+    elif latitude < 60:
+        return 45
+    elif latitude < 80:
+        return 60
         
