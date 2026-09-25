@@ -16,8 +16,8 @@ import {
 import { createPortal } from "react-dom";
 import { X, Minus, Plus, Locate, Maximize, Loader2, Crosshair } from "lucide-react";
 import { TyphoonDataContext } from '../../App';
-
 import { cn } from "@/lib/utils";
+import * as turf from '@turf/turf';
 
 const defaultStyles = {
   dark: "https://basemaps.cartocdn.com/gl/dark-matter-gl-style/style.json",
@@ -124,6 +124,7 @@ const Map = forwardRef(function Map(
     viewport,
     onViewportChange,
     loading = false,
+    circle_center = [123.1948, 13.6218],
     ...props
   },
   ref,
@@ -177,6 +178,38 @@ const Map = forwardRef(function Map(
       ...viewport,
     });
 
+    const placeCircle = () => {
+      if (circle_center.length == 0) return;
+      
+      const radiusInKm = 50;
+      const circle = turf.circle(circle_center, radiusInKm, { units: 'kilometers', steps: 64 });
+
+      map.addSource('circle-source', {
+        type: 'geojson',
+        data: circle
+      });
+    
+      map.addLayer({
+        id: 'circle-fill',
+        type: 'fill',
+        source: 'circle-source',
+        paint: {
+          'fill-color': '#007cbf',
+          'fill-opacity': 0.3
+        }
+      });
+      
+      map.addLayer({
+        id: 'circle-outline',
+        type: 'line',
+        source: 'circle-source',
+        paint: {
+          'line-color': '#007cbf',
+          'line-width': 2
+        }
+      });
+    }
+
   
     const styleDataHandler = () => {
       clearStyleTimeout();
@@ -190,7 +223,7 @@ const Map = forwardRef(function Map(
         }
       }, 100);
     };
-    const loadHandler = () => setIsLoaded(true);
+    const loadHandler = () => setIsLoaded(true)
 
     // Viewport change handler - skip if triggered by internal update
     const handleMove = () => {
@@ -199,9 +232,11 @@ const Map = forwardRef(function Map(
     };
 
     map.on("load", loadHandler);
+    map.on("load", placeCircle);
     map.on("styledata", styleDataHandler);
     map.on("move", handleMove);
     setMapInstance(map);
+
 
     return () => {
       clearStyleTimeout();
@@ -219,7 +254,7 @@ const Map = forwardRef(function Map(
     // draws the line for the incoming typhoon
     useEffect(() => {
       if (!mapInstance || !isLoaded) return;
-  
+    
       const coordinates = (typhoonLocations.map((track) => {
         return [track.lng, track.lat]
       }));
