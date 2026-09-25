@@ -124,7 +124,6 @@ const Map = forwardRef(function Map(
     viewport,
     onViewportChange,
     loading = false,
-    circle_center = [123.1948, 13.6218],
     ...props
   },
   ref,
@@ -138,6 +137,8 @@ const Map = forwardRef(function Map(
   const styleTimeoutRef = useRef(null);
   const internalUpdateRef = useRef(false);
   const resolvedTheme = useResolvedTheme(themeProp);
+
+  const markerRef = useRef(null);
 
   const isControlled = viewport !== undefined && onViewportChange !== undefined;
 
@@ -178,17 +179,45 @@ const Map = forwardRef(function Map(
       ...viewport,
     });
 
-    const placeCircle = () => {
-      if (circle_center.length == 0) return;
-      
-      const radiusInKm = 50;
-      const circle = turf.circle(circle_center, radiusInKm, { units: 'kilometers', steps: 64 });
 
+    const handleClick = (e) => {
+      const { lng, lat } = e.lngLat;
+      if (markerRef.current) {
+        markerRef.current.setLngLat([lng, lat]);
+        placeCircle([lng, lat], false);
+      } else {
+        markerRef.current = new MapLibreGL.Marker({ draggable: true, color: '#e11d48' })
+          .setLngLat([lng, lat])
+          .addTo(map);
+
+        markerRef.current.on('dragend', () => {
+          const pos = markerRef.current.getLngLat();
+          // setCoords(pos);
+          // onPinDropped(pos);
+        });
+        placeCircle([lng, lat], true);
+      }
+  
+      // console.log(e.lngLat)
+      // setCoords({ lng, lat });
+      // onPinDropped({ lng, lat });
+    }
+
+    const placeCircle = (circle_center, first_time) => {
+      if (circle_center.length == 0) return;
+
+      const radiusInKm = 50;
+      if (!first_time) {
+        const newCircle = turf.circle(circle_center, radiusInKm, { units: 'kilometers', steps: 64 });
+        map.getSource('circle-source').setData(newCircle);
+        return;
+      } 
+      const circle = turf.circle(circle_center, radiusInKm, { units: 'kilometers', steps: 64 });
       map.addSource('circle-source', {
         type: 'geojson',
         data: circle
       });
-    
+
       map.addLayer({
         id: 'circle-fill',
         type: 'fill',
@@ -198,7 +227,7 @@ const Map = forwardRef(function Map(
           'fill-opacity': 0.3
         }
       });
-      
+
       map.addLayer({
         id: 'circle-outline',
         type: 'line',
@@ -210,7 +239,7 @@ const Map = forwardRef(function Map(
       });
     }
 
-  
+
     const styleDataHandler = () => {
       clearStyleTimeout();
       // Delay to ensure style is fully processed before allowing layer operations
@@ -232,9 +261,10 @@ const Map = forwardRef(function Map(
     };
 
     map.on("load", loadHandler);
-    map.on("load", placeCircle);
+    // map.on("load", placeCircle);
     map.on("styledata", styleDataHandler);
     map.on("move", handleMove);
+    map.on("click", handleClick);
     setMapInstance(map);
 
 
@@ -251,49 +281,49 @@ const Map = forwardRef(function Map(
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-    // draws the line for the incoming typhoon
-    useEffect(() => {
-      if (!mapInstance || !isLoaded) return;
-    
-      const coordinates = (typhoonLocations.map((track) => {
-        return [track.lng, track.lat]
-      }));
-  
-      const source = mapInstance.getSource('route');
-      if (source) {
-        source.setData({
+  // draws the line for the incoming typhoon
+  useEffect(() => {
+    if (!mapInstance || !isLoaded) return;
+
+    const coordinates = (typhoonLocations.map((track) => {
+      return [track.lng, track.lat]
+    }));
+
+    const source = mapInstance.getSource('route');
+    if (source) {
+      source.setData({
+        type: 'Feature',
+        properties: {},
+        geometry: { type: 'LineString', coordinates }
+      });
+    } else {
+      mapInstance.addSource('route', {
+        type: 'geojson',
+        lineMetrics: true, // required for line-gradient to work
+        data: {
           type: 'Feature',
           properties: {},
           geometry: { type: 'LineString', coordinates }
-        });
-      } else {
-        mapInstance.addSource('route', {
-          type: 'geojson',
-          lineMetrics: true, // required for line-gradient to work
-          data: {
-            type: 'Feature',
-            properties: {},
-            geometry: { type: 'LineString', coordinates }
-          }
-        });
-  
-        mapInstance.addLayer({
-          id: 'route',
-          type: 'line',
-          source: 'route',
-          layout: { 'line-join': 'round', 'line-cap': 'round' },
-          paint: {
-            'line-width': 8,
-            'line-gradient': [
-              'interpolate', ['linear'], ['line-progress'],
-              0, '#6b7280',   // start color
-              1, '#10b981'    // end color
-            ]
-          }
-        });
-      }
-  
-    }, [mapInstance, isLoaded, typhoonLocations]);
+        }
+      });
+
+      mapInstance.addLayer({
+        id: 'route',
+        type: 'line',
+        source: 'route',
+        layout: { 'line-join': 'round', 'line-cap': 'round' },
+        paint: {
+          'line-width': 8,
+          'line-gradient': [
+            'interpolate', ['linear'], ['line-progress'],
+            0, '#6b7280',   // start color
+            1, '#10b981'    // end color
+          ]
+        }
+      });
+    }
+
+  }, [mapInstance, isLoaded, typhoonLocations]);
 
   // draws the line for the selected neighbor typhoon
   useEffect(() => {
@@ -308,7 +338,7 @@ const Map = forwardRef(function Map(
         break;
       }
     }
-    
+
     const source = mapInstance.getSource('neighbor-route');
     if (source) {
       source.setData({
@@ -566,14 +596,14 @@ function MarkerContent({
           />
         </div>
       ) : (
-        <DefaultMarkerIcon index={index} total={total} neighbor={neighbor}/>
+        <DefaultMarkerIcon index={index} total={total} neighbor={neighbor} />
       )}
     </div>,
     marker.getElement()
   );
 }
 
-function DefaultMarkerIcon({ size = 14, index = 0, total = 1, neighbor = false}) {
+function DefaultMarkerIcon({ size = 14, index = 0, total = 1, neighbor = false }) {
   // progress: 0 at start of list, 1 at the end
   const progress = total > 1 ? index / (total - 1) : 1;
 
@@ -581,11 +611,11 @@ function DefaultMarkerIcon({ size = 14, index = 0, total = 1, neighbor = false})
   let startColor;
   let endColor;
   if (!neighbor) {
-    startColor = [107, 114, 128]; 
-    endColor = [16, 185, 129];    
+    startColor = [107, 114, 128];
+    endColor = [16, 185, 129];
   } else {
-    startColor = [253, 230, 138]; 
-    endColor = [245, 158, 11];  
+    startColor = [253, 230, 138];
+    endColor = [245, 158, 11];
   }
 
   const r = Math.round(startColor[0] + (endColor[0] - startColor[0]) * progress);
