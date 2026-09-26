@@ -1,6 +1,5 @@
 import React, { useState, useContext } from 'react';
 import { Card } from './ui/card';
-import { Trash } from 'lucide-react';
 import { TyphoonDataContext } from '../App';
 import { Plus } from "lucide-react";
 

@@ -128,7 +128,7 @@ const Map = forwardRef(function Map(
   },
   ref,
 ) {
-  const { typhoonLocations, neighboringTyphoons, showNeighbor } = useContext(TyphoonDataContext);
+  const { typhoonLocations, neighboringTyphoons, showNeighbor, isDraggable } = useContext(TyphoonDataContext);
   const containerRef = useRef(null);
   const [mapInstance, setMapInstance] = useState(null);
   const [isLoaded, setIsLoaded] = useState(false);
@@ -192,15 +192,10 @@ const Map = forwardRef(function Map(
 
         markerRef.current.on('dragend', () => {
           const pos = markerRef.current.getLngLat();
-          // setCoords(pos);
-          // onPinDropped(pos);
         });
         placeCircle([lng, lat], true);
       }
   
-      // console.log(e.lngLat)
-      // setCoords({ lng, lat });
-      // onPinDropped({ lng, lat });
     }
 
     const placeCircle = (circle_center, first_time) => {

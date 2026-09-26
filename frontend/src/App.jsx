@@ -1,5 +1,5 @@
 import ParisMap from "./components/parisMap"
-import { createContext, useState, useRef, useEffect } from "react"
+import { createContext, useState, useRef } from "react"
 import './App.css';
 import RoutePoints from "./components/routesForm"
 import NeighborTyphoonCard from "./components/neighborTyphoonCard";
@@ -40,6 +40,7 @@ export function App() {
   const [model, setModel] = useState(MODELS[0]);
   const [sideDrawerDatabase, setSideDrawerDatabase] = useState(TYPHOON_AGENCIES[0]);
   const [fetching, setFetching] = useState(false);
+  const [isDraggable, setDraggable] = useState(false);
   const itemsRef = useRef([0, 0]);
 
 
@@ -82,7 +83,7 @@ export function App() {
         setNeighborTyphoonsSID, showNeighbor, setShowNeighbor, neighboringTyphoonsNames, setNeighboringTyphoonsNames,
         setNeighboringTyphoonsAdditionalProperties, database, setDatabase, setSideDrawerDatabase, sideDrawerDatabase,
         all_typhoons, year_range, TYPHOON_AGENCIES, itemsRef, sideDrawerLoading, setFetching, showTyphoon, setShowTyphoon,
-        get_live_typhoons_names, model, setModel
+        get_live_typhoons_names, model, setModel, setDraggable, isDraggable
       }}>
 
         <NeighboringTyphoonsDrawer></NeighboringTyphoonsDrawer>
