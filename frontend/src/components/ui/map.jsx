@@ -18,6 +18,9 @@ import { X, Minus, Plus, Locate, Maximize, Loader2, Crosshair } from "lucide-rea
 import { TyphoonDataContext } from '../../App';
 import { cn } from "@/lib/utils";
 import * as turf from '@turf/turf';
+import { createRoot } from 'react-dom/client';
+import PriceRangeSlider from "../PriceRangeSlider";
+import { createMarkerElement } from '../utils/CreateMarkerElement';
 
 const defaultStyles = {
   dark: "https://basemaps.cartocdn.com/gl/dark-matter-gl-style/style.json",
@@ -128,7 +131,7 @@ const Map = forwardRef(function Map(
   },
   ref,
 ) {
-  const { typhoonLocations, neighboringTyphoons, showNeighbor, isDraggable } = useContext(TyphoonDataContext);
+  const { typhoonLocations, neighboringTyphoons, showNeighbor, year_range, database } = useContext(TyphoonDataContext);
   const containerRef = useRef(null);
   const [mapInstance, setMapInstance] = useState(null);
   const [isLoaded, setIsLoaded] = useState(false);
@@ -139,6 +142,7 @@ const Map = forwardRef(function Map(
   const resolvedTheme = useResolvedTheme(themeProp);
 
   const markerRef = useRef(null);
+  const popupRef = useRef(null);
 
   const isControlled = viewport !== undefined && onViewportChange !== undefined;
 
@@ -180,33 +184,85 @@ const Map = forwardRef(function Map(
     });
 
 
+    const popupNode = document.createElement('div');
+    const root = createRoot(popupNode);
+    root.render(
+      <div
+        className="flex flex-col gap-3 w-[260px] p-4 rounded-lg border border-white/10 shadow-lg"
+        style={{
+          background: "rgba(30, 34, 40, 0.55)",
+          backdropFilter: "blur(10px)",
+          WebkitBackdropFilter: "blur(10px)",
+        }}
+      >
+        <div className="flex flex-col gap-1 w-[90%] mx-auto">
+          <PriceRangeSlider
+            showLabel
+            width="100%"
+            min={!year_range ? 10 : year_range[database][0]}
+            max={!year_range ? 10 : year_range[database][1]}
+            onChange={() => { }}
+          />
+        </div>
+        <button
+          onClick={() => { }}
+          className="w-full py-2 rounded-md bg-white/10 text-white text-sm font-medium border border-white/20 hover:bg-white/20 transition-colors"
+        >
+          Submit
+        </button>
+      </div>
+    );
+
     const handleClick = (e) => {
       const { lng, lat } = e.lngLat;
+
       if (markerRef.current) {
         markerRef.current.setLngLat([lng, lat]);
-        placeCircle([lng, lat], false);
+        updatePopup(lng, lat)
       } else {
-        markerRef.current = new MapLibreGL.Marker({ draggable: true, color: '#e11d48' })
+        const el = createMarkerElement();
+
+        markerRef.current = new MapLibreGL.Marker({ element: el, draggable: true, color: '#e11d48' })
           .setLngLat([lng, lat])
           .addTo(map);
 
-        markerRef.current.on('dragend', () => {
+        placeCircle([lng, lat]);
+
+        popupRef.current = new MapLibreGL.Popup({
+          closeButton: false,
+          closeOnClick: false,
+          anchor: 'bottom-left',
+          offset: 25,
+        })
+          .setLngLat([lng, lat])
+          .setDOMContent(popupNode)
+          .addTo(map);
+
+        markerRef.current.on('drag', () => {
           const pos = markerRef.current.getLngLat();
+          popupRef.current.setLngLat(pos);
+          placeCircle([pos.lng, pos.lat]);
         });
-        placeCircle([lng, lat], true);
+
       }
-  
+    };
+
+
+    function updatePopup(lng, lat) {
+      if (popupRef.current) {
+        popupRef.current.setLngLat([lng, lat]);
+      }
     }
 
-    const placeCircle = (circle_center, first_time) => {
+    const placeCircle = (circle_center) => {
       if (circle_center.length == 0) return;
 
       const radiusInKm = 50;
-      if (!first_time) {
+      if (map.getSource('circle-source')) {
         const newCircle = turf.circle(circle_center, radiusInKm, { units: 'kilometers', steps: 64 });
         map.getSource('circle-source').setData(newCircle);
         return;
-      } 
+      }
       const circle = turf.circle(circle_center, radiusInKm, { units: 'kilometers', steps: 64 });
       map.addSource('circle-source', {
         type: 'geojson',
