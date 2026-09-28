@@ -21,6 +21,7 @@ import * as turf from '@turf/turf';
 import { createRoot } from 'react-dom/client';
 import PriceRangeSlider from "../PriceRangeSlider";
 import { createMarkerElement } from '../utils/CreateMarkerElement';
+import { test } from "../../api/typhoons";
 
 const defaultStyles = {
   dark: "https://basemaps.cartocdn.com/gl/dark-matter-gl-style/style.json",
@@ -183,9 +184,14 @@ const Map = forwardRef(function Map(
       ...viewport,
     });
 
-   
+
+
     const handleClick = (e) => {
       const { lng, lat } = e.lngLat;
+
+      async function handleSubmit() {
+        const res = await test([lat, lng]);
+      }
 
       if (markerRef.current) {
         markerRef.current.setLngLat([lng, lat]);
@@ -214,7 +220,7 @@ const Map = forwardRef(function Map(
               />
             </div>
             <button
-              onClick={() => { }}
+              onClick={handleSubmit}
               className="w-full py-2 rounded-md bg-white/10 text-white text-sm font-medium border border-white/20 hover:bg-white/20 transition-colors"
             >
               Submit

@@ -29,6 +29,9 @@ class Body(BaseModel):
 class Query(BaseModel):
     question: str
 
+class CityCoordinates(BaseModel):
+    coordinates: List[float]
+    
 items = []
 list_coordinates = []
 
@@ -123,11 +126,10 @@ def get_live_typhoons_names():
     live_typhoon_list = WEATHER_DISTURBANCES_COLLECTION.find_one()["names"]
     return live_typhoon_list
 
-@app.get("/test")
-def test():
-    center = [14.5995, 120.9842]
-    typhoon_coords = [13.7565, 121.0583]
-    return typhoon_identifier("default",[])
+@app.post("/test")
+def test(body: CityCoordinates):
+    print(body.coordinates)
+    return typhoon_identifier("default", body.coordinates)
 
 
 # @app.get('/most_recent')

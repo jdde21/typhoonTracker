@@ -126,11 +126,12 @@ def all_typhoons_tracks_getter(agency, year_range=[float('-inf'),float('inf')]):
         dict_of_tracks[sid] = total_list_of_coordinates
     return dict_of_tracks
 
-def typhoon_identifier(agency, year_range):
+def typhoon_identifier(agency, coordinates):
+    year_range = []
     typhoon_database = get_database_by_agency(agency)
     list_of_sid = typhoon_database["SID"].values.tolist()
     dict_of_tracks = {}
-    naga_city = [13.6218, 123.1948]
+    naga_city = coordinates
     for sid in list_of_sid:
         within_proximity = False
         year = int(sid[0:4])
@@ -154,6 +155,7 @@ def typhoon_identifier(agency, year_range):
         
         if within_proximity:
             dict_of_tracks[sid] = total_list_of_coordinates
+    return dict_of_tracks
 
 if __name__ == "__main__":
     year_range_getter()
