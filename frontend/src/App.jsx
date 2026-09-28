@@ -61,6 +61,7 @@ export function App() {
     queryKey: ["year_range"],
     queryFn: async () => {
       const res = await fetch("http://127.0.0.1:8000/year_getter");
+      // console.log("origin", await res.json());
       return res.json();
     }
   });
@@ -87,11 +88,7 @@ export function App() {
       }}>
 
         <NeighboringTyphoonsDrawer></NeighboringTyphoonsDrawer>
-
         <ParisMap />
-
-
-
         <RoutePoints />
 
 

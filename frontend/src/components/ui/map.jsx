@@ -183,44 +183,44 @@ const Map = forwardRef(function Map(
       ...viewport,
     });
 
-
-    const popupNode = document.createElement('div');
-    const root = createRoot(popupNode);
-    root.render(
-      <div
-        className="flex flex-col gap-3 w-[260px] p-4 rounded-lg border border-white/10 shadow-lg"
-        style={{
-          background: "rgba(30, 34, 40, 0.55)",
-          backdropFilter: "blur(10px)",
-          WebkitBackdropFilter: "blur(10px)",
-        }}
-      >
-        <div className="flex flex-col gap-1 w-[90%] mx-auto">
-          <PriceRangeSlider
-            showLabel
-            width="100%"
-            min={!year_range ? 10 : year_range[database][0]}
-            max={!year_range ? 10 : year_range[database][1]}
-            onChange={() => { }}
-          />
-        </div>
-        <button
-          onClick={() => { }}
-          className="w-full py-2 rounded-md bg-white/10 text-white text-sm font-medium border border-white/20 hover:bg-white/20 transition-colors"
-        >
-          Submit
-        </button>
-      </div>
-    );
-
+   
     const handleClick = (e) => {
       const { lng, lat } = e.lngLat;
 
       if (markerRef.current) {
         markerRef.current.setLngLat([lng, lat]);
-        updatePopup(lng, lat)
+        updatePopup(lng, lat);
+        placeCircle([lng, lat]);
       } else {
         const el = createMarkerElement();
+        const popupNode = document.createElement('div');
+        const root = createRoot(popupNode);
+        root.render(
+          <div
+            className="flex flex-col gap-3 w-[260px] p-4 rounded-lg border border-white/10 shadow-lg"
+            style={{
+              background: "rgba(30, 34, 40, 0.55)",
+              backdropFilter: "blur(10px)",
+              WebkitBackdropFilter: "blur(10px)",
+            }}
+          >
+            <div className="flex flex-col gap-1 w-[90%] mx-auto">
+              <PriceRangeSlider
+                showLabel
+                width="100%"
+                min={!year_range ? 10 : year_range[database][0]}
+                max={!year_range ? 10 : year_range[database][1]}
+                onChange={() => { }}
+              />
+            </div>
+            <button
+              onClick={() => { }}
+              className="w-full py-2 rounded-md bg-white/10 text-white text-sm font-medium border border-white/20 hover:bg-white/20 transition-colors"
+            >
+              Submit
+            </button>
+          </div>
+        );
 
         markerRef.current = new MapLibreGL.Marker({ element: el, draggable: true, color: '#e11d48' })
           .setLngLat([lng, lat])
@@ -330,7 +330,7 @@ const Map = forwardRef(function Map(
       setMapInstance(null);
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [year_range]);
 
   // draws the line for the incoming typhoon
   useEffect(() => {
