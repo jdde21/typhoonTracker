@@ -87,13 +87,13 @@ export function App() {
       }}>
 
         <NeighboringTyphoonsDrawer></NeighboringTyphoonsDrawer>
-        <div className="h-full w-full">
-          <ParisMap />
-        </div>
 
-        <div className="absolute top-[5%] w-[20%] h-[90%] z-10">
-          <RoutePoints />
-        </div>
+        <ParisMap />
+
+
+
+        <RoutePoints />
+
 
         <div className="absolute bottom-4 left-1/2 -translate-x-1/2 z-10 w-full">
           <div className="w-[80%] m-auto">
@@ -131,16 +131,16 @@ export function App() {
           </div>
         </div>
         <AiChatWidget
-        onAsk={async (question) => {
-          const res = await fetch("http://127.0.0.1:8000/chat", {
-            method: "POST", headers: {
-              'Content-Type': 'application/json'
-            }, body: JSON.stringify({ question })
-          });
-          const data = await res.json();
-          return data; // shown in the dialog
-        }}
-      />
+          onAsk={async (question) => {
+            const res = await fetch("http://127.0.0.1:8000/chat", {
+              method: "POST", headers: {
+                'Content-Type': 'application/json'
+              }, body: JSON.stringify({ question })
+            });
+            const data = await res.json();
+            return data; // shown in the dialog
+          }}
+        />
       </TyphoonDataContext.Provider>
     </div>
   )
