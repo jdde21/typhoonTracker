@@ -1,7 +1,7 @@
 import { useState, useContext } from "react";
 import { createPortal } from "react-dom";
 import { ChevronUp, ChevronDown } from "lucide-react";
-import { TyphoonDataContext } from '../App';
+import { TyphoonDataContext } from '../../App';
 
 const BADGE_STYLES = {
   CAT1: { bg: "rgba(243,156,18,0.18)", color: "#f7b955" },

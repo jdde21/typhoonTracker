@@ -19,8 +19,8 @@ import { TyphoonDataContext } from '../../App';
 import { cn } from "@/lib/utils";
 import * as turf from '@turf/turf';
 import { createRoot } from 'react-dom/client';
-import PriceRangeSlider from "../PriceRangeSlider";
-import { createMarkerElement } from '../utils/CreateMarkerElement';
+import PriceRangeSlider from "./PriceRangeSlider";
+import { createMarkerElement } from './CreateMarkerElement';
 import { test } from "../../api/typhoons";
 
 const defaultStyles = {

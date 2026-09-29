@@ -1,13 +1,13 @@
-import ParisMap from "./components/parisMap"
+import MainMap from "./components/MainMap"
 import { createContext, useState, useRef } from "react"
 import './App.css';
-import RoutePoints from "./components/routesForm"
-import NeighborTyphoonCard from "./components/neighborTyphoonCard";
+import RoutePoints from "./components/typhoonPrediction/RoutesForm";
+import NeighborTyphoonCard from "./components/typhoonPrediction/NeighborTyphoonCard";
 import SliderPkg from 'react-slick';
 import { useQuery } from "@tanstack/react-query";
 import "slick-carousel/slick/slick.css";
 import "slick-carousel/slick/slick-theme.css";
-import NeighboringTyphoonsDrawer from "./components/testDrawer";
+import NeighboringTyphoonsDrawer from "./components/TyphoonDrawer";
 import AiChatWidget from "./components/AiChatWidget";
 export const TyphoonDataContext = createContext();
 
@@ -87,8 +87,8 @@ export function App() {
         get_live_typhoons_names, model, setModel, setDraggable, isDraggable
       }}>
 
-        <NeighboringTyphoonsDrawer></NeighboringTyphoonsDrawer>
-        <ParisMap />
+        <NeighboringTyphoonsDrawer />
+        <MainMap />
         <RoutePoints />
 
 

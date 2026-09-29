@@ -1,6 +1,6 @@
 import React, { useContext } from 'react'
-import { Map, MapControls, MapMarker, MarkerContent, MarkerTooltip, MarkerPopup } from './ui/map'
-import { Card } from './ui/card'
+import { Map, MapControls, MapMarker, MarkerContent, MarkerTooltip, MarkerPopup } from './utils/Map'
+import { Card } from './utils/Card'
 import { TyphoonDataContext } from '../App';
 
 
@@ -9,10 +9,9 @@ const DEFAULT_COORDINATES = [128.6, 8.1]
 const DEFAULT_ZOOM = 4
 
 
-export default function ParisMap() {
+export default function MainMap() {
 
   const { typhoonLocations, all_typhoons, showNeighbor, showTyphoon, neighboringTyphoons } = useContext(TyphoonDataContext);
-
   return (
     <Card className="flex h-full w-full p-0 overflow-hidden">
       <Map typhoonCoordinates={typhoonLocations} center={DEFAULT_COORDINATES} zoom={DEFAULT_ZOOM}>
@@ -44,7 +43,6 @@ export default function ParisMap() {
           Object.keys(neighboringTyphoons).map((sid) => {
             const tracks = neighboringTyphoons[sid][0];
             if (showNeighbor.length == 0 || sid !== showNeighbor[0]) {
-              console.log(showNeighbor[0], "yolo")
               return null;
             }
             return tracks.map((values, index) => {

@@ -1,9 +1,9 @@
-import { getAutoTrackData, getNeighbors, getNames, getNeighborsWindSpeedAndPressure, getData } from "../api/typhoons.js";
+import { getAutoTrackData, getNeighbors, getNames, getNeighborsWindSpeedAndPressure, getData } from "../../api/typhoons.js";
 import { Trash2, ChevronDown, ChevronUp, Plus, Radar, MapPin, Clock } from "lucide-react";
 import { useState, useRef, useContext, useEffect } from "react";
-import PriceRangeSlider from "./PriceRangeSlider";
-import { TyphoonDataContext } from '../App';
-import "./scrollbars.css";
+import PriceRangeSlider from "../utils/PriceRangeSlider.jsx";
+import { TyphoonDataContext } from '../../App.jsx';
+import "../css/scrollbars.css";
 
 
 const TYPHOON_AGENCIES = ["Default", "JTWC", "JMA", "CMA", "HKO", "IMD", "KMA"];

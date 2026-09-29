@@ -3,7 +3,7 @@ import { ChevronLeft, Wind, Gauge } from "lucide-react";
 import { WiHurricane } from "react-icons/wi";
 import { TyphoonDataContext } from '../App';
 import { useQueryClient } from '@tanstack/react-query';
-import PriceRangeSlider from "./PriceRangeSlider";
+import PriceRangeSlider from "./utils/PriceRangeSlider";
 
 const CATEGORY_STYLES = {
   TS: { bg: "bg-amber-950", text: "text-amber-300" },
