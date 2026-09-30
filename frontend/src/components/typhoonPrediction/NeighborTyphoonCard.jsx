@@ -2,6 +2,7 @@ import { useState, useContext } from "react";
 import { createPortal } from "react-dom";
 import { ChevronUp, ChevronDown } from "lucide-react";
 import { TyphoonDataContext } from '../../App';
+import '../css/neighborTyphoonCard.css'
 
 const BADGE_STYLES = {
   CAT1: { bg: "rgba(243,156,18,0.18)", color: "#f7b955" },
@@ -42,11 +43,11 @@ export default function NeighborTyphoonCard({ name, sid, category, wind, pressur
           zIndex: 9999,
           fontFamily: "'Inter', -apple-system, BlinkMacSystemFont, sans-serif",
         }}>
-          <div style={styles.waypointTitle}>Trajectory waypoints</div>
+          <div className="waypoint-card__waypoint-title">Trajectory waypoints</div>
           {tracks.map((track, i) => (
-            <div key={i} style={styles.waypointRow}>
-              <span style={styles.waypointLabel}>Pt {i + 1}:</span>
-              <span style={styles.waypointValue}>
+            <div key={i} className="waypoint-card__waypoint-row">
+              <span className="waypoint-card__waypoint-label">Pt {i + 1}:</span>
+              <span className="waypoint-card__waypoint-value">
                 {track[0]}, {track[1]}
               </span>
             </div>
@@ -57,7 +58,7 @@ export default function NeighborTyphoonCard({ name, sid, category, wind, pressur
 
       <div
         ref={setCardRef}
-        style={{ ...styles.card, cursor: "pointer" }}
+        className="waypoint-card waypoint-card--clickable"
         onClick={() => {
           if (!expanded) {
             setShowNeighbor(prev => [sid, ...prev]);
@@ -67,26 +68,26 @@ export default function NeighborTyphoonCard({ name, sid, category, wind, pressur
           setExpanded((prev) => !prev);
         }}
       >
-        <div style={styles.header}>
-          <span style={styles.name}>{name}</span>
+        <div className="waypoint-card__header">
+          <span className="waypoint-card__name">{name}</span>
           <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
             <span style={{ ...styles.badge, background: badge.bg, color: badge.color }}>
               {score.toFixed(2)}
             </span>
-            <span style={styles.chevron}>
+            <span className="waypoint-card__chevron">
               {expanded ? <ChevronUp size={13} /> : <ChevronDown size={13} />}
             </span>
           </div>
         </div>
 
-        <div style={styles.stats}>
+        <div className="waypoint-card__stats">
           <div>
-            <div style={styles.statLabel}>Wind</div>
-            <div style={styles.statValue}>{wind}</div>
+            <div className="waypoint-card__stat-label">Wind</div>
+            <div className="waypoint-card__stat-value">{wind}</div>
           </div>
           <div>
-            <div style={styles.statLabel}>Pres</div>
-            <div style={styles.statValue}>{pressure}</div>
+            <div className="waypoint-card__stat-label">Pres</div>
+            <div className="waypoint-card__stat-value">{pressure}</div>
           </div>
         </div>
       </div>
@@ -95,33 +96,6 @@ export default function NeighborTyphoonCard({ name, sid, category, wind, pressur
 }
 
 const styles = {
-  card: {
-    background: "rgba(26, 30, 38, 0.55)",
-    backdropFilter: "blur(14px)",
-    WebkitBackdropFilter: "blur(14px)",
-    border: "1px solid rgba(255,255,255,0.09)",
-    borderRadius: 10,
-    padding: "14px 16px",
-    minWidth: 180,
-    flex: 1,
-    transition: "all 0.2s ease",
-    fontFamily: "'Inter', -apple-system, BlinkMacSystemFont, sans-serif",
-  },
-  header: {
-    display: "flex",
-    alignItems: "center",
-    justifyContent: "space-between",
-    marginBottom: 10,
-    gap: 8,
-  },
-  name: {
-    fontSize: 14,
-    fontWeight: 500,
-    color: "rgba(255,255,255,0.9)",
-    whiteSpace: "nowrap",
-    overflow: "hidden",
-    textOverflow: "ellipsis",
-  },
   badge: {
     fontSize: 10,
     fontWeight: 500,
@@ -131,53 +105,5 @@ const styles = {
     textTransform: "uppercase",
     whiteSpace: "nowrap",
     flexShrink: 0,
-  },
-  chevron: {
-    display: "flex",
-    color: "rgba(255,255,255,0.35)",
-  },
-  stats: {
-    display: "flex",
-    gap: 20,
-  },
-  statLabel: {
-    fontSize: 10.5,
-    fontWeight: 500,
-    color: "rgba(255,255,255,0.4)",
-    textTransform: "uppercase",
-    letterSpacing: "0.09em",
-    marginBottom: 3,
-  },
-  statValue: {
-    fontSize: 15,
-    fontWeight: 500,
-    color: "rgba(255,255,255,0.85)",
-  },
-  waypointTitle: {
-    fontSize: 10.5,
-    fontWeight: 500,
-    color: "rgba(255,255,255,0.45)",
-    textTransform: "uppercase",
-    letterSpacing: "0.09em",
-    marginBottom: 10,
-  },
-  waypointRow: {
-    display: "flex",
-    justifyContent: "space-between",
-    alignItems: "center",
-    paddingBottom: 8,
-    gap: 12,
-  },
-  waypointLabel: {
-    fontSize: 13,
-    color: "rgba(255,255,255,0.45)",
-    fontVariantNumeric: "tabular-nums",
-    minWidth: 36,
-  },
-  waypointValue: {
-    fontSize: 13,
-    color: "rgba(255,255,255,0.8)",
-    fontVariantNumeric: "tabular-nums",
-    letterSpacing: "0.01em",
   },
 };

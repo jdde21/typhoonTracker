@@ -1,4 +1,3 @@
-/* Scrollbars.css */
 .typhoon-scroll::-webkit-scrollbar { width: 8px; }
 .typhoon-scroll::-webkit-scrollbar-track { background: transparent; }
 .typhoon-scroll::-webkit-scrollbar-thumb {
