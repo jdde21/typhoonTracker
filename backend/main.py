@@ -31,6 +31,7 @@ class Query(BaseModel):
 
 class CityCoordinates(BaseModel):
     coordinates: List[float]
+    range: List[float]
     
 items = []
 list_coordinates = []
@@ -128,8 +129,7 @@ def get_live_typhoons_names():
 
 @app.post("/test")
 def test(body: CityCoordinates):
-    print(body.coordinates)
-    return typhoon_identifier("default", body.coordinates)
+    return typhoon_identifier("default", body.coordinates, body.range)
 
 
 # @app.get('/most_recent')

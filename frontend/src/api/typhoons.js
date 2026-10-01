@@ -92,7 +92,7 @@ async function getData(list_coordinates, database, range, neighbors, model) {
     }
 }
 
-async function test(coordinates) {
+async function test(coordinates, range) {
     const url = "http://127.0.0.1:8000/test"
     try {
         const response = await fetch(url, {
@@ -100,7 +100,7 @@ async function test(coordinates) {
             headers: {
                 'Content-Type': 'application/json'
             },
-            body: JSON.stringify({ coordinates })
+            body: JSON.stringify({ coordinates, range })
         });
         if (!response.ok) {
             throw new Error(`Response status: ${response.status}`);

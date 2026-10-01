@@ -144,6 +144,11 @@ const Map = forwardRef(function Map(
 
   const markerRef = useRef(null);
   const popupRef = useRef(null);
+  const rangeRef = useRef([]);
+
+  useEffect(() => {
+    if (year_range) rangeRef.current = [year_range[database][0], year_range[database][1]]
+  }, [year_range])
 
   const isControlled = viewport !== undefined && onViewportChange !== undefined;
 
@@ -184,13 +189,15 @@ const Map = forwardRef(function Map(
       ...viewport,
     });
 
-
+    const handleRangeChange = (year_range) => {
+      rangeRef.current = [year_range.min, year_range.max]
+  };
 
     const handleClick = (e) => {
       const { lng, lat } = e.lngLat;
 
       async function handleSubmit() {
-        const res = await test([lat, lng]);
+        const res = await test([lat, lng], rangeRef.current);
       }
 
       if (markerRef.current) {
@@ -216,7 +223,7 @@ const Map = forwardRef(function Map(
                 width="100%"
                 min={!year_range ? 10 : year_range[database][0]}
                 max={!year_range ? 10 : year_range[database][1]}
-                onChange={() => { }}
+                onChange={handleRangeChange}
               />
             </div>
             <button
@@ -299,9 +306,6 @@ const Map = forwardRef(function Map(
 
     const styleDataHandler = () => {
       clearStyleTimeout();
-      // Delay to ensure style is fully processed before allowing layer operations
-      // This is a workaround to avoid race conditions with the style loading
-      // else we have to force update every layer on setStyle change
       styleTimeoutRef.current = setTimeout(() => {
         setIsStyleLoaded(true);
         if (projection) {
@@ -318,7 +322,6 @@ const Map = forwardRef(function Map(
     };
 
     map.on("load", loadHandler);
-    // map.on("load", placeCircle);
     map.on("styledata", styleDataHandler);
     map.on("move", handleMove);
     map.on("click", handleClick);

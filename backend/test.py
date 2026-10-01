@@ -126,8 +126,7 @@ def all_typhoons_tracks_getter(agency, year_range=[float('-inf'),float('inf')]):
         dict_of_tracks[sid] = total_list_of_coordinates
     return dict_of_tracks
 
-def typhoon_identifier(agency, coordinates):
-    year_range = []
+def typhoon_identifier(agency, coordinates, year_range):
     typhoon_database = get_database_by_agency(agency)
     list_of_sid = typhoon_database["SID"].values.tolist()
     dict_of_tracks = {}
