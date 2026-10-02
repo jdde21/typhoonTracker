@@ -210,7 +210,7 @@ const Map = forwardRef(function Map(
         const root = createRoot(popupNode);
         root.render(
           <div
-            className="flex flex-col gap-3 w-[260px] p-4 rounded-lg border border-white/10 shadow-lg"
+            className="flex flex-col gap-3 w-65 p-4 rounded-lg border border-white/10 shadow-lg"
             style={{
               background: "rgba(30, 34, 40, 0.55)",
               backdropFilter: "blur(10px)",
