@@ -1,5 +1,5 @@
 import numpy as np
-from helper import get_database_by_agency, coordinates_to_dict, determine_weights, predicted_track, get_database_by_agency_additional_properties, coordinates_cleaner, rf_predicted_track, typhoons_within_proximity
+from helper import get_database_by_agency, coordinates_to_dict, determine_weights, predicted_track, get_database_by_agency_additional_properties, coordinates_cleaner, rf_predicted_track, xgboost_predicted_track, typhoons_within_proximity
 
 
 SCORES = []
@@ -50,6 +50,8 @@ def typhoon_tracker(coordinates=None, agency="Default", year_range = [], neighbo
 
     if model == "Random forest":
         total_tracks = rf_predicted_track(recent_typhoons_dict_closest_to_farthest, inputs, unique_sid)
+    elif model == "XGBoost":
+        total_tracks = xgboost_predicted_track(recent_typhoons_dict_closest_to_farthest, inputs, unique_sid)
     else:   
         total_tracks = predicted_track(recent_typhoons_dict_closest_to_farthest, typhoon_scores, scores, weights, inputs, minimum, neighbors) 
         total_tracks[inputs.shape[0]:, :] /= np.array(weights).sum() # instead of neighbors, yung sum ng weights magiging denominator

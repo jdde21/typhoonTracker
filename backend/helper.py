@@ -1,5 +1,6 @@
 from sklearn.model_selection import train_test_split
 from sklearn.ensemble import RandomForestRegressor
+from xgboost import XGBRegressor
 import pandas as pd 
 import numpy as np
 import re
@@ -20,7 +21,7 @@ def get_database_by_agency(agency, model="Per-point"):
         case "KMA":
             typhoon_database = pd.read_csv('cleaned/cleaned_korea.csv', encoding = 'latin-1')
         case _:
-            if model == "Random forest":
+            if model == "Random forest" or model == "XGBoost":
                 typhoon_database = pd.read_csv('test_new_data.csv', encoding = 'latin-1')
             else:
                 typhoon_database = pd.read_csv('new_data.csv', encoding = 'latin-1')
@@ -74,7 +75,7 @@ def coordinates_to_dict(typhoon_database, year_range, unique_sid, inputs, model)
         list_of_coordinates = list_of_coordinates.replace('[', '')
         list_of_coordinates = list_of_coordinates.replace(']', '')
         sid = unique_sid[index]
-        if model == "Random forest":
+        if model == "Random forest" or model == "XGBoost":
             coordinates = re.findall(r"\(\d+\.\d+, \d+\.\d+, \d, '\w+', \d+\.\d+, \d+\.\d+\)", list_of_coordinates)
             recent_typhoons_dict[sid] = np.empty((0,6)) # initializing an empty 2d np array
         else:
@@ -291,7 +292,7 @@ def rf_predicted_track(recent_typhoons_dict_closest_to_farthest, inputs, unique_
     for _ in range(limit):
         try:
             predictions = rf.predict([starting_coords])
-            lat, long = (x[0] for x in zip(*predictions))
+            lat, long = predictions[0]
             new_coords = np.array([lat, long])
             dx = lat - starting_coords[0]
             dy = long - starting_coords[1]
@@ -303,6 +304,44 @@ def rf_predicted_track(recent_typhoons_dict_closest_to_farthest, inputs, unique_
             y = training_data[:, 2:-1] #ineexclude ko yung last element since direction yun
             rf = RandomForestRegressor(n_estimators=100, random_state=42)
             rf.fit(X, y)
+        except Exception:
+            break
+     
+    # yan ginawa ko sa inputs 2d array dahil currently, yung innermost elements niya is 3. 
+    # sa predicted track's innermost elements, it has two kaya ginawa kong inputs[:, :2]
+    # para same sila ng columns
+    return np.concatenate((inputs[:, :2], predicted_track), axis=0)
+
+def xgboost_predicted_track(recent_typhoons_dict_closest_to_farthest, inputs, unique_sid):
+    dx = inputs[-1][0] - inputs[-2][0]
+    dy = inputs[-1][1] - inputs[-2][1]
+    starting_coords = [inputs[-1][0], inputs[-1][1]]
+    direction = direction_getter(dx, dy)
+
+    
+    last_element = inputs.shape[0] - 1
+    training_data = training_data_generator(unique_sid, recent_typhoons_dict_closest_to_farthest, last_element, direction, starting_coords)
+    X = training_data[:, :2]
+    y = training_data[:, 2:-1] #ineexclude ko yung last element since direction yun
+    xg = XGBRegressor(random_state=8)
+    xg.fit(X, y)
+    predicted_track = np.empty((0,2))
+    limit = 10
+    for _ in range(limit):
+        try:
+            predictions = xg.predict([starting_coords])
+            lat, long = predictions[0]
+            new_coords = np.array([lat, long])
+            dx = lat - starting_coords[0]
+            dy = long - starting_coords[1]
+            predicted_track = np.vstack((predicted_track, new_coords))
+            starting_coords = new_coords
+            last_element += 1
+            training_data = training_data_generator(unique_sid, recent_typhoons_dict_closest_to_farthest, last_element, direction, starting_coords)
+            X = training_data[:, :2]
+            y = training_data[:, 2:-1] #ineexclude ko yung last element since direction yun
+            xg = XGBRegressor(random_state=8)
+            xg.fit(X, y)
         except Exception:
             break
      
