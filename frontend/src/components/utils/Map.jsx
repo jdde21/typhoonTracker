@@ -132,7 +132,7 @@ const Map = forwardRef(function Map(
   },
   ref,
 ) {
-  const { typhoonLocations, neighboringTyphoons, showNeighbor, year_range, database } = useContext(TyphoonDataContext);
+  const { typhoonLocations, neighboringTyphoons, showNeighbor, year_range, database, setTyphoonsWithinPerimeter } = useContext(TyphoonDataContext);
   const containerRef = useRef(null);
   const [mapInstance, setMapInstance] = useState(null);
   const [isLoaded, setIsLoaded] = useState(false);
@@ -191,13 +191,15 @@ const Map = forwardRef(function Map(
 
     const handleRangeChange = (year_range) => {
       rangeRef.current = [year_range.min, year_range.max]
-  };
+    };
 
     const handleClick = (e) => {
       const { lng, lat } = e.lngLat;
 
       async function handleSubmit() {
         const res = await test([lat, lng], rangeRef.current);
+        console.log(res)
+        setTyphoonsWithinPerimeter(res);
       }
 
       if (markerRef.current) {
@@ -634,32 +636,40 @@ function MarkerContent({
   total,
   className,
   pulsating = false,
+  withinPerimeter = false,
   pulseColor = neighbor ? "#f59e0b" : "#10b981",
   size = 14,
 }) {
   const { marker } = useMarkerContext();
+  let content = null;
+
+  if (pulsating) content = <PulsingDot />;
+  else if (withinPerimeter) content = <IndexedMarkerIcon index={index} />;
+  else content = <DefaultMarkerIcon index={index} total={total} neighbor={neighbor} />;
 
   return createPortal(
     <div className={cn("relative cursor-pointer", className)}>
-      {pulsating ? (
-        <div
-          className="relative flex items-center justify-center"
-          style={{ width: size * 2.5, height: size * 2.5 }}
-        >
-          <span
-            className="absolute inline-flex h-full w-full rounded-full opacity-60 animate-ping"
-            style={{ backgroundColor: pulseColor }}
-          />
-          <span
-            className="relative inline-flex rounded-full border-2 border-white/80 shadow-md"
-            style={{ backgroundColor: pulseColor, width: size, height: size }}
-          />
-        </div>
-      ) : (
-        <DefaultMarkerIcon index={index} total={total} neighbor={neighbor} />
-      )}
+      {content}
     </div>,
     marker.getElement()
+  );
+}
+
+function PulsingDot({ size = 14, color = "#10b981" }) {
+  return (
+    <div
+      className="relative flex items-center justify-center"
+      style={{ width: size * 2.5, height: size * 2.5 }}
+    >
+      <span
+        className="absolute inline-flex h-full w-full rounded-full opacity-60 animate-ping"
+        style={{ backgroundColor: color }}
+      />
+      <span
+        className="relative inline-flex rounded-full border-2 border-white/80 shadow-md"
+        style={{ backgroundColor: color, width: size, height: size }}
+      />
+    </div>
   );
 }
 
@@ -692,6 +702,24 @@ function DefaultMarkerIcon({ size = 14, index = 0, total = 1, neighbor = false }
       {/* solid dot */}
       <div
         className="relative rounded-full border-2 border-white shadow-[0_2px_5px_rgba(0,0,0,0.5)]"
+        style={{ width: size, height: size, backgroundColor: color }}
+      />
+    </div>
+  );
+}
+
+function IndexedMarkerIcon({ index = 0, size = 14, saturation = 70, lightness = 50 }) {
+  // golden angle keeps consecutive indexes visually distinct, no total needed
+  const hue = (index * 137.508) % 360;
+  const color = `hsl(${hue}, ${saturation}%, ${lightness}%)`;
+
+  return (
+    <div
+      className="relative flex items-center justify-center transition-transform hover:scale-110"
+      style={{ width: size * 1.8, height: size * 1.8 }}
+    >
+      <div
+        className="rounded-full border-2 border-white shadow-[0_2px_5px_rgba(0,0,0,0.5)]"
         style={{ width: size, height: size, backgroundColor: color }}
       />
     </div>

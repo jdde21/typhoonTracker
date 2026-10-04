@@ -11,7 +11,7 @@ const DEFAULT_ZOOM = 4
 
 export default function MainMap() {
 
-  const { typhoonLocations, all_typhoons, showNeighbor, showTyphoon, neighboringTyphoons } = useContext(TyphoonDataContext);
+  const { typhoonLocations, all_typhoons, showNeighbor, showTyphoon, neighboringTyphoons, typhoonsWithinPerimeter } = useContext(TyphoonDataContext);
   return (
     <Card className="flex h-full w-full p-0 overflow-hidden">
       <Map typhoonCoordinates={typhoonLocations} center={DEFAULT_COORDINATES} zoom={DEFAULT_ZOOM}>
@@ -37,7 +37,7 @@ export default function MainMap() {
                 </div>
               </MarkerPopup>
             </MapMarker>
-})
+          })
         }
         {
           Object.keys(neighboringTyphoons).map((sid) => {
@@ -76,8 +76,8 @@ export default function MainMap() {
               return null;
             }
             return tracks.map((values, index) => {
-              const longitude = values[1];
               const latitude = values[0];
+              const longitude = values[1];
               return <MapMarker
                 key={index}
                 longitude={longitude}
@@ -99,7 +99,36 @@ export default function MainMap() {
             })
           })
         }
-
+        {
+          Object.keys(typhoonsWithinPerimeter).length !== 0 && Object.keys(typhoonsWithinPerimeter).map((sid, idx) => {
+            const tracks = typhoonsWithinPerimeter[sid];
+            if (idx > 5) {
+              return null;
+            }
+            return tracks.map((values, index) => {
+              const latitude = values[0];
+              const longitude = values[1];
+              return <MapMarker
+                key={index}
+                longitude={longitude}
+                latitude={latitude}
+              >
+                <MarkerContent index={idx} total={Object.keys(typhoonsWithinPerimeter).length} withinPerimeter={true}>
+                  <div className="size-4 rounded-full bg-primary border-2 border-red-500 shadow-lg" />
+                </MarkerContent>
+                <MarkerTooltip>{`${latitude.toFixed(2)}, ${longitude.toFixed(2)}`}</MarkerTooltip>
+                <MarkerPopup>
+                  <div className="space-y-1">
+                    <p className="font-medium text-foreground">{sid}</p>
+                    <p className="text-xs text-muted-foreground">
+                      {latitude.toFixed(4)}, {longitude.toFixed(4)}
+                    </p>
+                  </div>
+                </MarkerPopup>
+              </MapMarker>
+            })
+          })
+        }
       </Map>
     </Card>
   )

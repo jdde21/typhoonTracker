@@ -30,6 +30,7 @@ export function App() {
   const [neighboringTyphoons, setNeighboringTyphoons] = useState({});
   const [neighboringTyphoonsNames, setNeighboringTyphoonsNames] = useState({});
   const [neighboringTyphoonsAdditionalProperties, setNeighboringTyphoonsAdditionalProperties] = useState({});
+  const [typhoonsWithinPerimeter, setTyphoonsWithinPerimeter] = useState({});
 
 
   const [neighborTyphoonsLocations, setNeighborTyphoonsLocations] = useState([]);
@@ -84,7 +85,7 @@ export function App() {
         setNeighborTyphoonsSID, showNeighbor, setShowNeighbor, neighboringTyphoonsNames, setNeighboringTyphoonsNames,
         setNeighboringTyphoonsAdditionalProperties, database, setDatabase, setSideDrawerDatabase, sideDrawerDatabase,
         all_typhoons, year_range, TYPHOON_AGENCIES, itemsRef, sideDrawerLoading, setFetching, showTyphoon, setShowTyphoon,
-        get_live_typhoons_names, model, setModel, setDraggable, isDraggable
+        get_live_typhoons_names, model, setModel, setDraggable, isDraggable, typhoonsWithinPerimeter, setTyphoonsWithinPerimeter
       }}>
 
         <NeighboringTyphoonsDrawer />
