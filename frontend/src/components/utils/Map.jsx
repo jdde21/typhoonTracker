@@ -132,7 +132,7 @@ const Map = forwardRef(function Map(
   },
   ref,
 ) {
-  const { typhoonLocations, neighboringTyphoons, showNeighbor, year_range, database, setTyphoonsWithinPerimeter } = useContext(TyphoonDataContext);
+  const { typhoonLocations, neighboringTyphoons, showNeighbor, year_range, database, setTyphoonsWithinPerimeter, typhoonsWithinPerimeter } = useContext(TyphoonDataContext);
   const containerRef = useRef(null);
   const [mapInstance, setMapInstance] = useState(null);
   const [isLoaded, setIsLoaded] = useState(false);
@@ -198,7 +198,6 @@ const Map = forwardRef(function Map(
 
       async function handleSubmit() {
         const res = await test([lat, lng], rangeRef.current);
-        console.log(res)
         setTyphoonsWithinPerimeter(res);
       }
 
@@ -435,6 +434,52 @@ const Map = forwardRef(function Map(
       });
     }
   }, [mapInstance, isLoaded, showNeighbor]);
+
+  // draws the line for the typhoons within perimeter
+  useEffect(() => {
+    if (!mapInstance || !isLoaded) return;
+
+    let list_of_coords = [];
+    for (const sid of Object.keys(typhoonsWithinPerimeter)) {
+      let coordinates = [];
+      for (const track of typhoonsWithinPerimeter[sid]) {
+        coordinates.push([track[1], track[0]]);
+      }
+      list_of_coords.push(coordinates);
+    }
+
+    for (let idx = 0; idx < list_of_coords.length; idx++) {
+      const source = mapInstance.getSource(`typhoon-within-route-${idx}`);
+      if (source) {
+        source.setData({
+          type: 'Feature',
+          properties: {},
+          geometry: { type: 'LineString', coordinates: list_of_coords[idx] }
+        });
+      } else {
+        mapInstance.addSource(`typhoon-within-route-${idx}`, {
+          type: 'geojson',
+          lineMetrics: true, // required for line-gradient to work
+          data: {
+            type: 'Feature',
+            properties: {},
+            geometry: { type: 'LineString', coordinates: list_of_coords[idx] }
+          }
+        });
+  
+        mapInstance.addLayer({
+          id: `typhoon-within-route-${idx}`,
+          type: 'line',
+          source: `typhoon-within-route-${idx}`,
+          layout: { 'line-join': 'round', 'line-cap': 'round' },
+          paint: {
+            'line-width': 7,
+            'line-color': '#ffffff'
+          }
+        });
+      }
+    }
+  }, [mapInstance, isLoaded, typhoonsWithinPerimeter]);
 
   // Sync controlled viewport to map
   useEffect(() => {
