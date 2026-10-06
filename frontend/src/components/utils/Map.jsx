@@ -22,6 +22,8 @@ import { createRoot } from 'react-dom/client';
 import PriceRangeSlider from "./PriceRangeSlider";
 import { createMarkerElement } from './CreateMarkerElement';
 import { test } from "../../api/typhoons";
+import TyphoonList from "../typhoonProximity/TyphoonList";
+import Popup from "../typhoonProximity/Popup";
 
 const defaultStyles = {
   dark: "https://basemaps.cartocdn.com/gl/dark-matter-gl-style/style.json",
@@ -142,13 +144,9 @@ const Map = forwardRef(function Map(
   const internalUpdateRef = useRef(false);
   const resolvedTheme = useResolvedTheme(themeProp);
 
+  const coordsRef = useRef([]);
   const markerRef = useRef(null);
   const popupRef = useRef(null);
-  const rangeRef = useRef([]);
-
-  useEffect(() => {
-    if (year_range) rangeRef.current = [year_range[database][0], year_range[database][1]]
-  }, [year_range])
 
   const isControlled = viewport !== undefined && onViewportChange !== undefined;
 
@@ -170,6 +168,18 @@ const Map = forwardRef(function Map(
     }
   }, []);
 
+  const popupNode = document.createElement('div');
+  const root = createRoot(popupNode);
+  let popup_props = { year_range: year_range, database: database, typhoonsWithinPerimeter: typhoonsWithinPerimeter, setTyphoonsWithinPerimeter: setTyphoonsWithinPerimeter };
+
+  useEffect(() => {
+    if (Object.keys(typhoonsWithinPerimeter).length !== 0) {
+      popup_props.typhoonsWithinPerimeter = typhoonsWithinPerimeter;
+      root.render(<Popup {...popup_props} coords={coordsRef.current} />);
+      popupRef.current.setDOMContent(popupNode);
+    }
+  }, [typhoonsWithinPerimeter])
+
   // Initialize the map
   useEffect(() => {
     if (!containerRef.current) return;
@@ -189,52 +199,18 @@ const Map = forwardRef(function Map(
       ...viewport,
     });
 
-    const handleRangeChange = (year_range) => {
-      rangeRef.current = [year_range.min, year_range.max]
-    };
-
     const handleClick = (e) => {
       const { lng, lat } = e.lngLat;
 
-      async function handleSubmit() {
-        const res = await test([lat, lng], rangeRef.current);
-        setTyphoonsWithinPerimeter(res);
-      }
-
       if (markerRef.current) {
+        coordsRef.current = [lat, lng];
         markerRef.current.setLngLat([lng, lat]);
         updatePopup(lng, lat);
         placeCircle([lng, lat]);
       } else {
+        coordsRef.current = [lat, lng];
         const el = createMarkerElement();
-        const popupNode = document.createElement('div');
-        const root = createRoot(popupNode);
-        root.render(
-          <div
-            className="flex flex-col gap-3 w-65 p-4 rounded-lg border border-white/10 shadow-lg"
-            style={{
-              background: "rgba(30, 34, 40, 0.55)",
-              backdropFilter: "blur(10px)",
-              WebkitBackdropFilter: "blur(10px)",
-            }}
-          >
-            <div className="flex flex-col gap-1 w-[90%] mx-auto">
-              <PriceRangeSlider
-                showLabel
-                width="100%"
-                min={!year_range ? 10 : year_range[database][0]}
-                max={!year_range ? 10 : year_range[database][1]}
-                onChange={handleRangeChange}
-              />
-            </div>
-            <button
-              onClick={handleSubmit}
-              className="w-full py-2 rounded-md bg-white/10 text-white text-sm font-medium border border-white/20 hover:bg-white/20 transition-colors"
-            >
-              Submit
-            </button>
-          </div>
-        );
+        root.render(<Popup {...popup_props} coords={[lat, lng]} />);
 
         markerRef.current = new MapLibreGL.Marker({ element: el, draggable: true, color: '#e11d48' })
           .setLngLat([lng, lat])
@@ -466,7 +442,7 @@ const Map = forwardRef(function Map(
             geometry: { type: 'LineString', coordinates: list_of_coords[idx] }
           }
         });
-  
+
         mapInstance.addLayer({
           id: `typhoon-within-route-${idx}`,
           type: 'line',
@@ -694,7 +670,7 @@ function MarkerContent({
   let content = null;
 
   if (pulsating) content = <PulsingDot />;
-  else if (withinPerimeter) content = <DefaultMarkerIcon index={index} total={total}/>;
+  else if (withinPerimeter) content = <DefaultMarkerIcon index={index} total={total} />;
   else content = <DefaultMarkerIcon index={index} total={total} neighbor={neighbor} />;
 
   return createPortal(

@@ -334,7 +334,7 @@ export default function RoutePoints() {
                                             </div>
                                             <div className="max-h-40 overflow-y-auto flex flex-col gap-1.5 pr-1">
                                                 {autoPreview.map((p, i) => (
-                                                    <div key={i} className="flex items-center justify-between rounded-md border border-white/[0.07] bg-white/[0.02] px-3 py-2 text-[12px]">
+                                                    <div key={i} className="flex items-center justify-between rounded-md border border-white/[0.07] bg-white/2 px-3 py-2 text-[12px]">
                                                         <span className="flex items-center gap-1.5 text-white/70">
                                                             <MapPin size={12} className="text-white/35" />
                                                             {Number(p[0]).toFixed(1)}, {Number(p[1]).toFixed(1)}
