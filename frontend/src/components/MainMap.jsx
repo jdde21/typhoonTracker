@@ -113,9 +113,11 @@ export default function MainMap() {
                 longitude={longitude}
                 latitude={latitude}
               >
-                <MarkerContent index={idx} total={Object.keys(typhoonsWithinPerimeter).length} withinPerimeter={true}>
-                  <div className="size-4 rounded-full bg-primary border-2 border-red-500 shadow-lg" />
-                </MarkerContent>
+                { idx == 1 ? 
+                  <MarkerContent pulsating={tracks.length == index + 1 ? true : false} index={index} total={tracks.length} withinPerimeter={true}>
+                    <div className="size-4 rounded-full bg-primary border-2 border-red-500 shadow-lg" />
+                  </MarkerContent> : null
+                }
                 <MarkerTooltip>{`${latitude.toFixed(2)}, ${longitude.toFixed(2)}`}</MarkerTooltip>
                 <MarkerPopup>
                   <div className="space-y-1">

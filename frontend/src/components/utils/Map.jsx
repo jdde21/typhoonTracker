@@ -473,8 +473,13 @@ const Map = forwardRef(function Map(
           source: `typhoon-within-route-${idx}`,
           layout: { 'line-join': 'round', 'line-cap': 'round' },
           paint: {
-            'line-width': 7,
-            'line-color': '#ffffff'
+            'line-opacity': 0.3,
+            'line-width': 8,
+            'line-gradient': [
+              'interpolate', ['linear'], ['line-progress'],
+              0, '#6b7280',   // start color
+              1, '#10b981'    // end color
+            ]
           }
         });
       }
@@ -689,7 +694,7 @@ function MarkerContent({
   let content = null;
 
   if (pulsating) content = <PulsingDot />;
-  else if (withinPerimeter) content = <IndexedMarkerIcon index={index} />;
+  else if (withinPerimeter) content = <DefaultMarkerIcon index={index} total={total}/>;
   else content = <DefaultMarkerIcon index={index} total={total} neighbor={neighbor} />;
 
   return createPortal(
