@@ -134,7 +134,7 @@ const Map = forwardRef(function Map(
   },
   ref,
 ) {
-  const { typhoonLocations, neighboringTyphoons, showNeighbor, year_range, database, setTyphoonsWithinPerimeter, typhoonsWithinPerimeter } = useContext(TyphoonDataContext);
+  const { typhoonLocations, neighboringTyphoons, showNeighbor, year_range, database, setTyphoonsWithinPerimeter, typhoonsWithinPerimeter, showTyphoonPerimeter, setShowTyphoonPerimeter } = useContext(TyphoonDataContext);
   const containerRef = useRef(null);
   const [mapInstance, setMapInstance] = useState(null);
   const [isLoaded, setIsLoaded] = useState(false);
@@ -170,7 +170,7 @@ const Map = forwardRef(function Map(
 
   const popupNode = document.createElement('div');
   const root = createRoot(popupNode);
-  let popup_props = { year_range: year_range, database: database, typhoonsWithinPerimeter: typhoonsWithinPerimeter, setTyphoonsWithinPerimeter: setTyphoonsWithinPerimeter };
+  let popup_props = { year_range: year_range, database: database, typhoonsWithinPerimeter: typhoonsWithinPerimeter, setTyphoonsWithinPerimeter: setTyphoonsWithinPerimeter, setShowTyphoonPerimeter: setShowTyphoonPerimeter };
 
   useEffect(() => {
     if (Object.keys(typhoonsWithinPerimeter).length !== 0) {

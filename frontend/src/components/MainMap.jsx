@@ -11,7 +11,7 @@ const DEFAULT_ZOOM = 4
 
 export default function MainMap() {
 
-  const { typhoonLocations, all_typhoons, showNeighbor, showTyphoon, neighboringTyphoons, typhoonsWithinPerimeter } = useContext(TyphoonDataContext);
+  const { typhoonLocations, all_typhoons, showNeighbor, showTyphoon, neighboringTyphoons, typhoonsWithinPerimeter, showTyphoonPerimeter } = useContext(TyphoonDataContext);
   return (
     <Card className="flex h-full w-full p-0 overflow-hidden">
       <Map typhoonCoordinates={typhoonLocations} center={DEFAULT_COORDINATES} zoom={DEFAULT_ZOOM}>
@@ -113,7 +113,7 @@ export default function MainMap() {
                 longitude={longitude}
                 latitude={latitude}
               >
-                { idx == 1 ? 
+                { sid == showTyphoonPerimeter ? 
                   <MarkerContent pulsating={tracks.length == index + 1 ? true : false} index={index} total={tracks.length} withinPerimeter={true}>
                     <div className="size-4 rounded-full bg-primary border-2 border-red-500 shadow-lg" />
                   </MarkerContent> : null

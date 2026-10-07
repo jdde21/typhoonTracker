@@ -3,9 +3,7 @@ import PriceRangeSlider from '../utils/PriceRangeSlider';
 import TyphoonList from './TyphoonList';
 import { test } from '../../api/typhoons';
 
-const Popup = ({ year_range, database, typhoonsWithinPerimeter, setTyphoonsWithinPerimeter, coords }) => {
-
-    console.log("re-render")
+const Popup = ({ year_range, database, typhoonsWithinPerimeter, setTyphoonsWithinPerimeter, coords, setShowTyphoonPerimeter }) => {
     const [lat, lng] = coords;
     const rangeRef = useRef([]);
 
@@ -39,7 +37,7 @@ const Popup = ({ year_range, database, typhoonsWithinPerimeter, setTyphoonsWithi
                     max={!year_range ? 10 : year_range[database][1]}
                     onChange={handleRangeChange}
                 />
-                <TyphoonList sids={(Object.keys(typhoonsWithinPerimeter)).slice(0, 5)} />
+                <TyphoonList sids={(Object.keys(typhoonsWithinPerimeter)).slice(0, 5)} setShowTyphoonPerimeter={setShowTyphoonPerimeter} />
             </div>
             <button
                 onClick={handleSubmit}
