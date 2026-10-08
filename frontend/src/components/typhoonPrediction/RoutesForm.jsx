@@ -181,10 +181,10 @@ export default function RoutePoints() {
                         <div className="px-5 pt-5">
                             <div
                                 onMouseDown={(e) => e.stopPropagation()}
-                                className="relative grid grid-cols-2 rounded-md bg-white/[0.04] border border-white/[0.09] p-1"
+                                className="relative grid grid-cols-2 rounded-md bg-white/4 border border-white/9 p-1"
                             >
                                 <div
-                                    className="absolute top-1 bottom-1 w-[calc(50%-4px)] rounded-[4px] bg-white/90 transition-transform duration-200 ease-out"
+                                    className="absolute top-1 bottom-1 w-[calc(50%-4px)] rounded-lg bg-white/90 transition-transform duration-200 ease-out"
                                     style={{ transform: mode === "automatic" ? "translateX(calc(100% + 4px))" : "translateX(0)" }}
                                 />
                                 <button
