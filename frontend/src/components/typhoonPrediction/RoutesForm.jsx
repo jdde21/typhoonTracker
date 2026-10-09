@@ -212,7 +212,7 @@ export default function RoutePoints() {
                                         defaultValue={database}
                                         onMouseDown={(e) => e.stopPropagation()}
                                         onChange={(e) => setDatabase(e.target.value)}
-                                        className="w-full bg-white/[0.04] text-white/85 text-[13px] px-3 py-2 border border-white/[0.09] rounded-md focus:outline-none focus:border-white/25 cursor-pointer appearance-none"
+                                        className="w-full bg-white/4 text-white/85 text-[13px] px-3 py-2 border border-white/9 rounded-md focus:outline-none focus:border-white/25 cursor-pointer appearance-none"
                                     >
                                         {TYPHOON_AGENCIES.map((agency, i) => (
                                             <option key={i} value={agency} className="bg-[#1a1e26]">{agency}</option>
@@ -226,9 +226,9 @@ export default function RoutePoints() {
                                         type="number"
                                         onChange={(e) => updateNeighbors(e)}
                                         value={neighbors}
-                                        className={`w-full bg-white/[0.04] text-white/85 text-[13px] px-3 py-2 border rounded-md focus:outline-none ${neighborsError
+                                        className={`w-full bg-white/4 text-white/85 text-[13px] px-3 py-2 border rounded-md focus:outline-none ${neighborsError
                                             ? "border-red-500/60 focus:border-red-500"
-                                            : "border-white/[0.09] focus:border-white/25"
+                                            : "border-white/9 focus:border-white/25"
                                             }`}
                                     />
                                     {neighborsError && (
@@ -245,7 +245,7 @@ export default function RoutePoints() {
                                         defaultValue={model}
                                         onMouseDown={(e) => e.stopPropagation()}
                                         onChange={(e) => setModel(e.target.value)}
-                                        className="w-full bg-white/[0.04] text-white/85 text-[13px] px-3 py-2 border border-white/[0.09] rounded-md focus:outline-none focus:border-white/25 cursor-pointer appearance-none"
+                                        className="w-full bg-white/4 text-white/85 text-[13px] px-3 py-2 border border-white/9 rounded-md focus:outline-none focus:border-white/25 cursor-pointer appearance-none"
                                     >
                                         {MODELS.map((agency, i) => (
                                             <option key={i} value={agency} className="bg-[#1a1e26]">{agency}</option>
@@ -289,7 +289,7 @@ export default function RoutePoints() {
                                                             placeholder={field === "timegap" ? "0" : "0.000"}
                                                             value={p[field]}
                                                             onChange={(e) => updatePoint(i, field, e.target.value)}
-                                                            className="bg-white/[0.04] border border-white/[0.09] rounded-md px-2.5 py-2 text-[13px] w-full outline-none focus:border-white/25 placeholder:text-white/25"
+                                                            className="bg-white/4 border border-white/9 rounded-md px-2.5 py-2 text-[13px] w-full outline-none focus:border-white/25 placeholder:text-white/25"
                                                         />
                                                     </div>
                                                 ))}
@@ -435,7 +435,7 @@ function TyphoonListItem({ storm, onClick, range, neighbors }) {
 
             <button
                 onClick={() => clicked(storm)}
-                className="w-full flex items-center justify-between rounded-md border border-white/[0.09] bg-white/[0.04] px-3 py-2 hover:bg-white/[0.06] transition-colors"
+                className="w-full flex items-center justify-between rounded-md border border-white/9 bg-white/4 px-3 py-2 hover:bg-white/6 transition-colors"
             >
                 <span className="text-[13px] text-white/85">{storm}</span>
                 <Radar size={14} className="text-emerald-400/70" />
@@ -443,7 +443,7 @@ function TyphoonListItem({ storm, onClick, range, neighbors }) {
 
             <div className={`grid transition-[grid-template-rows] duration-300 ease-out ${isOpen ? "grid-rows-[1fr]" : "grid-rows-[0fr]"}`}>
                 <div className="overflow-hidden">
-                    <div className="coord-scroll flex flex-col gap-1 rounded-md border border-white/[0.09] bg-white/[0.04] px-3 py-2 max-h-[120px] overflow-y-auto">
+                    <div className="coord-scroll flex flex-col gap-1 rounded-md border border-white/9 bg-white/4 px-3 py-2 max-h-30 overflow-y-auto">
                         {typhoonCoordinates.map((coord, i) => (
                             <div
                                 key={i}
@@ -453,7 +453,7 @@ function TyphoonListItem({ storm, onClick, range, neighbors }) {
                                     type="checkbox"
                                     checked={typhoonIncluded.includes(i)}
                                     onChange={() => checkboxChecked(i, coord)}
-                                    className="appearance-none w-3 h-3 rounded-sm border border-white/[0.15] bg-white/[0.04] checked:bg-emerald-400/80 checked:border-emerald-400/80 cursor-pointer transition-colors"
+                                    className="appearance-none w-3 h-3 rounded-sm border border-white/15 bg-white/4 checked:bg-emerald-400/80 checked:border-emerald-400/80 cursor-pointer transition-colors"
                                 />
                                 <span className="text-white/35">{i + 1}</span>
                                 <span className="ml-auto">{coord[0]}, {coord[1]}</span>
