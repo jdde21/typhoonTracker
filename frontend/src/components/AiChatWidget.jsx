@@ -38,7 +38,7 @@ export default function AiChatWidget({
         <button
           onClick={handleClick}
           aria-label="Open chat assistant"
-          className="fixed bottom-6 left-6 z-9999 flex items-center gap-2 rounded-full bg-white px-[18px] py-2.5 text-sm font-semibold text-black shadow-lg shadow-black/20 border border-black/10 transition-transform duration-150 ease-out hover:-translate-y-0.5 hover:shadow-xl hover:shadow-black/30 active:translate-y-0"
+          className="fixed bottom-6 left-6 z-9999 flex items-center gap-2 rounded-full bg-white px-4.5 py-2.5 text-sm font-semibold text-black shadow-lg shadow-black/20 border border-black/10 transition-transform duration-150 ease-out hover:-translate-y-0.5 hover:shadow-xl hover:shadow-black/30 active:translate-y-0"
         >
           <Sparkles size={18} className="animate-pulse text-black" />
           <span>Ask AI</span>
