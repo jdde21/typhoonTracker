@@ -83,7 +83,7 @@ export default function MainMap() {
                 longitude={longitude}
                 latitude={latitude}
               >
-                <MarkerContent>
+                <MarkerContent pulsating={tracks.length == index + 1 ? true : false} total={tracks.length} index={index}>
                   <div className="size-4 rounded-full bg-primary border-2 border-red-500 shadow-lg" />
                 </MarkerContent>
                 <MarkerTooltip>{`${latitude.toFixed(2)}, ${longitude.toFixed(2)}`}</MarkerTooltip>

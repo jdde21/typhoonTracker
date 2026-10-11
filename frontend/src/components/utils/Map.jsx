@@ -134,7 +134,7 @@ const Map = forwardRef(function Map(
   },
   ref,
 ) {
-  const { typhoonLocations, neighboringTyphoons, showNeighbor, year_range, database, setTyphoonsWithinPerimeter, typhoonsWithinPerimeter, showTyphoonPerimeter, setShowTyphoonPerimeter } = useContext(TyphoonDataContext);
+  const { typhoonLocations, neighboringTyphoons, all_typhoons, showNeighbor, year_range, database, setTyphoonsWithinPerimeter, typhoonsWithinPerimeter, setShowTyphoonPerimeter, showTyphoon } = useContext(TyphoonDataContext);
   const containerRef = useRef(null);
   const [mapInstance, setMapInstance] = useState(null);
   const [isLoaded, setIsLoaded] = useState(false);
@@ -336,7 +336,7 @@ const Map = forwardRef(function Map(
     } else {
       mapInstance.addSource('route', {
         type: 'geojson',
-        lineMetrics: true, // required for line-gradient to work
+        lineMetrics: true, 
         data: {
           type: 'Feature',
           properties: {},
@@ -353,8 +353,8 @@ const Map = forwardRef(function Map(
           'line-width': 8,
           'line-gradient': [
             'interpolate', ['linear'], ['line-progress'],
-            0, '#6b7280',   // start color
-            1, '#10b981'    // end color
+            0, '#6b7280',   
+            1, '#10b981'   
           ]
         }
       });
@@ -386,7 +386,7 @@ const Map = forwardRef(function Map(
     } else {
       mapInstance.addSource('neighbor-route', {
         type: 'geojson',
-        lineMetrics: true, // required for line-gradient to work
+        lineMetrics: true, 
         data: {
           type: 'Feature',
           properties: {},
@@ -403,13 +403,58 @@ const Map = forwardRef(function Map(
           'line-width': 5,
           'line-gradient': [
             'interpolate', ['linear'], ['line-progress'],
-            0, '#fde68a',   // amber-200 at the oldest point
-            1, '#f59e0b'    // amber-500 near the live position
+            0, '#fde68a',  
+            1, '#f59e0b'    
           ]
         }
       });
     }
   }, [mapInstance, isLoaded, showNeighbor]);
+
+  // draws the line for the selected historical typhoon
+  useEffect(() => {
+    if (!mapInstance || !isLoaded || !showTyphoon) return;
+
+    const typhoon_track = all_typhoons[showTyphoon];
+    const coordinates = (typhoon_track.map((track) => {
+      return [track[1], track[0]]
+    }));
+
+    const source = mapInstance.getSource('route');
+    if (source) {
+      source.setData({
+        type: 'Feature',
+        properties: {},
+        geometry: { type: 'LineString', coordinates }
+      });
+    } else {
+      mapInstance.addSource('historical-route', {
+        type: 'geojson',
+        lineMetrics: true,
+        data: {
+          type: 'Feature',
+          properties: {},
+          geometry: { type: 'LineString', coordinates }
+        }
+      });
+
+      mapInstance.addLayer({
+        id: 'historical-route',
+        type: 'line',
+        source: 'historical-route',
+        layout: { 'line-join': 'round', 'line-cap': 'round' },
+        paint: {
+          'line-width': 8,
+          'line-gradient': [
+            'interpolate', ['linear'], ['line-progress'],
+            0, '#6b7280',  
+            1, '#10b981'    
+          ]
+        }
+      });
+    }
+
+  }, [mapInstance, isLoaded, showTyphoon]);
 
   // draws the line for the typhoons within perimeter
   useEffect(() => {
@@ -435,7 +480,7 @@ const Map = forwardRef(function Map(
       } else {
         mapInstance.addSource(`typhoon-within-route-${idx}`, {
           type: 'geojson',
-          lineMetrics: true, // required for line-gradient to work
+          lineMetrics: true, 
           data: {
             type: 'Feature',
             properties: {},
@@ -453,8 +498,8 @@ const Map = forwardRef(function Map(
             'line-width': 8,
             'line-gradient': [
               'interpolate', ['linear'], ['line-progress'],
-              0, '#6b7280',   // start color
-              1, '#10b981'    // end color
+              0, '#6b7280',   
+              1, '#10b981'    
             ]
           }
         });
@@ -515,7 +560,6 @@ const Map = forwardRef(function Map(
     <MapContext.Provider value={contextValue}>
       <div ref={containerRef} className={cn("relative h-full w-full", className)}>
         {(!isLoaded || loading) && <DefaultLoader />}
-        {/* SSR-safe: children render only when map is loaded on client */}
         {mapInstance && children}
       </div>
     </MapContext.Provider>

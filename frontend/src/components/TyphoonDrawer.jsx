@@ -89,7 +89,7 @@ export default function NeighboringTyphoonsDrawer({
   return (
     <>
       <aside
-        className={`absolute top-0 left-0 h-full w-full max-w-sm z-20 transition-transform duration-300 ease-out ${isOpen ? "translate-x-0" : "-translate-x-full"
+        className={`absolute top-0 left-0 h-full w-full max-w-sm z-999 transition-transform duration-300 ease-out ${isOpen ? "translate-x-0" : "-translate-x-full"
           }`}
       >
         <style>{`
@@ -112,7 +112,7 @@ export default function NeighboringTyphoonsDrawer({
             WebkitBackdropFilter: "blur(14px)",
             fontFamily: "'Inter', -apple-system, BlinkMacSystemFont, sans-serif",
           }}
-          className="h-full border-r border-white/[0.08] flex flex-col shadow-[0_8px_30px_rgba(0,0,0,0.35)]"
+          className="h-full border-r border-white/8 flex flex-col shadow-[0_8px_30px_rgba(0,0,0,0.35)]"
         >
           <header className="flex items-center justify-between px-4 pt-4 pb-3.5 border-b border-white/[0.07] shrink-0">
             <div className="flex items-center gap-2.5">
