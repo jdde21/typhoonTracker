@@ -225,7 +225,7 @@ export default function NeighboringTyphoonsDrawer({
           WebkitBackdropFilter: "blur(14px)",
           fontFamily: "'Inter', -apple-system, BlinkMacSystemFont, sans-serif",
         }}
-        className={`absolute top-4 left-0 z-10 flex items-center border border-white/[0.08] border-l-0 rounded-r-md px-3 py-2 text-white/40 hover:text-white/75 text-[13px] font-medium transition-opacity duration-200 focus:outline-none focus-visible:ring-1 focus-visible:ring-white/40 ${isOpen ? "opacity-0 pointer-events-none" : "opacity-100"
+        className={`absolute top-4 left-0 z-10 flex items-center border border-white/8 border-l-0 rounded-r-md px-3 py-2 text-white/40 hover:text-white/75 text-[13px] font-medium transition-opacity duration-200 focus:outline-none focus-visible:ring-1 focus-visible:ring-white/40 ${isOpen ? "opacity-0 pointer-events-none" : "opacity-100"
           }`}
       >
         <WiHurricane size={25} color="currentColor" />
