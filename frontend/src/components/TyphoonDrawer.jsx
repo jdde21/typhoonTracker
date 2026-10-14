@@ -40,7 +40,7 @@ function StormCard({ storm, selected, onSelect }) {
       onClick={() => onSelect?.(storm)}
       className={`w-full text-left rounded-lg px-3.5 py-3 transition-colors focus:outline-none focus-visible:ring-1 focus-visible:ring-white/40 ${selected
         ? "bg-white/[0.07] border border-white/25"
-        : "bg-white/[0.02] border border-white/[0.07] hover:border-white/20"
+        : "bg-white/2 border border-white/[0.07] hover:border-white/20"
         }`}
     >
       <div className="flex items-center justify-between mb-2">
