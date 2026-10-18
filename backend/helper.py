@@ -215,9 +215,14 @@ def determine_weights(recent_typhoons_dict_closest_to_farthest, typhoon_scores, 
     return [weights, minimum]
 
 def predicted_track(recent_typhoons_dict_closest_to_farthest, typhoon_scores, scores, weights, inputs, minimum, neighbors):
+    dy = inputs[-1][0] - inputs[-2][0] # difference in latitudes (vertical displacement)
+    dx = inputs[-1][1] - inputs[-2][1] # difference in longitudes (horizontal displacement)
+    starting_coords = [inputs[-1][0], inputs[-1][1]]
+    direction = direction_getter(dx, dy)
     total_tracks = np.empty((minimum,3))
     total_tracks.fill(0)
     
+    print(direction, "boom")
     # nilalagay ko lng yung tracks given as input. as is na siya sa total tracks. di siya mababago
     total_tracks[0:inputs.shape[0], :] += inputs
     # ginagawa naman dito ay from all the neighbors, kukunin yung values from index [inputs.shape[0], minimum] -- this is because yung index 0 to inputs.shape - 1 ay binigay na ng user --
@@ -232,8 +237,20 @@ def predicted_track(recent_typhoons_dict_closest_to_farthest, typhoon_scores, sc
     
             temp_tracks = np.empty((minimum,3))
             temp_tracks.fill(0)
+            print(sid)
             for j in range(inputs.shape[0], minimum):
-                temp_tracks[j] += tracks[j][:3] * weights[i] # yung track ng typhoon will now be multiplied by its weight
+                lat = tracks[j][0]
+                lon = tracks[j][1]
+                dy = lon - starting_coords[1]
+                dx = lat - starting_coords[0]
+                new_direction = direction_getter(dx, dy)
+                starting_coords = [lat, lon]
+                print(new_direction, lat, lon)
+                if new_direction == "NW":
+                    print("yow")
+                    temp_tracks[j] += tracks[j][:3] * weights[i] # yung track ng typhoon will now be multiplied by its weight
+                else:
+                    pass
             total_tracks += temp_tracks
             i += 1
             if i >= neighbors:
