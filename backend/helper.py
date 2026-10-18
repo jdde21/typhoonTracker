@@ -58,7 +58,7 @@ def coordinates_to_dict(typhoon_database, year_range, unique_sid, inputs, model)
     recent_typhoons_dict = {}
     recent_typhoons_dict_closest_to_farthest = {}
     typhoon_names = {}
-    typhoon_scores = {} # gagamitin ko eto para malaman ko kung ano yung sid nung top k typhoons sa scores. yung score ay key tapos yung sid yung value. may ran into a problem if may parehong score pero i think improbable
+    typhoon_scores = {} # gagamitin ko eto para malaman ko kung ano yung sid nung top k typhoons sa scores. yung score ay key tapos yung sid yung value. may run into a problem if may parehong score pero i think improbable
     scores = [] # will hold the distance scores of each typhoon compared to the new typhoon
     dirs = {'ORIGIN': 0,'N': 1,'NE': 2,'E': 3,'SE': 4,'S': 5,'SW': 6,'W': 7,'NW': 8}
 
@@ -94,7 +94,7 @@ def coordinates_to_dict(typhoon_database, year_range, unique_sid, inputs, model)
             temp = temp.replace(')', '')
             temp = temp.split(',')
             
-            if model == "Per-point":
+            if model == "Per-point" or model == "Nearest centroid":
                 temp = np.array(list(map(float, temp))) # converted the coordinates to a float instead of a string
             else:
                 # for random forest, tinatanggal ko muna yung direction kasi di gagana yung map function kung may isang string na element
@@ -179,7 +179,7 @@ def coordinates_to_dict(typhoon_database, year_range, unique_sid, inputs, model)
             #print("error")
             continue
 
-        score = distance_of_tracks.mean() # i think .mean will only make a difference if ginamit yung per point euclidean distance. otherwise, walang difference
+        score = distance_of_tracks.mean() # i think .mean will only make a difference if ginamit yung hindi frobenius norm. otherwise, walang difference
 
         recent_typhoons_dict_closest_to_farthest[sid] = recent_typhoons_dict[sid][typhoon_indices + list(range(typhoon_indices[-1] + 1, recent_typhoons_dict[sid].shape[0])), :] # every row index that comes after the last one already in typhoon_indices, through the end of the array.
         typhoon_names[sid] = row['NAME']
@@ -243,7 +243,7 @@ def predicted_track(recent_typhoons_dict_closest_to_farthest, typhoon_scores, sc
     return total_tracks
 
 def direction_getter(dx, dy):
-    angles = np.arctan2(dy, dx)
+    angles = np.arctan2(dx, dy)
     angles_deg = np.degrees(angles) 
     bearing = (angles_deg + 360) % 360
     dirs = ['N','NE','E','SE','S','SW','W','NW']
@@ -263,8 +263,8 @@ def training_data_generator(unique_sid, recent_typhoons_dict_closest_to_farthest
             # kaya yung index ng last element yung gagamitin din natin dun sa historical typhoons
             track = recent_typhoons_dict_closest_to_farthest[sid][element_index] 
             track = np.delete(track, 2)
-            dx = track[0] - starting_coords[0]
-            dy = track[1] -  starting_coords[1]
+            dy = track[0] - starting_coords[0]
+            dx = track[1] -  starting_coords[1]
             track_direction = direction_getter(dx, dy)
             if track_direction != direction:
                 continue
@@ -275,8 +275,8 @@ def training_data_generator(unique_sid, recent_typhoons_dict_closest_to_farthest
     return training_data
     
 def rf_predicted_track(recent_typhoons_dict_closest_to_farthest, inputs, unique_sid):
-    dx = inputs[-1][0] - inputs[-2][0]
-    dy = inputs[-1][1] - inputs[-2][1]
+    dy = inputs[-1][0] - inputs[-2][0] # difference in latitudes (vertical displacement)
+    dx = inputs[-1][1] - inputs[-2][1] # difference in longitudes (horizontal displacement)
     starting_coords = [inputs[-1][0], inputs[-1][1]]
     direction = direction_getter(dx, dy)
 
@@ -313,8 +313,8 @@ def rf_predicted_track(recent_typhoons_dict_closest_to_farthest, inputs, unique_
     return np.concatenate((inputs[:, :2], predicted_track), axis=0)
 
 def xgboost_predicted_track(recent_typhoons_dict_closest_to_farthest, inputs, unique_sid):
-    dx = inputs[-1][0] - inputs[-2][0]
-    dy = inputs[-1][1] - inputs[-2][1]
+    dy = inputs[-1][0] - inputs[-2][0] # difference in latitudes (vertical displacement)
+    dx = inputs[-1][1] - inputs[-2][1] # difference in longitudes (horizontal displacement)
     starting_coords = [inputs[-1][0], inputs[-1][1]]
     direction = direction_getter(dx, dy)
 

@@ -1,5 +1,5 @@
 import numpy as np
-from helper import get_database_by_agency, coordinates_to_dict, determine_weights, predicted_track, get_database_by_agency_additional_properties, coordinates_cleaner, rf_predicted_track, xgboost_predicted_track, typhoons_within_proximity
+from helper import get_database_by_agency, coordinates_to_dict, determine_weights, predicted_track, get_database_by_agency_additional_properties, coordinates_cleaner, rf_predicted_track, xgboost_predicted_track, typhoons_within_proximity, direction_getter
 
 
 SCORES = []
@@ -159,7 +159,9 @@ def typhoon_identifier(agency, coordinates, year_range):
     return dict_of_tracks
 
 if __name__ == "__main__":
-    year_range_getter()
+    print(np.degrees(np.arctan2(0.1,-0.5)))
+    print(direction_getter(0.1, -0.5))
+    # year_range_getter()
     # typhoon_tracker()
     # scores_printer()
     

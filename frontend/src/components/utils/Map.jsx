@@ -713,7 +713,7 @@ function MarkerContent({
   const { marker } = useMarkerContext();
   let content = null;
 
-  if (pulsating) content = <PulsingDot />;
+  if (pulsating) content = <PulsingDot color={pulseColor}/>;
   else if (withinPerimeter) content = <DefaultMarkerIcon index={index} total={total} />;
   else content = <DefaultMarkerIcon index={index} total={total} neighbor={neighbor} />;
 
