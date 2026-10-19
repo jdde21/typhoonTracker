@@ -222,7 +222,6 @@ def predicted_track(recent_typhoons_dict_closest_to_farthest, typhoon_scores, sc
     total_tracks = np.empty((minimum,3))
     total_tracks.fill(0)
     
-    print(direction, "boom")
     # nilalagay ko lng yung tracks given as input. as is na siya sa total tracks. di siya mababago
     total_tracks[0:inputs.shape[0], :] += inputs
     # ginagawa naman dito ay from all the neighbors, kukunin yung values from index [inputs.shape[0], minimum] -- this is because yung index 0 to inputs.shape - 1 ay binigay na ng user --
@@ -237,7 +236,7 @@ def predicted_track(recent_typhoons_dict_closest_to_farthest, typhoon_scores, sc
     
             temp_tracks = np.empty((minimum,3))
             temp_tracks.fill(0)
-            print(sid)
+            # print(sid)
             for j in range(inputs.shape[0], minimum):
                 lat = tracks[j][0]
                 lon = tracks[j][1]
@@ -245,12 +244,13 @@ def predicted_track(recent_typhoons_dict_closest_to_farthest, typhoon_scores, sc
                 dx = lat - starting_coords[0]
                 new_direction = direction_getter(dx, dy)
                 starting_coords = [lat, lon]
-                print(new_direction, lat, lon)
-                if new_direction == "NW":
-                    print("yow")
-                    temp_tracks[j] += tracks[j][:3] * weights[i] # yung track ng typhoon will now be multiplied by its weight
-                else:
-                    pass
+                # print(new_direction, lat, lon)
+                # if new_direction == "NW":
+                # print("yow")
+                temp_tracks[j] += tracks[j][:3] * weights[i] # yung track ng typhoon will now be multiplied by its weight
+                # print(tracks[j][:3], weights[i])
+                # else:
+                #     pass
             total_tracks += temp_tracks
             i += 1
             if i >= neighbors:
@@ -397,3 +397,20 @@ def typhoons_within_proximity(center, typhoon_coords):
     if (sum_of_differences <= radius**2):
         return True
     return False
+
+if __name__ == "__main__":
+    one = np.array([[8.4, 127], [8.6,126.4],[8.9,125.7]])
+    two = np.array([[8.6, 127], [8.9,126.8],[9.2,126.6]])
+    three = np.array([[8.7, 126.7], [8.9,125.9],[9.1,125.1]])
+    
+    one = one * 3.333
+    two = two * 3.162
+    three = three * 2.425
+    
+    avg = (one + two + three)/(3.333 + 3.162 + 2.425)
+    print(avg)
+    print(np.mean(avg))
+    print(np.linalg.norm(5-2))
+    # year_range_getter()
+    # typhoon_tracker()
+    # scores_printer()
