@@ -154,7 +154,7 @@ export default function NeighboringTyphoonsDrawer({
                 <select
                   value={basin}
                   onChange={(e) => setBasin(e.target.value)}
-                  className="w-full bg-white/4 border border-white/[0.09] text-white/85 rounded-md px-2.5 py-2 text-[13px] focus:outline-none focus-visible:ring-1 focus-visible:ring-white/30 focus:border-white/25"
+                  className="w-full bg-white/4 border border-white/9 text-white/85 rounded-md px-2.5 py-2 text-[13px] focus:outline-none focus-visible:ring-1 focus-visible:ring-white/30 focus:border-white/25"
                 >
                   {BASINS.map((b) => (
                     <option key={b} className="bg-[#181c24]">{b}</option>
