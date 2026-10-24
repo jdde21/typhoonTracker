@@ -188,7 +188,7 @@ export default function NeighboringTyphoonsDrawer({
                 {Array.from({ length: 10 }).map((_, i) => (
                   <div
                     key={i}
-                    className="h-16 rounded-lg bg-white/[0.05] animate-pulse"
+                    className="h-16 rounded-lg bg-white/5 animate-pulse"
                   />
                 ))}
               </div>
