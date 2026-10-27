@@ -1,4 +1,4 @@
-
+const API_URL = import.meta.env.VITE_API_URL
 
 async function getAutoTrackData(name) {
     const url = `http://127.0.0.1:8000/get_live_typhoons?name=${name}`
@@ -72,7 +72,7 @@ async function getNeighborsWindSpeedAndPressure(database) {
 }
 
 async function getData(list_coordinates, database, range, neighbors, model) {
-    const url = "http://127.0.0.1:8000/input"
+    const url = `${API_URL}/input`
     try {
         const response = await fetch(url, {
             method: 'POST',
