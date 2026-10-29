@@ -55,7 +55,7 @@ async function getNames() {
 }
 
 async function getNeighborsWindSpeedAndPressure(database) {
-    const url = `http://127.0.0.1:8000/neighbors_wind_speed_and_pressure/${database}`
+    const url = `${API_URL}/neighbors_wind_speed_and_pressure/${database}`
     try {
         const response = await fetch(url, {
             method: 'GET',
