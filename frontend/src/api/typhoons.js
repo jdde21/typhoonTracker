@@ -38,7 +38,7 @@ async function getNeighbors() {
 }
 
 async function getNames() {
-    const url = "http://127.0.0.1:8000/neighbors_names"
+    const url = `${API_URL}/neighbors_names`
     try {
         const response = await fetch(url, {
             method: 'GET',
