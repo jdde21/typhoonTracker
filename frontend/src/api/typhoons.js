@@ -21,7 +21,7 @@ async function getAutoTrackData(name) {
 }
 
 async function getNeighbors() {
-    const url = "http://127.0.0.1:8000/neighbors"
+    const url = `${API_URL}/neighbors`
     try {
         const response = await fetch(url, {
             method: 'GET',
