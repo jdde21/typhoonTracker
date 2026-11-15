@@ -417,8 +417,9 @@ const Map = forwardRef(function Map(
 
     const typhoon_track = all_typhoons[showTyphoon];
     const coordinates = (typhoon_track.map((track) => {
-      return [track[1], track[0]]
+        return [track[1], track[0]]
     }));
+
 
     const source = mapInstance.getSource('route');
     if (source) {
@@ -444,11 +445,11 @@ const Map = forwardRef(function Map(
         source: 'historical-route',
         layout: { 'line-join': 'round', 'line-cap': 'round' },
         paint: {
-          'line-width': 8,
+          'line-width': 5,
           'line-gradient': [
             'interpolate', ['linear'], ['line-progress'],
-            0, '#6b7280',  
-            1, '#10b981'    
+            0, '#fde68a',  
+            1, '#f59e0b'    
           ]
         }
       });

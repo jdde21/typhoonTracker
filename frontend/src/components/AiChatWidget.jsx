@@ -1,6 +1,8 @@
 import { useState, useRef, useEffect } from "react";
 import { Sparkles } from "lucide-react";
 import { AnimatePresence, motion } from 'framer-motion';
+import ReactMarkdown from 'react-markdown';
+import remarkGfm from 'remark-gfm';
 
 export default function AiChatWidget({
   onAsk,
@@ -71,14 +73,16 @@ export default function AiChatWidget({
                   key={i}
                   className={`mb-2 flex ${value.from === 'user' ? 'justify-end' : 'justify-start'}`}
                 >
-                  <span
+                  <div
                     className={`max-w-[75%] rounded-xl px-3 py-1.5 ${value.from === 'user'
                         ? 'rounded-br-sm bg-white text-black'
                         : 'rounded-bl-sm bg-white/10 text-white'
                       }`}
                   >
-                    {value.text}
-                  </span>
+                    <ReactMarkdown remarkPlugins={[remarkGfm]}>
+                      {value.text}
+                    </ReactMarkdown>
+                  </div>
                 </div>
               ))}
             </div>

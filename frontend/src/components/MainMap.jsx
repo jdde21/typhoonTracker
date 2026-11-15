@@ -78,7 +78,8 @@ export default function MainMap() {
             return tracks.map((values, index) => {
               const latitude = values[0];
               const longitude = values[1];
-              return <MapMarker
+        
+                return <MapMarker
                 key={index}
                 longitude={longitude}
                 latitude={latitude}
@@ -96,6 +97,8 @@ export default function MainMap() {
                   </div>
                 </MarkerPopup>
               </MapMarker>
+              
+              
             })
           })
         }

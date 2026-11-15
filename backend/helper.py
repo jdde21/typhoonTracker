@@ -231,8 +231,9 @@ def predicted_track(recent_typhoons_dict_closest_to_farthest, typhoon_scores, sc
     while i < neighbors:
         list_of_sid = typhoon_scores[scores[scores_counter]]
         
-        for sid in list_of_sid:
+        for sid in list_of_sid:            
             tracks = recent_typhoons_dict_closest_to_farthest[sid]
+            
             temp_tracks = np.empty((minimum,3))
             temp_tracks.fill(0)
             # print(sid)
