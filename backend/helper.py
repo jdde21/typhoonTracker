@@ -202,9 +202,13 @@ def determine_weights(recent_typhoons_dict_closest_to_farthest, typhoon_scores, 
     i = 0
     while i < neighbors:
         list_of_sid = typhoon_scores[scores[i]]
+        
         for sid in list_of_sid:
             weights.append(1/(scores[i] + 1e-8))
             tracks = recent_typhoons_dict_closest_to_farthest[sid]
+           
+           # maybe pwede tau maglagay dito ng dapat minimum length ng tracks para hindi naman kaonti yung coordinates na ibigay ng model
+   
             if len(tracks) < minimum:
                 minimum = len(tracks)
             i += 1
@@ -231,7 +235,9 @@ def predicted_track(recent_typhoons_dict_closest_to_farthest, typhoon_scores, sc
     while i < neighbors:
         list_of_sid = typhoon_scores[scores[scores_counter]]
         
-        for sid in list_of_sid:            
+        
+        
+        for sid in list_of_sid:       
             tracks = recent_typhoons_dict_closest_to_farthest[sid]
             
             temp_tracks = np.empty((minimum,3))
