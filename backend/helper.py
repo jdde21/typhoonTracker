@@ -246,7 +246,6 @@ def predicted_track(recent_typhoons_dict_closest_to_farthest, typhoon_scores, sc
     # ginagawa naman dito ay from all the neighbors, kukunin yung values from index [inputs.shape[0], minimum] -- this is because yung index 0 to inputs.shape - 1 ay binigay na ng user --
     # (continuation) at i-aadd sa total tracks.
     i = 0
-    check = 1
     scores_counter = 0
     while i < neighbors:
         list_of_sid = typhoon_scores[scores[scores_counter]]
@@ -254,11 +253,7 @@ def predicted_track(recent_typhoons_dict_closest_to_farthest, typhoon_scores, sc
         
         for sid in list_of_sid:       
             tracks = recent_typhoons_dict_closest_to_farthest[sid]
-            
-            if check == 1:
-                check += 1
-                continue
-            
+                    
             temp_tracks = np.empty((minimum,3))
             temp_tracks.fill(0)
             # print(sid)
