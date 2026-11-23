@@ -55,6 +55,7 @@ def coordinates_cleaner(list_of_coordinates):
     return re.findall(r"\(\d+\.\d+, \d+\.\d+, \d\)", list_of_coordinates)
 
 def coordinates_to_dict(typhoon_database, year_range, unique_sid, inputs, model):
+    MINIMUM_LENGTH = 5
     recent_typhoons_dict = {}
     recent_typhoons_dict_closest_to_farthest = {}
     typhoon_names = {}
@@ -166,10 +167,17 @@ def coordinates_to_dict(typhoon_database, year_range, unique_sid, inputs, model)
             if model == "Per-point":
                 distance_of_tracks = np.linalg.norm(inputs[:, :2] - recent_typhoons_dict[sid][typhoon_indices, :2]) # frobenius
             else:
-                user_input = np.mean(inputs[:, :2])
-                previous_typhoon_input = np.mean(recent_typhoons_dict[sid][typhoon_indices, :2])
+                # axis = 0 means kinukuha yung mean per column which means mean per lat and mean per long
+                user_input = np.mean(inputs[:, :2], axis=0)
+                previous_typhoon_input = np.mean(recent_typhoons_dict[sid][typhoon_indices, :2],axis = 0)
                 distance_of_tracks = np.linalg.norm(user_input - previous_typhoon_input) # nearest centroid classifier
-
+                # temp = ['1895227N18130', '1967271N25135', '1990261N12141', '2004239N11171', '2025231N27128']
+                # if sid in temp:
+                #     print(sid, inputs[:, :2])
+                #     print(user_input, recent_typhoons_dict[sid][typhoon_indices, :2], )
+                #     print(previous_typhoon_input)
+                #     print(distance_of_tracks)
+                
             # distance_of_tracks = np.sum(np.linalg.norm(inputs[:, :2] - recent_typhoons_dict[sid][typhoon_indices, :2], axis = 1)) # per point euclidean distance
             # if secret < 6:
             #     secret += 1
@@ -181,7 +189,13 @@ def coordinates_to_dict(typhoon_database, year_range, unique_sid, inputs, model)
 
         score = distance_of_tracks.mean() # i think .mean will only make a difference if ginamit yung hindi frobenius norm. otherwise, walang difference
 
-        recent_typhoons_dict_closest_to_farthest[sid] = recent_typhoons_dict[sid][typhoon_indices + list(range(typhoon_indices[-1] + 1, recent_typhoons_dict[sid].shape[0])), :] # every row index that comes after the last one already in typhoon_indices, through the end of the array.
+        #recent_typhoons_dict_closest_to_farthest[sid] = recent_typhoons_dict[sid][typhoon_indices + list(range(typhoon_indices[-1] + 1, recent_typhoons_dict[sid].shape[0])), :] # every row index that comes after the last one already in typhoon_indices, through the end of the array.
+        temp = recent_typhoons_dict[sid][typhoon_indices + list(range(typhoon_indices[-1] + 1, recent_typhoons_dict[sid].shape[0])), :] # every row index that comes after the last one already in typhoon_indices, through the end of the array.
+        
+        if len(temp) < MINIMUM_LENGTH:
+            continue
+        
+        recent_typhoons_dict_closest_to_farthest[sid] = temp    
         typhoon_names[sid] = row['NAME']
             
         if score in typhoon_scores:
@@ -206,11 +220,12 @@ def determine_weights(recent_typhoons_dict_closest_to_farthest, typhoon_scores, 
         for sid in list_of_sid:
             weights.append(1/(scores[i] + 1e-8))
             tracks = recent_typhoons_dict_closest_to_farthest[sid]
-           
-           # maybe pwede tau maglagay dito ng dapat minimum length ng tracks para hindi naman kaonti yung coordinates na ibigay ng model
-   
-            if len(tracks) < minimum:
-                minimum = len(tracks)
+            length = len(tracks)
+            # maybe pwede tau maglagay dito ng dapat minimum length ng tracks para hindi naman kaonti yung coordinates na ibigay ng model
+
+                
+            if length < minimum:
+                minimum = length
             i += 1
             if i >= neighbors:
                 return [weights, minimum]
@@ -231,14 +246,18 @@ def predicted_track(recent_typhoons_dict_closest_to_farthest, typhoon_scores, sc
     # ginagawa naman dito ay from all the neighbors, kukunin yung values from index [inputs.shape[0], minimum] -- this is because yung index 0 to inputs.shape - 1 ay binigay na ng user --
     # (continuation) at i-aadd sa total tracks.
     i = 0
+    check = 1
     scores_counter = 0
     while i < neighbors:
         list_of_sid = typhoon_scores[scores[scores_counter]]
         
         
-        
         for sid in list_of_sid:       
             tracks = recent_typhoons_dict_closest_to_farthest[sid]
+            
+            if check == 1:
+                check += 1
+                continue
             
             temp_tracks = np.empty((minimum,3))
             temp_tracks.fill(0)
