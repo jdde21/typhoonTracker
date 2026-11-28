@@ -9,6 +9,7 @@ import "slick-carousel/slick/slick.css";
 import "slick-carousel/slick/slick-theme.css";
 import NeighboringTyphoonsDrawer from "./components/TyphoonDrawer";
 import AiChatWidget from "./components/AiChatWidget";
+import HideUI from "./components/utils/HideUi";
 export const TyphoonDataContext = createContext();
 
 
@@ -43,6 +44,7 @@ export function App() {
   const [sideDrawerDatabase, setSideDrawerDatabase] = useState(TYPHOON_AGENCIES[0]);
   const [fetching, setFetching] = useState(false);
   const [isDraggable, setDraggable] = useState(false);
+  const [hidden, setHidden] = useState(false);
   const itemsRef = useRef([0, 0]);
 
 
@@ -87,12 +89,17 @@ export function App() {
         setNeighboringTyphoonsAdditionalProperties, database, setDatabase, setSideDrawerDatabase, sideDrawerDatabase,
         all_typhoons, year_range, TYPHOON_AGENCIES, itemsRef, sideDrawerLoading, setFetching, showTyphoon, setShowTyphoon,
         get_live_typhoons_names, model, setModel, setDraggable, isDraggable, typhoonsWithinPerimeter, setTyphoonsWithinPerimeter,
-        showTyphoonPerimeter, setShowTyphoonPerimeter
+        showTyphoonPerimeter, setShowTyphoonPerimeter, hidden, setHidden
       }}>
 
-        <NeighboringTyphoonsDrawer />
+        <HideUI />
         <MainMap />
-        <RoutePoints />
+        {
+          !hidden ? <>
+            <NeighboringTyphoonsDrawer />
+            <RoutePoints />
+          </> : null
+        }
 
 
         <div className="absolute bottom-4 left-1/2 -translate-x-1/2 z-10 w-full">
