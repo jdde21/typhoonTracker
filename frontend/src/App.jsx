@@ -3,20 +3,19 @@ import { createContext, useState, useRef } from "react"
 import './App.css';
 import RoutePoints from "./components/typhoonPrediction/RoutesForm";
 import NeighborTyphoonCard from "./components/typhoonPrediction/NeighborTyphoonCard";
-import SliderPkg from 'react-slick';
 import { useQuery } from "@tanstack/react-query";
 import "slick-carousel/slick/slick.css";
 import "slick-carousel/slick/slick-theme.css";
 import NeighboringTyphoonsDrawer from "./components/TyphoonDrawer";
+import NeighborList from "./components/closestNeighbors/NeighborList";
 import AiChatWidget from "./components/AiChatWidget";
 import HideUI from "./components/utils/HideUi";
 export const TyphoonDataContext = createContext();
+import SliderPkg from 'react-slick';
 
-
-const Slider = SliderPkg.default;
 const TYPHOON_AGENCIES = ["Default", "JTWC", "JMA", "CMA", "HKO", "IMD", "KMA"];
 const MODELS = ["Per-point", "Nearest centroid"];
-
+const Slider = SliderPkg.default;
 export function App() {
 
   const settings = {
@@ -86,8 +85,8 @@ export function App() {
         typhoonLocations, setTyphoonLocations, neighboringTyphoons,
         setNeighboringTyphoons, neighborTyphoonsLocations, setNeighborTyphoonsLocations, neighborTyphoonsSID,
         setNeighborTyphoonsSID, showNeighbor, setShowNeighbor, neighboringTyphoonsNames, setNeighboringTyphoonsNames,
-        setNeighboringTyphoonsAdditionalProperties, database, setDatabase, setSideDrawerDatabase, sideDrawerDatabase,
-        all_typhoons, year_range, TYPHOON_AGENCIES, itemsRef, sideDrawerLoading, setFetching, showTyphoon, setShowTyphoon,
+        neighboringTyphoonsAdditionalProperties, setNeighboringTyphoonsAdditionalProperties, database, setDatabase, setSideDrawerDatabase, sideDrawerDatabase,
+        all_typhoons, year_range, TYPHOON_AGENCIES, itemsRef, sideDrawerLoading, fetching, setFetching, showTyphoon, setShowTyphoon,
         get_live_typhoons_names, model, setModel, setDraggable, isDraggable, typhoonsWithinPerimeter, setTyphoonsWithinPerimeter,
         showTyphoonPerimeter, setShowTyphoonPerimeter, hidden, setHidden
       }}>
@@ -98,45 +97,11 @@ export function App() {
           !hidden ? <>
             <NeighboringTyphoonsDrawer />
             <RoutePoints />
+            <NeighborList></NeighborList>
           </> : null
         }
 
 
-        <div className="absolute bottom-4 left-1/2 -translate-x-1/2 z-10 w-full">
-          <div className="w-[80%] m-auto">
-            {fetching ? (
-              <div className="flex items-center justify-center py-8">
-                <div className="flex flex-col items-center gap-3">
-                  <div className="w-8 h-8 border-4 border-gray-200 border-t-blue-500 rounded-full animate-spin" />
-                  <span className="text-sm text-gray-300">Loading neighboring typhoons...</span>
-                </div>
-              </div>
-            ) : (
-              <Slider {...settings}>
-                {Object.keys(neighboringTyphoons).map((sid) => (
-                  <NeighborTyphoonCard
-                    key={sid}
-                    name={neighboringTyphoonsNames[sid]}
-                    sid={sid}
-                    category={'CAT 5'}
-                    wind={
-                      neighboringTyphoonsAdditionalProperties[sid].length !== 0
-                        ? `${neighboringTyphoonsAdditionalProperties[sid][1]} knots`
-                        : "No Data"
-                    }
-                    pressure={
-                      neighboringTyphoonsAdditionalProperties[sid].length !== 0
-                        ? `${neighboringTyphoonsAdditionalProperties[sid][2]} mb`
-                        : "No Data"
-                    }
-                    tracks={neighboringTyphoons[sid][0]}
-                    score={neighboringTyphoons[sid][1]}
-                  />
-                ))}
-              </Slider>
-            )}
-          </div>
-        </div>
         <AiChatWidget
           onAsk={async (question) => {
             const res = await fetch("http://127.0.0.1:8000/chat", {
